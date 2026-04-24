@@ -953,9 +953,9 @@ onedev.server.markdown = {
 		var $edit = $body.children(".edit");
 		var $preview = $body.children(".preview");
 		var $input = $edit.children("textarea");
-		$warning.find(".clear-unsaved-change").click(function() {
+		$warning.find(".discard-unsaved-change").click(function() {
 			$warning.hide();
-			$input.val("");
+			$input.val($input.data("initialValue"));
 			$preview.children(".markdown-rendered").html("");
 			localStorage.removeItem(autosaveKey);
 			onedev.server.form.markClean($input.closest("form"));
@@ -986,6 +986,7 @@ onedev.server.markdown = {
 		if (autosaveKey) {
 			var autosaveValue = localStorage.getItem(autosaveKey);
 			if (autosaveValue && $input.val() != autosaveValue) {
+				$input.data("initialValue", $input.val());
 				$input.val(autosaveValue);
 				$warning.show();
 				onedev.server.markdown.fireInputEvent($input);

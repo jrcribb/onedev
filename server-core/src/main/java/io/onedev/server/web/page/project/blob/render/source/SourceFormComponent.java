@@ -79,20 +79,31 @@ abstract class SourceFormComponent extends FormComponentPanel<byte[]> {
 		} else {
 			jsonOfMark = "undefined";
 		}
+		String autosaveKey = getAutosaveKey();
+		String escapedAutosaveKey;
+		if (autosaveKey != null)
+			escapedAutosaveKey = "'" + JavaScriptEscape.escapeJavaScript(autosaveKey) + "'";
+		else
+			escapedAutosaveKey = "undefined";
 		String script = String.format("onedev.server.sourceEdit.onDomReady("
-				+ "'%s', '%s', %s, '%s', %s, '%s', %b);", 
+				+ "'%s', '%s', %s, '%s', %s, '%s', %b, %s);", 
 				getMarkupId(), 
 				JavaScriptEscape.escapeJavaScript(getContext().getNewPath()), 
 				jsonOfMark,
 				getSourceFormat().getIndentType(), 
 				getSourceFormat().getTabSize(), 
 				getSourceFormat().getLineWrapMode(), 
-				getContext().getMode() == Mode.EDIT || getContext().getInitialNewPath() != null);
+				getContext().getMode() == Mode.EDIT || getContext().getInitialNewPath() != null,
+				escapedAutosaveKey);
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 	
 	protected abstract BlobRenderContext getContext();
 	
 	protected abstract SourceFormatPanel getSourceFormat();
+
+	protected String getAutosaveKey() {
+		return null;
+	}
 	
 }
