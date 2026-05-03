@@ -97,11 +97,11 @@ public class PasswordResetPage extends SimplePage {
 						if (user == null) {
 							throw new ExplicitException(_T("No user found with login name or email: ") + loginNameOrEmail);
 						} else if (user.isDisabled()) {
-							throw new ExplicitException(_T("Can not reset password for disabled account"));
+							throw new ExplicitException(_T("Cannot reset password for disabled account"));
 						} else if (user.getType() != ORDINARY) {
-							throw new ExplicitException(_T("Can not reset password for service or AI account"));
+							throw new ExplicitException(_T("Cannot reset password for service or AI account"));
 						} else if (user.getPassword() == null) {
-							throw new ExplicitException(_T("Can not reset password for user authenticating via external system"));
+							throw new ExplicitException(_T("Cannot reset password for user authenticating via external system"));
 						} else {
 							SettingService settingService = OneDev.getInstance(SettingService.class);
 							if (settingService.getMailConnector() != null) {

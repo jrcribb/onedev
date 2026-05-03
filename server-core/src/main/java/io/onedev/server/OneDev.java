@@ -20,6 +20,7 @@ import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.wicket.request.Url;
 import org.eclipse.jgit.util.FS.FileStoreAttributes;
 import org.jspecify.annotations.Nullable;
@@ -288,6 +289,8 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 			} else {
 				try {
 					hostName = InetAddress.getLocalHost().getHostName();
+					if (SystemUtils.IS_OS_MAC_OSX && !hostName.equals("localhost") && !hostName.contains("."))
+						hostName += ".local";
 				} catch (UnknownHostException e) {
 					hostName = "localhost";
 				}

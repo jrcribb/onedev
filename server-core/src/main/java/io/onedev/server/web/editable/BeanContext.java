@@ -48,10 +48,10 @@ public class BeanContext implements Serializable {
 	private void checkBeanEditable() {
 		Class<?> beanClass = descriptor.getBeanClass();
 		if (beanClass.getAnnotation(Editable.class) == null) {
-			throw new RuntimeException("Can not edit bean " + beanClass 
+			throw new RuntimeException("Cannot edit bean " + beanClass 
 				+ " as it is not annotated with @Editable");
 		} else if (!ClassUtils.isConcrete(beanClass)) {
-			throw new RuntimeException("Can not edit bean " + beanClass 
+			throw new RuntimeException("Cannot edit bean " + beanClass 
 				+ " as it is not concrete");
 		}
 		

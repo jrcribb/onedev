@@ -234,7 +234,7 @@ public class ProjectQuery extends EntityQuery<Project> {
 				var fieldName = getValue(order.Quoted().getText());
 				var sortField = SORT_FIELDS.get(fieldName);
 				if (sortField == null)
-					throw new ExplicitException("Can not order by field: " + fieldName);
+					throw new ExplicitException("Cannot order by field: " + fieldName);
 				
 				EntitySort projectSort = new EntitySort();
 				projectSort.setField(fieldName);

@@ -237,7 +237,7 @@ public class LdapAuthenticator extends Authenticator {
             try {
             	ctx = new InitialDirContext(ldapEnv);
             } catch (AuthenticationException e) {
-        		throw new RuntimeException("Can not bind to ldap server '" + getLdapUrl() + "': " + e.getMessage());
+        		throw new RuntimeException("Cannot bind to ldap server '" + getLdapUrl() + "': " + e.getMessage());
             }
 
 			NamingEnumeration<SearchResult> results = null;
@@ -349,7 +349,7 @@ public class LdapAuthenticator extends Authenticator {
                         groupCtx = (DirContext) ctx.lookup(groupDN);
 
                         if (groupCtx == null) {
-                            throw new RuntimeException("Can not find group entry " +
+                            throw new RuntimeException("Cannot find group entry " +
                             		"identified by '" + groupDN + "'.");
                         }
                         String groupNameAttribute = groupRetrieval.getGroupNameAttribute();
@@ -358,7 +358,7 @@ public class LdapAuthenticator extends Authenticator {
                         if (groupAttributes == null 
                         		|| groupAttributes.get(groupNameAttribute) == null
                                 || groupAttributes.get(groupNameAttribute).get() == null) {
-                            throw new RuntimeException("Can not find attribute '" 
+                            throw new RuntimeException("Cannot find attribute '" 
                             		+ groupNameAttribute + "' in returned group entry.");
                         }
                         groupNames.add((String) groupAttributes.get(groupNameAttribute).get());
@@ -404,7 +404,7 @@ public class LdapAuthenticator extends Authenticator {
 	                if (searchResultAttributes == null 
 	                		|| searchResultAttributes.get(groupNameAttribute) == null
 	                        || searchResultAttributes.get(groupNameAttribute).get() == null) {
-	                    throw new RuntimeException("Can not find attribute '" 
+	                    throw new RuntimeException("Cannot find attribute '" 
 	                    		+ groupNameAttribute + "' in the returned group object.");
 	                }
 	                groupNames.add((String) searchResultAttributes.get(groupNameAttribute).get());

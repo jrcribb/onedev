@@ -407,7 +407,7 @@ public class GitUtils {
 
 	/**
 	 * @return merge base of specified commits, or <tt>null</tt> if two commits do
-	 *         not have related history. In this case, these two commits can not be
+	 *         not have related history. In this case, these two commits cannot be
 	 *         merged
 	 */
 	@Nullable

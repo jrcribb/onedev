@@ -608,7 +608,7 @@ public abstract class IssuePrimaryPanel extends Panel {
 						private boolean checkLink(AjaxRequestTarget target, Issue linkIssue) {
 							LinkSpec spec = linkSpecService.load(specId);
 							if (getIssue().getId().equals(linkIssue.getId())) {
-								form.error(_T("Can not link to self: " + linkIssue.getReference().toString(getProject())));
+								form.error(_T("Cannot link to self: " + linkIssue.getReference().toString(getProject())));
 								target.add(form);
 								return false;
 							} else if (getIssue().findLinkedIssues(spec, opposite).contains(linkIssue)) { 

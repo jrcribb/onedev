@@ -215,7 +215,7 @@ public class WorkspaceQuery extends EntityQuery<Workspace> {
 				var fieldName = getValue(order.Quoted().getText());
 				var sortField = SORT_FIELDS.get(fieldName);
 				if (sortField == null)
-					throw new ExplicitException("Can not order by field: " + fieldName);
+					throw new ExplicitException("Cannot order by field: " + fieldName);
 
 				EntitySort workspaceSort = new EntitySort();
 				workspaceSort.setField(fieldName);

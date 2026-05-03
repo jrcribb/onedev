@@ -457,7 +457,7 @@ public abstract class RevisionSelector extends Panel {
 			if (projectModel.getObject().getRevCommit(revision, false) != null) {
 				onSelect(target, revision);
 			} else {
-				feedbackMessage = "Can not find commit of revision " + revision + "";
+				feedbackMessage = "Cannot find commit of revision " + revision + "";
 				target.add(feedback);
 			}
 		} catch (Exception e) {

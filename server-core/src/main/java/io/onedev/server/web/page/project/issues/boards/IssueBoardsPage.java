@@ -176,7 +176,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 		if (StringUtils.isNotBlank(boardName)) {
 			boardIndex = BoardSpec.getBoardIndex(boards, boardName);
 			if (boardIndex == -1)
-				throw new ExplicitException(_T("Can not find issue board: ") + boardName);
+				throw new ExplicitException(_T("Cannot find issue board: ") + boardName);
 		} else {
 			boardIndex = 0;
 		}

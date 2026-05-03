@@ -11,7 +11,7 @@ import org.hibernate.type.descriptor.sql.SqlTypeDescriptor;
  * <ul>
  * <li> Blobs are stored in a separate table and will not be removed automatically even 
  * if the associating row is removed
- * <li> It can not load blobs in auto-commit mode, meaning that we can not lazy load 
+ * <li> It cannot load blobs in auto-commit mode, meaning that we cannot lazy load 
  * entities with blob fields out side of a transaction even if Hibernate session 
  * is available 
  */

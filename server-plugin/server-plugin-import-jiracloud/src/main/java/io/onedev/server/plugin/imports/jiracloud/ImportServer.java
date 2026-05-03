@@ -548,7 +548,7 @@ public class ImportServer implements Serializable, Validatable {
 								issue.setState(initialIssueState);
 							}
 						} else {
-							throw new ExplicitException("Can not find JIRA status of id: " + statusId);
+							throw new ExplicitException("Cannot find JIRA status of id: " + statusId);
 						}
 						
 						String typeId = fieldsNode.get("issuetype").get("id").asText();
@@ -568,7 +568,7 @@ public class ImportServer implements Serializable, Validatable {
 								unmappedIssueTypes.add(untranslatedTypeName);
 							}
 						} else {
-							String errorMessage = String.format("Can not find JIRA issue type by id (project: %s, issue type id: %s)", 
+							String errorMessage = String.format("Cannot find JIRA issue type by id (project: %s, issue type id: %s)", 
 									jiraProject.get("name").asText(), typeId);
 							throw new ExplicitException(errorMessage);
 						}

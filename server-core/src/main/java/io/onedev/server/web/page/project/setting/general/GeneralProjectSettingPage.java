@@ -125,7 +125,7 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 						if (parent == null) 
 							parentError = _T("Parent project not found");
 						else if (project.isSelfOrAncestorOf(parent)) 
-							parentError = _T("Can not use current or descendant project as parent");
+							parentError = _T("Cannot use current or descendant project as parent");
 						else if (!SecurityUtils.canCreateChildren(parent)) 
 							parentError = _T("Not authorized to move project under this parent");
 						else
@@ -210,7 +210,7 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 
 					@Override
 					protected String getConfirmMessage() {
-						return MessageFormat.format(_T("Everything inside this project and all child projects will be deleted and can not be recovered, "
+						return MessageFormat.format(_T("Everything inside this project and all child projects will be deleted and cannot be recovered, "
 								+ "please type project path <code>{0}</code> below to confirm deletion."), getProject().getPath());
 					}
 

@@ -30,7 +30,7 @@ onedev.server.sourceEdit = {
 		onedev.server.codemirror.setModeByFileName(cm, filePath);
 		
 		/*
-		 * AreYouSure can not track dirty correctly for CodeMirror generated
+		 * AreYouSure cannot track dirty correctly for CodeMirror generated
 		 * textarea, and it will always mark the form as clean even if we 
 		 * mark it as dirty explicitly. So we use no-dirtytrack class to 
 		 * disable automatic dirty track

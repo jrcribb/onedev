@@ -20,8 +20,8 @@ import io.onedev.commons.utils.PathUtils;
 /*
  * When css is bundled, and its access url can be changed (unless its resource is annotated with @ResourceBundle), 
  * and this can cause the issue that relative resources referenced in the css via url property (for instance background
- * image etc.) can not be loaded correctly. To solve this issue, this factory class tries to locate the relative 
- * resource against each bundled resource if it can not be found with its original resource key 
+ * image etc.) cannot be loaded correctly. To solve this issue, this factory class tries to locate the relative 
+ * resource against each bundled resource if it cannot be found with its original resource key 
  */
 class BundleAwareResourceReferenceFactory implements IResourceReferenceFactory {
 

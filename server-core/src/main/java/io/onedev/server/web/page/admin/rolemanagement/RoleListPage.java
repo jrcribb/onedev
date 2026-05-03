@@ -217,7 +217,7 @@ public class RoleListPage extends AdministrationPage {
 						super.onComponentTag(tag);
 						if (!isEnabled()) {
 							tag.put("disabled", "disabled");
-							tag.put("data-tippy-content", _T("This is a built-in role and can not be deleted"));
+							tag.put("data-tippy-content", _T("This is a built-in role and cannot be deleted"));
 						}
 					}
 

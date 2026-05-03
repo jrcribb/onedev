@@ -166,7 +166,7 @@ public class RepositoryResource {
 		if (!project.isCommitSignatureRequirementSatisfied(
 				user, request.getBranchName(), 
 				project.getRevCommit(request.getRevision(), true))) {
-			throw new ExplicitException("Can not create this branch as branch protection setting "
+			throw new ExplicitException("Cannot create this branch as branch protection setting "
 					+ "requires valid signature on head commit");
 		}
 		
@@ -185,7 +185,7 @@ public class RepositoryResource {
 			throw new UnauthorizedException();
 		
 		if (workspaceService.count(project, branchName) > 0) {
-			throw new NotAcceptableException("Can not delete branch '" + branchName + "' as there are workspaces on it");
+			throw new NotAcceptableException("Cannot delete branch '" + branchName + "' as there are workspaces on it");
 		}
 
 		projectService.deleteBranch(project, branchName);

@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * This annotation should be applied to an entity field to indicate that the 
- * field can not be updated after entity is created
+ * field cannot be updated after entity is created
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.FIELD})

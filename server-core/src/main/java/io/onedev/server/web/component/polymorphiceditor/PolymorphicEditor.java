@@ -62,7 +62,7 @@ public class PolymorphicEditor extends ValueEditor<Serializable> {
 
 		Preconditions.checkArgument(
 				!implementations.isEmpty(),
-				"Can not find implementations for '" + baseClass + "'.");
+				"Cannot find implementations for '" + baseClass + "'.");
 
 		EditableUtils.sortAnnotatedElements(implementations);
 	}

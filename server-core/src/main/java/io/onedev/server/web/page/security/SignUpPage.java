@@ -46,7 +46,7 @@ public class SignUpPage extends SimplePage {
 		if (!getSecuritySetting().isEnableSelfRegister())
 			throw new UnauthenticatedException("User sign-up is disabled");
 		if (getLoginUser() != null)
-			throw new IllegalStateException("Can not sign up a user while signed in");
+			throw new IllegalStateException("Cannot sign up a user while signed in");
 	}
 	
 	private SecuritySetting getSecuritySetting() {

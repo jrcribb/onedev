@@ -1,7 +1,5 @@
 package io.onedev.server.ai;
 
-import static io.onedev.server.ai.QueryDescriptions.getBuildQueryDescription;
-import static io.onedev.server.ai.QueryDescriptions.getPackQueryDescription;
 import static javax.ws.rs.core.Response.Status.NOT_ACCEPTABLE;
 import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
@@ -9,7 +7,6 @@ import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -34,10 +31,13 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.eclipse.jgit.lib.ObjectId;
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -46,6 +46,7 @@ import com.google.common.base.Splitter;
 import com.google.common.base.Throwables;
 
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.OneDev;
 import io.onedev.server.ServerConfig;
 import io.onedev.server.SubscriptionService;
 import io.onedev.server.buildspec.BuildSpec;
@@ -57,13 +58,14 @@ import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.job.JobService;
 import io.onedev.server.model.Build;
+import io.onedev.server.model.CodeCommentReply;
+import io.onedev.server.model.CodeCommentStatusChange;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.IssueLink;
 import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.IssueWork;
 import io.onedev.server.model.Iteration;
-import io.onedev.server.model.LabelSpec;
 import io.onedev.server.model.Pack;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -73,6 +75,8 @@ import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.SystemSetting;
+import io.onedev.server.model.support.code.ConventionalCommitChecker;
+import io.onedev.server.model.support.code.RegexpCommitChecker;
 import io.onedev.server.model.support.issue.field.FieldUtils;
 import io.onedev.server.model.support.issue.field.spec.BooleanField;
 import io.onedev.server.model.support.issue.field.spec.DateField;
@@ -96,6 +100,9 @@ import io.onedev.server.search.entity.pack.PackQuery;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.BuildService;
+import io.onedev.server.service.CodeCommentReplyService;
+import io.onedev.server.service.CodeCommentService;
+import io.onedev.server.service.CodeCommentStatusChangeService;
 import io.onedev.server.service.IssueChangeService;
 import io.onedev.server.service.IssueCommentService;
 import io.onedev.server.service.IssueLinkService;
@@ -120,11 +127,13 @@ import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.ProjectScope;
 
 @Api(internal = true)
-@Path("/mcp-helper")
+@Path("/tod")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 @Singleton
-public class McpHelperResource {
+public class TodResource {
+
+    private static final Logger logger = LoggerFactory.getLogger(TodResource.class);
 
     @Inject
     private ObjectMapper objectMapper;
@@ -181,6 +190,15 @@ public class McpHelperResource {
     private PullRequestCommentService pullRequestCommentService;
 
     @Inject
+    private CodeCommentService codeCommentService;
+
+    @Inject
+    private CodeCommentReplyService codeCommentReplyService;
+
+    @Inject
+    private CodeCommentStatusChangeService codeCommentStatusChangeService;
+
+    @Inject
     private BuildService buildService;
 
     @Inject
@@ -204,8 +222,18 @@ public class McpHelperResource {
     @Inject
     private ServerConfig serverConfig;
 
-    private String getToolParamName(String fieldName) {
-        return fieldName.replace(" ", "_");
+	@Api(description = "Get tod version range compatible with this server")
+	@Path("/check-version")
+	@GET
+	public VersionInfo checkVersion() {
+        var versionInfo = new VersionInfo();
+        versionInfo.serverVersion = OneDev.getInstance().getVersion();
+        versionInfo.minRequiredTodVersion = "3.0.0";
+        return versionInfo;
+	}
+
+    private String getParamName(String fieldName) {
+        return fieldName.replace(" ", "-");
     }
 
     private String appendDescription(String description, String additionalDescription) {
@@ -293,334 +321,132 @@ public class McpHelperResource {
             "description", description);
     }
 
-    @Path("/get-tool-input-schemas")
+    @Api(description = "Get commit message requirement for non-merge commits")
+    @Path("/get-commit-message-requirement")
     @GET
-    public Map<String, Object> getToolInputSchemas() {
+    public String getCommitMessageRequirement(@QueryParam("project") @NotNull String projectPath) {
+        var user = SecurityUtils.getUser();
+        if (user == null)
+            throw new UnauthenticatedException();
+
+        var project = getProject(projectPath);
+        if (!SecurityUtils.canWriteCode(project))
+            throw new UnauthorizedException();
+            
+        var requirementBuilder = new StringBuilder();
+        var branchProtection = project.getBranchProtection(project.getDefaultBranch(), user);
+        if (branchProtection.getCommitMessageChecker() instanceof ConventionalCommitChecker checker) {
+            requirementBuilder.append("Non-merge commit messages should use Conventional Commits format: ")
+                    .append("<type>[optional (scope)][!]: <description>. Git revert messages are also allowed.");
+            if (!checker.getCommitTypes().isEmpty()) {
+                requirementBuilder.append("\nAllowed commit types: ")
+                        .append(String.join(", ", checker.getCommitTypes()));
+            }
+            if (!checker.getCommitScopes().isEmpty()) {
+                requirementBuilder.append("\nAllowed commit scopes: ")
+                        .append(String.join(", ", checker.getCommitScopes()));
+            }
+            requirementBuilder.append("\nUse exactly one blank line between subject and body/footer.");
+            if (checker.isCheckCommitMessageFooter()) {
+                requirementBuilder.append("\nA footer is required");
+                if (!checker.getCommitTypesForFooterCheck().isEmpty()) {
+                    requirementBuilder.append(" for commit types: ")
+                            .append(String.join(", ", checker.getCommitTypesForFooterCheck()));
+                }
+                requirementBuilder.append(". The footer should be the last line, preceded by exactly one blank line, ")
+                        .append("and match Java regex: ")
+                        .append(checker.getCommitMessageFooterPattern());
+            }
+        } else if (branchProtection.getCommitMessageChecker() instanceof RegexpCommitChecker checker) {
+            requirementBuilder.append("Non-merge commit messages should match Java regex: ")
+                    .append(checker.getPattern());
+            if (checker.getExplanation() != null)
+                requirementBuilder.append("\nExplanation: ").append(checker.getExplanation());
+        }
+
+        var fixPatternEntries = settingService.getIssueSetting().getCommitMessageFixPatterns().getEntries();
+        if (!fixPatternEntries.isEmpty()) {
+            if (requirementBuilder.length() != 0)
+                requirementBuilder.append("\n\n");
+            requirementBuilder.append("When a commit closes/fixes/resolves an issue, mention the issue reference by enclosing it ")
+                    .append("with one of these prefix/suffix pattern pairs:");
+            for (var entry : fixPatternEntries) {
+                var prefix = entry.getPrefix();
+                var suffix = entry.getSuffix();
+                requirementBuilder.append("\n- prefix pattern: ")
+                        .append(prefix != null? prefix: "")
+                        .append("; suffix pattern: ")
+                        .append(suffix != null? suffix: "");
+            }
+        }
+
+        if (requirementBuilder.length() != 0)
+            return requirementBuilder.toString();
+        else
+            return "No commit message requirement for non-merge commits";
+    }
+
+    @Path("/get-issue-query-description")
+    @GET
+    public String getIssueQueryDescription() {
         if (SecurityUtils.getUser() == null)
             throw new UnauthenticatedException();
-        var inputSchemas = new HashMap<String, Object>();
+        return escapeHtml5(QueryDescriptions.getIssueQueryDescription());
+    }
 
-        var queryIssuesInputSchema = new HashMap<String, Object>();
-        var queryIssuesProperties = new HashMap<String, Object>();
+    @Path("/get-build-query-description")
+    @GET
+    public String getBuildQueryDescription() {
+        if (SecurityUtils.getUser() == null)
+            throw new UnauthenticatedException();
+        return escapeHtml5(QueryDescriptions.getBuildQueryDescription());
+    }
 
-        queryIssuesProperties.put("project", Map.of(
-            "type", "string",
-            "description", "Project to query issues in. Leave empty to query in current project"));
-        queryIssuesProperties.put("query", Map.of(
-            "type", "string",
-            "description", escapeHtml5(QueryDescriptions.getIssueQueryDescription())));
-        queryIssuesProperties.put("offset", Map.of(
-            "type", "integer",
-            "description", "start position for the query (optional, defaults to 0)"));
-        queryIssuesProperties.put("count", Map.of(
-            "type", "integer",
-            "description", "number of issues to return (optional, defaults to 25, max 100)"));
+    @Path("/get-pull-request-query-description")
+    @GET
+    public String getPullRequestQueryDescription() {
+        if (SecurityUtils.getUser() == null)
+            throw new UnauthenticatedException();
+        return escapeHtml5(QueryDescriptions.getPullRequestQueryDescription());
+    }
 
-        queryIssuesInputSchema.put("Type", "object");
-        queryIssuesInputSchema.put("Properties", queryIssuesProperties);
-        queryIssuesInputSchema.put("Required", new ArrayList<>());
-
-        inputSchemas.put("queryIssues", queryIssuesInputSchema);
-
-        var createIssueInputSchema = new HashMap<String, Object>();
-        var createIssueProperties = new HashMap<String, Object>();
-        createIssueProperties.put("project", Map.of(
-            "type", "string",
-            "description", "Project to create issue in. Leave empty to create issue in current project"));
-        createIssueProperties.put("title", Map.of(
-            "type", "string", 
-            "description", "title of the issue"));
-        createIssueProperties.put("description", Map.of(
-            "type", "string", 
-            "description", "description of the issue"));
-        createIssueProperties.put("confidential", Map.of(
-            "type", "boolean", 
-            "description", "whether the issue is confidential"));
-
-        createIssueProperties.put("iterations", getArrayProperties("iteration names"));
-
-        if (subscriptionService.isSubscriptionActive()) {
-            createIssueProperties.put("ownEstimatedTime", Map.of(
-                "type", "integer",
-                "description", "Estimated time in hours for this issue only (not including linked issues)"));
-        }
-
+    @Path("/get-valid-issue-fields")
+    @GET
+    public Map<String, Object> getValidIssueFields() {
+        if (SecurityUtils.getUser() == null)
+            throw new UnauthenticatedException();
+        var issueFields = new HashMap<String, Object>();
         for (var field: settingService.getIssueSetting().getFieldSpecs()) {
-            var paramName = getToolParamName(field.getName());
+            var paramName = getParamName(field.getName());
             var fieldProperties = getFieldProperties(field);
-            createIssueProperties.put(paramName, fieldProperties);
+            issueFields.put(paramName, fieldProperties);
         }
-        
-        createIssueInputSchema.put("Type", "object");
-        createIssueInputSchema.put("Properties", createIssueProperties);
-        createIssueInputSchema.put("Required", List.of("title"));
+        return issueFields;
+    }
 
-        inputSchemas.put("createIssue", createIssueInputSchema);
-
-        var editIssueInputSchema = new HashMap<String, Object>();
-        var editIssueProperties = new HashMap<String, Object>();
-        editIssueProperties.put("issueReference", Map.of(
-            "type", "string",
-            "description", "reference of the issue to update"));
-        editIssueProperties.put("title", Map.of(
-                "type", "string",
-                "description", "title of the issue"));
-        editIssueProperties.put("description", Map.of(
-                "type", "string",
-                "description", "description of the issue"));
-        editIssueProperties.put("confidential", Map.of(
-                "type", "boolean",
-                "description", "whether the issue is confidential"));
-
-        editIssueProperties.put("iterations", getArrayProperties("iterations to schedule the issue in"));
-
-        if (subscriptionService.isSubscriptionActive()) {
-            editIssueProperties.put("ownEstimatedTime", Map.of(
-                    "type", "integer",
-                    "description", "Estimated time in hours for this issue only (not including linked issues)"));
+    @Path("/get-valid-issue-links")
+    @GET
+    public List<String> getValidIssueLinks() {
+        if (SecurityUtils.getUser() == null)
+            throw new UnauthenticatedException();
+        var linkNames = new ArrayList<String>();
+        for (var linkSpec: linkSpecService.query()) {
+            linkNames.add(linkSpec.getName());
+            if (linkSpec.getOpposite() != null)
+                linkNames.add(linkSpec.getOpposite().getName());
         }
+        return linkNames;
+    }
 
-        for (var field : settingService.getIssueSetting().getFieldSpecs()) {
-            var paramName = getToolParamName(field.getName());
-
-            var fieldProperties = getFieldProperties(field);
-            editIssueProperties.put(paramName, fieldProperties);
-        }
-
-        editIssueInputSchema.put("Type", "object");
-        editIssueInputSchema.put("Properties", editIssueProperties);
-        editIssueInputSchema.put("Required", List.of("issueReference"));
-
-        inputSchemas.put("editIssue", editIssueInputSchema);            
-
-        var toStates = settingService.getIssueSetting().getStateSpecMap().keySet();
-        if (toStates.size() > 0) {
-            var changeIssueStateInputSchema = new HashMap<String, Object>();
-            changeIssueStateInputSchema.put("Type", "object");
-
-            var changeIssueStateProperties = new HashMap<String, Object>();
-            changeIssueStateProperties.put("issueReference", Map.of(
-                "type", "string",
-                "description", "reference of the issue to change state"));
-            changeIssueStateProperties.put("state", Map.of(
-                    "type", "string",
-                    "description", "new state of the issue. Must be one of: " + String.join(", ", toStates)));
-            changeIssueStateProperties.put("comment", Map.of(
-                    "type", "string",
-                    "description", "comment of the state change"));
-
-            for (var field : settingService.getIssueSetting().getFieldSpecs()) {
-                var paramName = getToolParamName(field.getName());
-
-                var fieldProperties = getFieldProperties(field);
-                changeIssueStateProperties.put(paramName, fieldProperties);
-            }                
-
-            changeIssueStateInputSchema.put("Properties", changeIssueStateProperties);
-            changeIssueStateInputSchema.put("Required", List.of("issueReference", "state"));
-
-            inputSchemas.put("changeIssueState", changeIssueStateInputSchema);
-        }
-
-        var linkSpecs = linkSpecService.query();
-        if (!linkSpecs.isEmpty()) {
-            var linkInputSchema = new HashMap<String, Object>();
-            linkInputSchema.put("Type", "object");
-
-            var linkProperties = new HashMap<String, Object>();
-            linkProperties.put("sourceIssueReference", Map.of(
-                "type", "string", 
-                "description", "Issue reference as source of the link"));
-            linkProperties.put("targetIssueReference", Map.of(
-                "type", "string", 
-                "description", "Issue reference as target of the link"
-            ));
-            var linkNames = new ArrayList<String>();
-            for (var linkSpec: linkSpecs) {
-                linkNames.add(linkSpec.getName());
-                if (linkSpec.getOpposite() != null)
-                    linkNames.add(linkSpec.getOpposite().getName());
-            }
-            linkProperties.put("linkName", Map.of(
-                "type", "string", 
-                "description", "Name of the link. Must be one of: " + String.join(", ", linkNames)));
-            linkInputSchema.put("Properties", linkProperties);
-            linkInputSchema.put("Required", List.of("sourceIssueReference", "targetIssueReference", "linkName"));
-
-            inputSchemas.put("linkIssues", linkInputSchema);
-        }
-
-        var queryPullRequestsInputSchema = new HashMap<String, Object>();
-        var queryPullRequestsProperties = new HashMap<String, Object>();
-
-        queryPullRequestsProperties.put("project", Map.of(
-            "type", "string",
-            "description", "Project to query pull requests in. Leave empty to query in current project"));
-        queryPullRequestsProperties.put("query", Map.of(
-                "type", "string",
-                "description", escapeHtml5(QueryDescriptions.getPullRequestQueryDescription())));
-        queryPullRequestsProperties.put("offset", Map.of(
-                "type", "integer",
-                "description", "start position for the query (optional, defaults to 0)"));
-        queryPullRequestsProperties.put("count", Map.of(
-                "type", "integer",
-                "description", "number of pull requests to return (optional, defaults to 25, max 100)"));
-
-        queryPullRequestsInputSchema.put("Type", "object");
-        queryPullRequestsInputSchema.put("Properties", queryPullRequestsProperties);
-        queryPullRequestsInputSchema.put("Required", new ArrayList<>());
-
-        inputSchemas.put("queryPullRequests", queryPullRequestsInputSchema);
-
-        var queryBuildsInputSchema = new HashMap<String, Object>();
-        var queryBuildsProperties = new HashMap<String, Object>();
-
-        queryBuildsProperties.put("project", Map.of(
-            "type", "string",
-            "description", "Project to query builds in. Leave empty to query in current project"));
-        queryBuildsProperties.put("query", Map.of(
-                "type", "string",
-                "description", escapeHtml5(getBuildQueryDescription())));
-        queryBuildsProperties.put("offset", Map.of(
-                "type", "integer",
-                "description", "start position for the query (optional, defaults to 0)"));
-        queryBuildsProperties.put("count", Map.of(
-                "type", "integer",
-                "description", "number of builds to return (optional, defaults to 25, max 100)"));
-
-        queryBuildsInputSchema.put("Type", "object");
-        queryBuildsInputSchema.put("Properties", queryBuildsProperties);
-        queryBuildsInputSchema.put("Required", new ArrayList<>());
-
-        inputSchemas.put("queryBuilds", queryBuildsInputSchema);
-
-        var createPullRequestInputSchema = new HashMap<String, Object>();
-        var createPullRequestProperties = new HashMap<String, Object>();            
-        createPullRequestProperties.put("targetProject", Map.of(
-            "type", "string",
-            "description", "Target project of the pull request. If left empty, it defaults to the original project when the source project is a fork, or to the source project itself otherwise"));
-        createPullRequestProperties.put("sourceProject", Map.of(
-            "type", "string",
-            "description", "Source project of the pull request. Leave empty to use current project"));
-        createPullRequestProperties.put("title", Map.of(
-            "type", "string",
-            "description", "Title of the pull request. Leave empty to use default title"));
-        createPullRequestProperties.put("description", Map.of(
-                "type", "string",
-                "description", "Description of the pull request"));
-        createPullRequestProperties.put("targetBranch", Map.of(
-                "type", "string",
-                "description", "A branch in target project to be used as target branch of the pull request. Leave empty to use default branch"));
-        createPullRequestProperties.put("sourceBranch", Map.of(
-                "type", "string",
-                "description", "A branch in source project to be used as source branch of the pull request"));
-        createPullRequestProperties.put("mergeStrategy", Map.of(
-                "type", "string",
-                "description", "Merge strategy of the pull request. Must be one of: " + 
-                    Arrays.stream(MergeStrategy.values()).map(Enum::name).collect(Collectors.joining(", "))));
-        createPullRequestProperties.put("reviewers", Map.of(
-                "type", "array",
-                "items", Map.of("type", "string"),
-                "uniqueItems", true,
-                "description", "Reviewers of the pull request. Expects user login names"));
-        createPullRequestProperties.put("assignees", Map.of(
-                "type", "array",
-                "items", Map.of("type", "string"),
-                "uniqueItems", true,
-                "description", "Assignees of the pull request. Expects user login names"));
-
-        var labelSpecs = labelSpecService.query();
-        if (!labelSpecs.isEmpty()) {
-            createPullRequestProperties.put("labels", Map.of(
-                    "type", "array",
-                    "items", Map.of("type", "string"),
-                    "uniqueItems", true,
-                    "description", "Labels of the pull request. Must be one or more of: " + String.join(", ",
-                            labelSpecs.stream().map(LabelSpec::getName).collect(Collectors.toList()))));
-        }
-
-        createPullRequestInputSchema.put("Type", "object");
-        createPullRequestInputSchema.put("Properties", createPullRequestProperties);
-        createPullRequestInputSchema.put("Required", List.of("sourceBranch"));
-
-        inputSchemas.put("createPullRequest", createPullRequestInputSchema);
-
-        var editPullRequestInputSchema = new HashMap<String, Object>();
-        var editPullRequestProperties = new HashMap<String, Object>();
-        editPullRequestProperties.put("pullRequestReference", Map.of(
-                "type", "string",
-                "description", "Reference of the pull request to edit"));
-        editPullRequestProperties.put("title", Map.of(
-                "type", "string",
-                "description", "Title of the pull request"));
-        editPullRequestProperties.put("description", Map.of(
-                "type", "string",
-                "description", "Description of the pull request"));
-        editPullRequestProperties.put("mergeStrategy", Map.of(
-                "type", "string",
-                "description", "Merge strategy of the pull request. Must be one of: " +
-                        Arrays.stream(MergeStrategy.values()).map(Enum::name).collect(Collectors.joining(", "))));
-        editPullRequestProperties.put("assignees", Map.of(
-                "type", "array",
-                "items", Map.of("type", "string"),
-                "uniqueItems", true,
-                "description", "Assignees of the pull request. Expects user login names"));
-
-        editPullRequestProperties.put("addReviewers", Map.of(
-                "type", "array",
-                "items", Map.of("type", "string"),
-                "uniqueItems", true,
-                "description", "Request review from specified users. Expects user login names"));
-        editPullRequestProperties.put("removeReviewers", Map.of(
-                "type", "array",
-                "items", Map.of("type", "string"),
-                "uniqueItems", true,
-                "description", "Remove specified reviewers. Expects user login names"));
-
-        if (!labelSpecs.isEmpty()) {
-            editPullRequestProperties.put("labels", Map.of(
-                "type", "array",
-                "items", Map.of("type", "string"),
-                "uniqueItems", true,
-                "description", "Labels of the pull request. Must be one or more of: " + String.join(", ", labelSpecs.stream().map(LabelSpec::getName).collect(Collectors.toList()))));
-        }
-
-        editPullRequestProperties.put("autoMerge", Map.of(
-                "type", "boolean",
-                "description", "Whether to enable auto merge"));
-        editPullRequestProperties.put("autoMergeCommitMessage", Map.of(
-                "type", "string",
-                "description", "Preset commit message for auto merge"));
-
-        editPullRequestInputSchema.put("Type", "object");
-        editPullRequestInputSchema.put("Properties", editPullRequestProperties);
-        editPullRequestInputSchema.put("Required", List.of("pullRequestReference"));
-
-        inputSchemas.put("editPullRequest", editPullRequestInputSchema);
-
-        var queryPacksInputSchema = new HashMap<String, Object>();
-        var queryPacksProperties = new HashMap<String, Object>();
-
-        queryPacksProperties.put("project", Map.of(
-            "type", "string",
-            "description", "Project to query packages in. Leave empty to query in current project"));
-        queryPacksProperties.put("query", Map.of(
-                "type", "string",
-                "description", escapeHtml5(getPackQueryDescription())));
-        queryPacksProperties.put("offset", Map.of(
-                "type", "integer",
-                "description", "start position for the query (optional, defaults to 0)"));
-        queryPacksProperties.put("count", Map.of(
-                "type", "integer",
-                "description", "number of packages to return (optional, defaults to 25, max 100)"));
-
-        queryPacksInputSchema.put("Type", "object");
-        queryPacksInputSchema.put("Properties", queryPacksProperties);
-        queryPacksInputSchema.put("Required", new ArrayList<>());
-
-        inputSchemas.put("queryPacks", queryPacksInputSchema);
-        
-        return inputSchemas;
+    @Path("/get-valid-labels")
+    @GET
+    public List<String> getValidLabels() {
+        if (SecurityUtils.getUser() == null)
+            throw new UnauthenticatedException();
+        var labelNames = new ArrayList<String>();
+        for (var labelSpec: labelSpecService.query()) 
+            labelNames.add(labelSpec.getName());
+        return labelNames;
     }
 
     @Path("/get-login-name")
@@ -689,9 +515,14 @@ public class McpHelperResource {
         if (query != null) {
             var option = new IssueQueryParseOption();
             option.withCurrentUserCriteria(true);
-            parsedQuery = IssueQuery.parse(projectInfo.project, query, option, true);
+            try {
+                parsedQuery = IssueQuery.parse(projectInfo.project, query, option, true);
+            } catch (ParseCancellationException e) {
+                logger.error("Error parsing query", e);
+                throw new NotAcceptableException("Invalid issue query, check server log for details");
+            }
         } else {
-            parsedQuery = new IssueQuery();
+            parsedQuery = new IssueQuery(null, new ArrayList<>());
         }
 
         var summaries = new ArrayList<Map<String, Object>>();
@@ -729,6 +560,18 @@ public class McpHelperResource {
         var currentProject = getProject(currentProjectPath);
         var issue = getIssue(currentProject, issueReference);                
         return IssueHelper.getDetail(currentProject, issue);
+    }
+
+    @Path("/get-project-key")
+    @GET
+    @Nullable
+    public String getProjectKey(@QueryParam("project") @NotNull String projectPath) {
+        if (SecurityUtils.getUser() == null)
+            throw new UnauthenticatedException();
+
+        var project = getProject(projectPath);
+
+        return project.getKey();
     }
 
     @Path("/get-issue-comments")
@@ -1013,7 +856,7 @@ public class McpHelperResource {
                 entry.setValue(StringUtils.trimToNull((String) entry.getValue()));
         }
         for (var field: settingService.getIssueSetting().getFieldSpecs()) {
-            var paramName = getToolParamName(field.getName());
+            var paramName = getParamName(field.getName());
             if (!paramName.equals(field.getName()) && data.containsKey(paramName)) {
                 data.put(field.getName(), data.get(paramName));
                 data.remove(paramName);
@@ -1043,7 +886,12 @@ public class McpHelperResource {
 
         EntityQuery<PullRequest> parsedQuery;
         if (query != null) {
-            parsedQuery = PullRequestQuery.parse(projectInfo.project, query, true);
+            try {
+                parsedQuery = PullRequestQuery.parse(projectInfo.project, query, true);
+            } catch (ParseCancellationException e) {
+                logger.error("Error parsing query", e);
+                throw new NotAcceptableException("Invalid pull request query, check server log for details");
+            }
         } else {
             parsedQuery = new PullRequestQuery();
         }
@@ -1076,7 +924,12 @@ public class McpHelperResource {
 
         EntityQuery<Build> parsedQuery;
         if (query != null) {
-            parsedQuery = BuildQuery.parse(projectInfo.project, query, true, true);
+            try {
+                parsedQuery = BuildQuery.parse(projectInfo.project, query, true, true);
+            } catch (ParseCancellationException e) {
+                logger.error("Error parsing query", e);
+                throw new NotAcceptableException("Invalid build query, check server log for details");
+            }
         } else {
             parsedQuery = new BuildQuery();
         }
@@ -1160,20 +1013,8 @@ public class McpHelperResource {
         var currentProject = getProject(currentProjectPath);
 
         var pullRequest = getPullRequest(currentProject, pullRequestReference);
-                
-        var comments = new ArrayList<Map<String, Object>>();
-        for (var comment : pullRequest.getCodeComments()) {
-            var commentMap = new HashMap<String, Object>();
-            commentMap.put("user", comment.getUser().getName());
-            commentMap.put("date", comment.getCreateDate());
-            commentMap.put("file", comment.getMark().getPath());
-            commentMap.put("content", comment.getContent());
-            commentMap.put("replies", comment.getReplies().size());
-            commentMap.put("status", comment.isResolved()?"resolved":"unresolved");
-            commentMap.put("link", urlService.urlFor(comment, true));
-            comments.add(commentMap);
-        }
-        return comments;
+
+        return PullRequestHelper.getCodeComments(pullRequest);
     }
 
     @Path("/get-pull-request-patch-info")
@@ -1274,19 +1115,13 @@ public class McpHelperResource {
 
         var title = (String) data.remove("title");
         if (title == null)
-            title = request.generateTitleFromCommits();
-        else
-            title = request.cleanTitle(title);
-
-        if (title == null)
-            title = request.generateTitleFromBranch();
+            throw new NotAcceptableException("Title is required");
 
         request.setTitle(title);
 
         var description = (String) data.remove("description");
-        if (description == null)
-            description = request.generateDescriptionFromCommits();
-        request.setDescription(description);
+        if (description != null)
+            request.setDescription(description);
 
         @SuppressWarnings("unchecked")
         var reviewerNames = (List<String>) data.remove("reviewers");
@@ -1296,7 +1131,7 @@ public class McpHelperResource {
                 if (reviewer == null)
                     throw new NotFoundException("Reviewer not found: " + reviewerName);
                 if (reviewer.equals(request.getSubmitter()))
-                    throw new NotAcceptableException("Pull request submitter can not be reviewer");
+                    throw new NotAcceptableException("Pull request submitter cannot be reviewer");
 
                 if (request.getReview(reviewer) == null) {
                     PullRequestReview review = new PullRequestReview();
@@ -1450,7 +1285,6 @@ public class McpHelperResource {
                 pullRequestReviewService.createOrUpdate(user, review);
         }
 
-
         var autoMergeEnabled = (Boolean) data.remove("autoMerge");
         if (autoMergeEnabled != null) {
             if (!SecurityUtils.canWriteCode(request.getProject()))
@@ -1474,87 +1308,172 @@ public class McpHelperResource {
         return "Edited pull request " + pullRequestReference;
     }    
 
-    @Path("/process-pull-request")
+    @Path("/approve-pull-request")
     @Consumes(MediaType.TEXT_PLAIN)
     @POST
-    public String processPullRequest(
-                @QueryParam("currentProject") @NotNull String currentProjectPath, 
-                @QueryParam("reference") @NotNull String pullRequestReference, 
-                @QueryParam("operation") String operation, 
+    public String approvePullRequest(
+                @QueryParam("currentProject") @NotNull String currentProjectPath,
+                @QueryParam("reference") @NotNull String pullRequestReference,
                 String comment) {
         var user = SecurityUtils.getUser();
         if (user == null)
             throw new UnauthenticatedException();
 
         var currentProject = getProject(currentProjectPath);
-
         var pullRequest = getPullRequest(currentProject, pullRequestReference);
-        comment = StringUtils.trimToNull(comment);
-        
-        switch (operation) {
-        case "approve":
-            pullRequestReviewService.review(user, pullRequest, true, comment);
-            return "Approved pull request " + pullRequestReference;
-        case "requestChanges":
-            pullRequestReviewService.review(user, pullRequest, false, comment);
-            return "Requested changes on pull request " + pullRequestReference;
-        case "merge":
-            if (!SecurityUtils.canWriteCode(user.asSubject(), pullRequest.getProject()))
-                throw new UnauthorizedException();
-            String errorMessage = pullRequest.checkMergeCondition();
-            if (errorMessage != null)
-                throw new NotAcceptableException(errorMessage);
-            errorMessage = pullRequest.checkMergeCommitMessage(user, comment);
-            if (errorMessage != null)
-                throw new NotAcceptableException("Error validating merge commit message: " + errorMessage);
 
-            pullRequestService.merge(user, pullRequest, comment);
+        pullRequestReviewService.review(user, pullRequest, true, StringUtils.trimToNull(comment));
+        return "Approved pull request " + pullRequestReference;
+    }
 
-            return "Merged pull request " + pullRequestReference;
-        case "discard":
-            if (!SecurityUtils.canModifyPullRequest(pullRequest))
-                throw new UnauthorizedException();
-            if (!pullRequest.isOpen())
-                throw new NotAcceptableException("Pull request already closed");
-            pullRequestService.discard(user, pullRequest, comment);
-            return "Discarded pull request " + pullRequestReference;
-        case "reopen":
-            if (!SecurityUtils.canModifyPullRequest(pullRequest))
-                throw new UnauthorizedException();
-            errorMessage = pullRequest.checkReopenCondition();
-            if (errorMessage != null)
-                throw new NotAcceptableException(errorMessage);
-            pullRequestService.reopen(user, pullRequest, comment);
-            return "Reopened pull request " + pullRequestReference;
-        case "deleteSourceBranch":
-            if (!SecurityUtils.canModifyPullRequest(pullRequest) 
-                    || !SecurityUtils.canDeleteBranch(pullRequest.getSourceProject(), pullRequest.getSourceBranch())) {
-                throw new UnauthorizedException();
-            }
-            
-            errorMessage = pullRequest.checkDeleteSourceBranchCondition();
-            if (errorMessage != null)
-                throw new NotAcceptableException(errorMessage); 		
-            
-            pullRequestService.deleteSourceBranch(user, pullRequest, comment);
+    @Path("/request-changes-on-pull-request")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @POST
+    public String requestChangesOnPullRequest(
+                @QueryParam("currentProject") @NotNull String currentProjectPath,
+                @QueryParam("reference") @NotNull String pullRequestReference,
+                String comment) {
+        var user = SecurityUtils.getUser();
+        if (user == null)
+            throw new UnauthenticatedException();
 
-            return "Deleted source branch of pull request " + pullRequestReference;
-        case "restoreSourceBranch":
-            if (!SecurityUtils.canModifyPullRequest(pullRequest) || 
-                    !SecurityUtils.canWriteCode(pullRequest.getSourceProject())) {
-                throw new UnauthorizedException();
-            }
-            
-            errorMessage = pullRequest.checkRestoreSourceBranchCondition();
-            if (errorMessage != null)
-                throw new NotAcceptableException(errorMessage);
-            
-            pullRequestService.restoreSourceBranch(user, pullRequest, comment);
+        var currentProject = getProject(currentProjectPath);
+        var pullRequest = getPullRequest(currentProject, pullRequestReference);
 
-            return "Restored source branch of pull request " + pullRequestReference;
-        default:
-            throw new NotAcceptableException("Invalid operation: " + operation);
+        pullRequestReviewService.review(user, pullRequest, false, StringUtils.trimToNull(comment));
+        return "Requested changes on pull request " + pullRequestReference;
+    }
+
+    @Path("/merge-pull-request")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @POST
+    public String mergePullRequest(
+                @QueryParam("currentProject") @NotNull String currentProjectPath,
+                @QueryParam("reference") @NotNull String pullRequestReference,
+                String commitMessage) {
+        var user = SecurityUtils.getUser();
+        if (user == null)
+            throw new UnauthenticatedException();
+
+        var currentProject = getProject(currentProjectPath);
+        var pullRequest = getPullRequest(currentProject, pullRequestReference);
+
+        if (!SecurityUtils.canWriteCode(user.asSubject(), pullRequest.getProject()))
+            throw new UnauthorizedException();
+
+        commitMessage = StringUtils.trimToNull(commitMessage);
+
+        var errorMessage = pullRequest.checkMergeCondition();
+        if (errorMessage != null)
+            throw new NotAcceptableException(errorMessage);
+        errorMessage = pullRequest.checkMergeCommitMessage(user, commitMessage);
+        if (errorMessage != null)
+            throw new NotAcceptableException("Error validating merge commit message: " + errorMessage);
+
+        pullRequestService.merge(user, pullRequest, commitMessage);
+
+        return "Merged pull request " + pullRequestReference;
+    }
+
+    @Path("/discard-pull-request")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @POST
+    public String discardPullRequest(
+                @QueryParam("currentProject") @NotNull String currentProjectPath,
+                @QueryParam("reference") @NotNull String pullRequestReference,
+                String comment) {
+        var user = SecurityUtils.getUser();
+        if (user == null)
+            throw new UnauthenticatedException();
+
+        var currentProject = getProject(currentProjectPath);
+        var pullRequest = getPullRequest(currentProject, pullRequestReference);
+
+        if (!SecurityUtils.canModifyPullRequest(pullRequest))
+            throw new UnauthorizedException();
+        if (!pullRequest.isOpen())
+            throw new NotAcceptableException("Pull request already closed");
+
+        pullRequestService.discard(user, pullRequest, StringUtils.trimToNull(comment));
+        return "Discarded pull request " + pullRequestReference;
+    }
+
+    @Path("/reopen-pull-request")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @POST
+    public String reopenPullRequest(
+                @QueryParam("currentProject") @NotNull String currentProjectPath,
+                @QueryParam("reference") @NotNull String pullRequestReference,
+                String comment) {
+        var user = SecurityUtils.getUser();
+        if (user == null)
+            throw new UnauthenticatedException();
+
+        var currentProject = getProject(currentProjectPath);
+        var pullRequest = getPullRequest(currentProject, pullRequestReference);
+
+        if (!SecurityUtils.canModifyPullRequest(pullRequest))
+            throw new UnauthorizedException();
+        var errorMessage = pullRequest.checkReopenCondition();
+        if (errorMessage != null)
+            throw new NotAcceptableException(errorMessage);
+
+        pullRequestService.reopen(user, pullRequest, StringUtils.trimToNull(comment));
+        return "Reopened pull request " + pullRequestReference;
+    }
+
+    @Path("/delete-pull-request-source-branch")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @POST
+    public String deletePullRequestSourceBranch(
+                @QueryParam("currentProject") @NotNull String currentProjectPath,
+                @QueryParam("reference") @NotNull String pullRequestReference,
+                String comment) {
+        var user = SecurityUtils.getUser();
+        if (user == null)
+            throw new UnauthenticatedException();
+
+        var currentProject = getProject(currentProjectPath);
+        var pullRequest = getPullRequest(currentProject, pullRequestReference);
+
+        if (!SecurityUtils.canModifyPullRequest(pullRequest)
+                || !SecurityUtils.canDeleteBranch(pullRequest.getSourceProject(), pullRequest.getSourceBranch())) {
+            throw new UnauthorizedException();
         }
+
+        var errorMessage = pullRequest.checkDeleteSourceBranchCondition();
+        if (errorMessage != null)
+            throw new NotAcceptableException(errorMessage);
+
+        pullRequestService.deleteSourceBranch(user, pullRequest, StringUtils.trimToNull(comment));
+        return "Deleted source branch of pull request " + pullRequestReference;
+    }
+
+    @Path("/restore-pull-request-source-branch")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @POST
+    public String restorePullRequestSourceBranch(
+                @QueryParam("currentProject") @NotNull String currentProjectPath,
+                @QueryParam("reference") @NotNull String pullRequestReference,
+                String comment) {
+        var user = SecurityUtils.getUser();
+        if (user == null)
+            throw new UnauthenticatedException();
+
+        var currentProject = getProject(currentProjectPath);
+        var pullRequest = getPullRequest(currentProject, pullRequestReference);
+
+        if (!SecurityUtils.canModifyPullRequest(pullRequest)
+                || !SecurityUtils.canWriteCode(pullRequest.getSourceProject())) {
+            throw new UnauthorizedException();
+        }
+
+        var errorMessage = pullRequest.checkRestoreSourceBranchCondition();
+        if (errorMessage != null)
+            throw new NotAcceptableException(errorMessage);
+
+        pullRequestService.restoreSourceBranch(user, pullRequest, StringUtils.trimToNull(comment));
+        return "Restored source branch of pull request " + pullRequestReference;
     }
 
     @Path("/add-pull-request-comment")
@@ -1578,6 +1497,98 @@ public class McpHelperResource {
         pullRequestCommentService.create(comment);
 
         return "Commented on pull request " + pullRequestReference;
+    }
+
+    @Path("/add-pull-request-code-comment")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @POST
+    public String addPullRequestCodeComment(
+                @QueryParam("currentProject") @NotNull String currentProjectPath, 
+                @QueryParam("reference") @NotNull String pullRequestReference, 
+                @QueryParam("filePath") @NotNull String filePath,
+                @QueryParam("fromLineNumber") int fromLineNumber, // index starts from 1
+                @QueryParam("toLineNumber") int toLineNumber, // index starts from 1
+                @NotNull String commentContent) {
+        var user = SecurityUtils.getUser();
+        if (user == null)
+            throw new UnauthenticatedException();
+
+        var currentProject = getProject(currentProjectPath);
+        var pullRequest = getPullRequest(currentProject, pullRequestReference);
+
+        PullRequestHelper.addCodeComment(pullRequest, user, filePath, fromLineNumber, toLineNumber, commentContent);
+
+        return "Added code comment on pull request " + pullRequestReference;
+    }
+
+    @Path("/add-code-comment-reply")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @POST
+    public String addCodeCommentReply(
+                @QueryParam("commentId") @NotNull Long commentId,
+                @NotNull String replyContent) {
+        var user = SecurityUtils.getUser();
+        if (user == null)
+            throw new UnauthenticatedException();
+
+        var comment = codeCommentService.load(commentId);
+        if (!SecurityUtils.canReadCode(comment.getProject()))
+            throw new UnauthorizedException();
+
+        var reply = new CodeCommentReply();
+        reply.setComment(comment);
+        reply.setContent(replyContent);
+        reply.setUser(user);
+        reply.setDate(new Date());
+        reply.setCompareContext(comment.getCompareContext());
+        codeCommentReplyService.create(reply);
+
+        return "Added reply to code comment #" + commentId;
+    }
+
+    @Path("/resolve-code-comment")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @POST
+    public String resolveCodeComment(@QueryParam("commentId") @NotNull Long commentId, String note) {
+        var user = SecurityUtils.getUser();
+        if (user == null)
+            throw new UnauthenticatedException();
+
+        var comment = codeCommentService.load(commentId);
+        if (!SecurityUtils.canWriteCode(comment.getProject()))
+            throw new UnauthorizedException();
+
+        var statusChange = new CodeCommentStatusChange();
+        statusChange.setComment(comment);
+        statusChange.setUser(user);
+        statusChange.setResolved(true);
+        statusChange.setCompareContext(comment.getCompareContext());
+        codeCommentStatusChangeService.create(statusChange, note);
+
+        return "Resolved code comment #" + commentId;
+    }
+
+    @Path("/unresolve-code-comment")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @POST
+    public String unresolveCodeComment(@QueryParam("commentId") @NotNull Long commentId, String note) {
+        var user = SecurityUtils.getUser();
+        if (user == null)
+            throw new UnauthenticatedException();
+
+        var comment = codeCommentService.load(commentId);
+        if (!SecurityUtils.canWriteCode(comment.getProject()))
+            throw new UnauthorizedException();
+
+        var statusChange = new CodeCommentStatusChange();
+        statusChange.setComment(comment);
+        statusChange.setUser(user);
+        statusChange.setDate(new Date(System.currentTimeMillis() + 1000));
+        statusChange.setResolved(false);
+        statusChange.setCompareContext(comment.getCompareContext());
+        codeCommentStatusChangeService.create(statusChange, note);
+
+        return "Unresolved code comment #" + commentId;
     }
 
     @SuppressWarnings("unchecked")
@@ -1736,7 +1747,12 @@ public class McpHelperResource {
 
         EntityQuery<Pack> parsedQuery;
         if (query != null) {
-            parsedQuery = PackQuery.parse(projectInfo.project, query, true);
+            try {
+                parsedQuery = PackQuery.parse(projectInfo.project, query, true);
+            } catch (ParseCancellationException e) {
+                logger.error("Error parsing query", e);
+                throw new NotAcceptableException("Invalid pack query, check server log for details");
+            }
         } else {
             parsedQuery = new PackQuery();
         }
@@ -1776,6 +1792,16 @@ public class McpHelperResource {
         Project project;
 
         Project currentProject;
+    }
+
+    private static class VersionInfo {
+
+        @SuppressWarnings("unused")
+        String serverVersion;
+
+        @SuppressWarnings("unused")
+        String minRequiredTodVersion;
+
     }
 
  }

@@ -2025,7 +2025,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 							Session.get().success(_T("Approved"));
 							return null;
 						} else {
-							return _T("Can not perform this operation now");
+							return _T("Cannot perform this operation now");
 						}
 					}
 
@@ -2068,7 +2068,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 							Session.get().success(_T("Requested For changes"));
 							return null;
 						} else {
-							return _T("Can not perform this operation now");
+							return _T("Cannot perform this operation now");
 						}
 					}
 
@@ -2114,7 +2114,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 							notifyPullRequestChange(target);
 							return null;
 						} else {
-							return _T("Can not perform this operation now");
+							return _T("Cannot perform this operation now");
 						}
 					}
 
@@ -2146,7 +2146,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 							notifyPullRequestChange(target);
 							return null;
 						} else {
-							return _T("Can not perform this operation now");
+							return _T("Cannot perform this operation now");
 						}
 					}
 
@@ -2183,7 +2183,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 							notifyPullRequestChange(target);
 							return null;
 						} else {
-							return _T("Can not perform this operation now");
+							return _T("Cannot perform this operation now");
 						}
 					}
 
@@ -2223,7 +2223,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 							Session.get().success(_T("Deleted source branch"));
 							return null;
 						} else {
-							return _T("Can not perform this operation now");
+							return _T("Cannot perform this operation now");
 						}
 					}
 
@@ -2263,7 +2263,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 							Session.get().success(_T("Restored source branch"));
 							return null;
 						} else {
-							return _T("Can not perform this operation now");
+							return _T("Cannot perform this operation now");
 						}
 					}
 

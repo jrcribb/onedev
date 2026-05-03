@@ -281,10 +281,10 @@ public class UserListPage extends AdministrationPage {
 									for (var model: selectionColumn.getSelections()) {
 										var user = model.getObject();
 										if (user.isRoot()) {
-											Session.get().error(_T("Can not disable root account"));
+											Session.get().error(_T("Cannot disable root account"));
 											return;
 										} else if (user.equals(SecurityUtils.getAuthUser())) {
-											Session.get().error(_T("Can not disable yourself"));
+											Session.get().error(_T("Cannot disable yourself"));
 											return;
 										}
 									}
@@ -359,10 +359,10 @@ public class UserListPage extends AdministrationPage {
 									for (var model: selectionColumn.getSelections()) {
 										var user = model.getObject();
 										if (user.isRoot()) {
-											Session.get().error(_T("Can not convert root user to service account"));
+											Session.get().error(_T("Cannot convert root user to service account"));
 											return;
 										} else if (user.equals(SecurityUtils.getAuthUser())) {
-											Session.get().error(_T("Can not convert yourself to service account"));
+											Session.get().error(_T("Cannot convert yourself to service account"));
 											return;
 										}
 									}
@@ -437,10 +437,10 @@ public class UserListPage extends AdministrationPage {
 								for (var model: selectionColumn.getSelections()) {
 									var user = model.getObject();
 									if (user.isRoot()) {
-										Session.get().error(_T("Can not delete root account"));
+										Session.get().error(_T("Cannot delete root account"));
 										return;
 									} else if (user.equals(SecurityUtils.getAuthUser())) {
-										Session.get().error(_T("Can not delete yourself"));
+										Session.get().error(_T("Cannot delete yourself"));
 										return;
 									}
 								}
@@ -567,10 +567,10 @@ public class UserListPage extends AdministrationPage {
 									for (@SuppressWarnings("unchecked") var it = (Iterator<User>) dataProvider.iterator(0, usersTable.getItemCount()); it.hasNext();) {
 										var user = it.next();
 										if (user.isRoot()) {
-											Session.get().error(_T("Can not disable root account"));
+											Session.get().error(_T("Cannot disable root account"));
 											return;
 										} else if (user.equals(SecurityUtils.getAuthUser())) {
-											Session.get().error(_T("Can not disable yourself"));
+											Session.get().error(_T("Cannot disable yourself"));
 											return;
 										}
 									}
@@ -648,10 +648,10 @@ public class UserListPage extends AdministrationPage {
 									for (@SuppressWarnings("unchecked") var it = (Iterator<User>) dataProvider.iterator(0, usersTable.getItemCount()); it.hasNext();) {
 										var user = it.next();
 										if (user.isRoot()) {
-											Session.get().error(_T("Can not convert root user to service account"));
+											Session.get().error(_T("Cannot convert root user to service account"));
 											return;
 										} else if (user.equals(SecurityUtils.getAuthUser())) {
-											Session.get().error(_T("Can not convert yourself to service account"));
+											Session.get().error(_T("Cannot convert yourself to service account"));
 											return;
 										}
 									}
@@ -730,10 +730,10 @@ public class UserListPage extends AdministrationPage {
 								for (@SuppressWarnings("unchecked") var it = (Iterator<User>) dataProvider.iterator(0, usersTable.getItemCount()); it.hasNext();) {
 									var user = it.next();
 									if (user.isRoot()) {
-										Session.get().error(_T("Can not delete root account"));
+										Session.get().error(_T("Cannot delete root account"));
 										return;
 									} else if (user.equals(SecurityUtils.getAuthUser())) {
-										Session.get().error(_T("Can not delete yourself"));
+										Session.get().error(_T("Cannot delete yourself"));
 										return;
 									}
 								}

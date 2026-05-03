@@ -103,7 +103,7 @@ they need to be updated to use iteration api instead
 The builder should be specified in more settings section of corresponding executors. If you are accessing insecure
 private docker registries, please follow [this tutorial](https://docs.onedev.io/tutorials/cicd/insecure-docker-registry) to configure the builder
 
-2. Builder and platform option can not be specified via _More Options_ property of build image step now. The builder option
+2. Builder and platform option cannot be specified via _More Options_ property of build image step now. The builder option
 should be specified in executor (see above note), and platform option should be specified via property _Platform_
 
 3. Build image step now either push image to registry, or save image as OCI layout. The option to build local image without
@@ -247,7 +247,7 @@ some service urls have been changed and this causes some incompatibitlities:
 1. The RESTful api url now starts with `~api` instead of `api`, for instance url to access project information is now `/~api/projects/{projectId}` 
 2. SSO callback url now takes the form `https://<onedev root url>/~sso/callback/<Provider Name>` (use `~sso` instead of `sso`)
 3. If you are using OAuth based Office365 or Gmail mail service, make sure to change redirect url as `https://<onedev root url>/~oauth/callback` (use `~oauth` instead of `oauth`)
-4. Agents can not upgrade itself for this version, as url connecting to server has been changed. You will need to re-download 
+4. Agents cannot upgrade itself for this version, as url connecting to server has been changed. You will need to re-download 
 agent package from server if running in bare-metal mode, or re-pull the agent image if running in docker mode
 5. If you are setting up reverse proxy using Apache or Nginx, make sure to change proxied path `/server` to `/~server`. Check [the docs](https://docs.onedev.io/administration-guide/reverse-proxy-setup) for details
 

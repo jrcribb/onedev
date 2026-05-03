@@ -64,7 +64,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("<a wicket:id=\"dependents\"><span wicket:id=\"label\"></span></a> depends on me", "<a wicket:id=\"dependents\"><span wicket:id=\"label\"></span></a> が私に依存しています");
 		m.put("<a wicket:id=\"removePassword\">Remove password</a> to force the user to authenticate via external system", 
 			"<a wicket:id=\"removePassword\">パスワードを削除</a>して、ユーザーが外部システムを介して認証するように強制します");
-		m.put("<a wicket:id=\"verifyRecoveryCode\">Verify by recovery code</a> if you can not access your TOTP authenticator", 
+		m.put("<a wicket:id=\"verifyRecoveryCode\">Verify by recovery code</a> if you cannot access your TOTP authenticator", 
 			"<a wicket:id=\"verifyRecoveryCode\">リカバリーコードで確認</a>してください。TOTP認証器にアクセスできない場合");
 		m.put("<b class='text-danger'>NOTE: </b> This requires an enterprise subscription. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
 			"<b class='text-danger'>注意: </b> これはエンタープライズサブスクリプションが必要です。<a href='https://onedev.io/pricing' target='_blank'>30日間無料で試す</a>");
@@ -158,9 +158,9 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Access Token Secret", "アクセストークンシークレット");
 		m.put("Access Token for Target Project", "ターゲットプロジェクト用アクセストークン");
 		m.put("Access Tokens", "アクセストークン");
-		m.put("Access token is intended for api access and repository pull/push. It can not be used to sign in to web ui", 
+		m.put("Access token is intended for api access and repository pull/push. It cannot be used to sign in to web ui", 
 			"アクセストークンは API アクセスおよびリポジトリのプル/プッシュを目的としています。Web UI にサインインするためには使用できません");
-		m.put("Access token is intended for api access or repository pull/push. It can not be used to sign in to web ui", 
+		m.put("Access token is intended for api access or repository pull/push. It cannot be used to sign in to web ui", 
 			"アクセストークンは API アクセスまたはリポジトリのプル/プッシュを目的としています。Web UI にサインインするためには使用できません");
 		m.put("Access token regenerated successfully", "アクセストークンが正常に再生成されました");
 		m.put("Access token regenerated, make sure to update the token at agent side", "アクセストークンが再生成されました。エージェント側でトークンを更新することを確認してください");
@@ -601,22 +601,22 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Can Be Used By Workspaces", "ワークスペースで使用可能");
 		m.put("Can Create Root Projects", "ルートプロジェクトを作成可能");
 		m.put("Can Edit Estimated Time", "推定時間を編集可能");
-		m.put("Can not convert root user to service account", "ルートユーザーをサービスアカウントに変換できません");
-		m.put("Can not convert yourself to service account", "自分自身をサービスアカウントに変換できません");
-		m.put("Can not delete branch \"{0}\" as there are workspaces on it", "ブランチ\"{0}\"を削除できません。そこにワークスペースがあるためです");
-		m.put("Can not delete default branch", "デフォルトブランチを削除できません");
-		m.put("Can not delete root account", "ルートアカウントを削除できません");
-		m.put("Can not delete yourself", "自分自身を削除できません");
-		m.put("Can not disable root account", "ルートアカウントを無効化できません");
-		m.put("Can not disable yourself", "自分自身を無効化できません");
-		m.put("Can not find issue board: ", "課題ボードが見つかりません:");
-		m.put("Can not move project \"{0}\" to be under itself or its descendants", "プロジェクト\"{0}\"を自身またはその子孫の下に移動することはできません");
-		m.put("Can not perform this operation now", "現在この操作を実行することはできません");
-		m.put("Can not reset password for disabled account", "無効なアカウントのパスワードをリセットできません");
-		m.put("Can not reset password for service or AI account", "サービスまたはAIアカウントのパスワードをリセットできません");
-		m.put("Can not reset password for user authenticating via external system", "外部システムで認証するユーザーのパスワードをリセットできません");
-		m.put("Can not save malformed query", "不正なクエリを保存することはできません");
-		m.put("Can not use current or descendant project as parent", "現在のプロジェクトまたは子孫プロジェクトを親として使用することはできません");
+		m.put("Cannot convert root user to service account", "ルートユーザーをサービスアカウントに変換できません");
+		m.put("Cannot convert yourself to service account", "自分自身をサービスアカウントに変換できません");
+		m.put("Cannot delete branch \"{0}\" as there are workspaces on it", "ブランチ\"{0}\"を削除できません。そこにワークスペースがあるためです");
+		m.put("Cannot delete default branch", "デフォルトブランチを削除できません");
+		m.put("Cannot delete root account", "ルートアカウントを削除できません");
+		m.put("Cannot delete yourself", "自分自身を削除できません");
+		m.put("Cannot disable root account", "ルートアカウントを無効化できません");
+		m.put("Cannot disable yourself", "自分自身を無効化できません");
+		m.put("Cannot find issue board: ", "課題ボードが見つかりません:");
+		m.put("Cannot move project \"{0}\" to be under itself or its descendants", "プロジェクト\"{0}\"を自身またはその子孫の下に移動することはできません");
+		m.put("Cannot perform this operation now", "現在この操作を実行することはできません");
+		m.put("Cannot reset password for disabled account", "無効なアカウントのパスワードをリセットできません");
+		m.put("Cannot reset password for service or AI account", "サービスまたはAIアカウントのパスワードをリセットできません");
+		m.put("Cannot reset password for user authenticating via external system", "外部システムで認証するユーザーのパスワードをリセットできません");
+		m.put("Cannot save malformed query", "不正なクエリを保存することはできません");
+		m.put("Cannot use current or descendant project as parent", "現在のプロジェクトまたは子孫プロジェクトを親として使用することはできません");
 		m.put("Can only compare with common ancestor when different projects are involved", "異なるプロジェクトが関与している場合、共通の祖先との比較のみ可能です");
 		m.put("Cancel", "キャンセル");
 		m.put("Cancel All Queried Builds", "クエリされたすべてのビルドをキャンセル");
@@ -1379,7 +1379,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Event Types", "イベントタイプ");
 		m.put("Events", "イベント");
 		m.put("Ever Used Since", "使用開始日");
-		m.put("Everything inside this project and all child projects will be deleted and can not be recovered, please type project path <code>{0}</code> below to confirm deletion.", 
+		m.put("Everything inside this project and all child projects will be deleted and cannot be recovered, please type project path <code>{0}</code> below to confirm deletion.", 
 			"このプロジェクト内のすべての内容とすべての子プロジェクトが削除され、復元できなくなります。削除を確認するには、以下にプロジェクトパス<code>{0}</code>を入力してください。");
 		m.put("Example", "例");
 		m.put("Example Plugin Setting", "プラグイン設定の例");
@@ -2455,7 +2455,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("OneDev requires git command line to manage repositories. The minimum required version is 2.11.1. Also make sure that git-lfs is installed if you want to retrieve LFS files in build job", 
 			"OneDevはリポジトリを管理するためにgitコマンドラインを必要とします。必要な最低バージョンは2.11.1です。また、ビルドジョブでLFSファイルを取得したい場合はgit-lfsがインストールされていることを確認してください");
 		m.put("Online", "オンライン");
-		m.put("Only create merge commit if target branch can not be fast-forwarded to source branch", 
+		m.put("Only create merge commit if target branch cannot be fast-forwarded to source branch", 
 			"ターゲットブランチがソースブランチに対して高速フォワードできない場合のみマージコミットを作成");
 		m.put("Only projects manageable by access token owner can be authorized", "アクセストークン所有者が管理可能なプロジェクトのみが認可されます");
 		m.put("Only system level audit events are displayed here. To view audit events for a specific project, please visit the project audit log page", 
@@ -2897,7 +2897,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Plain text expected", "プレーンテキストが期待されます");
 		m.put("Platform", "プラットフォーム");
 		m.put("Platforms", "プラットフォーム");
-		m.put("Please <a wicket:id=\"download\" class=\"font-weight-bolder\">download</a> recovery codes below and keep them secret. These codes can be used to provide one-time access to your account in case you can not access the authentication application. They will <b>NOT</b> be displayed again", 
+		m.put("Please <a wicket:id=\"download\" class=\"font-weight-bolder\">download</a> recovery codes below and keep them secret. These codes can be used to provide one-time access to your account in case you cannot access the authentication application. They will <b>NOT</b> be displayed again", 
 			"以下のリカバリーコードを<a wicket:id=\"download\" class=\"font-weight-bolder\">ダウンロード</a>して秘密に保管してください。これらのコードは、認証アプリケーションにアクセスできない場合にアカウントへの一時的なアクセスを提供するために使用できます。これらは<b>再表示されません</b>");
 		m.put("Please Confirm", "確認してください");
 		m.put("Please Note", "注意してください");
@@ -3098,15 +3098,15 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Pull request already closed", "プルリクエストはすでにクローズされています");
 		m.put("Pull request already opened", "プルリクエストはすでにオープンされています");
 		m.put("Pull request and code review", "プルリクエストとコードレビュー");
-		m.put("Pull request can not be merged now as <a class=\"more-info d-inline link-primary\">some required builds</a> are not finished yet", 
+		m.put("Pull request cannot be merged now as <a class=\"more-info d-inline link-primary\">some required builds</a> are not finished yet", 
 			"<a class=\"more-info d-inline link-primary\">必要なビルドの一部</a>がまだ完了していないため、現在プルリクエストをマージすることはできません");
-		m.put("Pull request can not be merged now as <a class=\"more-info d-inline link-primary\">some required builds</a> are not successful", 
+		m.put("Pull request cannot be merged now as <a class=\"more-info d-inline link-primary\">some required builds</a> are not successful", 
 			"<a class=\"more-info d-inline link-primary\">必要なビルドの一部</a>が成功していないため、現在プルリクエストをマージすることはできません");
-		m.put("Pull request can not be merged now as it is <a class=\"more-info d-inline link-primary\">pending review</a>", 
+		m.put("Pull request cannot be merged now as it is <a class=\"more-info d-inline link-primary\">pending review</a>", 
 			"<a class=\"more-info d-inline link-primary\">レビュー待ち</a>のため、現在プルリクエストをマージすることはできません");
-		m.put("Pull request can not be merged now as it was <a class=\"more-info d-inline link-primary\">requested for changes</a>", 
+		m.put("Pull request cannot be merged now as it was <a class=\"more-info d-inline link-primary\">requested for changes</a>", 
 			"<a class=\"more-info d-inline link-primary\">変更が要求されました</a>ため、現在プルリクエストをマージすることはできません");
-		m.put("Pull request can not be merged now as valid signature is required for head commit", 
+		m.put("Pull request cannot be merged now as valid signature is required for head commit", 
 			"ヘッドコミットに有効な署名が必要なため、現在プルリクエストをマージすることはできません");
 		m.put("Pull request can only be merged after getting approvals from all reviewers", "すべてのレビュアーから承認を得た後にのみプルリクエストをマージできます");
 		m.put("Pull request can only be merged by users with code write permission", "コード書き込み権限を持つユーザーのみがプルリクエストをマージできます");
@@ -4228,7 +4228,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("This installation's subscription has expired and is now running as the community edition", 
 			"このインストールのサブスクリプションは期限切れで、現在コミュニティエディションとして実行されています");
 		m.put("This is a Git LFS object, but the storage file is missing", "これはGit LFSオブジェクトですが、ストレージファイルがありません");
-		m.put("This is a built-in role and can not be deleted", "これは組み込みのロールであり、削除することはできません");
+		m.put("This is a built-in role and cannot be deleted", "これは組み込みのロールであり、削除することはできません");
 		m.put("This is a disabled AI account", "これは無効なAIアカウントです");
 		m.put("This is a disabled service account", "これは無効化されたサービスアカウントです");
 		m.put("This is a layer cache. To use the cache, add below option to your docker buildx command", 
@@ -4716,7 +4716,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Whether or not to show branch/tag column", "ブランチ/タグ列を表示するかどうか");
 		m.put("Whether or not to show duration column", "期間列を表示するかどうか");
 		m.put("Whether or not to use user avatar from a public service", "公開サービスからユーザーアバターを使用するかどうか");
-		m.put("Whether or not use force option to overwrite changes in case ref updating can not be fast-forwarded", 
+		m.put("Whether or not use force option to overwrite changes in case ref updating cannot be fast-forwarded", 
 			"参照の更新が高速フォワードできない場合に変更を上書きするために強制オプションを使用するかどうか");
 		m.put("Whether or not user can remove own account", "ユーザーが自分のアカウントを削除できるかどうか");
 		m.put("Whether the password must contain at least one lowercase letter", "パスワードに少なくとも1つの小文字を含める必要があるかどうか");
@@ -4801,7 +4801,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("add another order", "別の注文を追加");
 		m.put("adding .onedev-buildspec.yml", ".onedev-buildspec.ymlを追加中");
 		m.put("after specified date", "指定された日付以降");
-		m.put("an <a href='https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/notification/Unsubscribable.java' target='_blank'>object</a> holding unsubscribe information.  A <code>null</code> value means that the notification can not be unsubscribed", 
+		m.put("an <a href='https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/notification/Unsubscribable.java' target='_blank'>object</a> holding unsubscribe information.  A <code>null</code> value means that the notification cannot be unsubscribed", 
 			"通知解除情報を保持する<a href='https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/notification/Unsubscribable.java' target='_blank'>オブジェクト</a>。<code>null</code>値は通知を解除できないことを意味します");
 		m.put("and more", "さらに多く");
 		m.put("archived", "アーカイブ済み");

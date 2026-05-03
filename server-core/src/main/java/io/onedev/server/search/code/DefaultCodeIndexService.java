@@ -274,7 +274,7 @@ public class DefaultCodeIndexService implements CodeIndexService, Serializable {
 					try {
 						symbols = extractor.extract(blobName, StringUtils.removeBOM(content));
 					} catch (Exception e) {
-						logger.trace("Can not extract symbols from blob (hash:" + blobId.name() + ", path:" + blobPath + ")", e);
+						logger.trace("Cannot extract symbols from blob (hash:" + blobId.name() + ", path:" + blobPath + ")", e);
 					}
 					if (symbols != null) {
 						for (Symbol symbol: symbols) {

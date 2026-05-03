@@ -148,7 +148,7 @@ public final class LastCommitsOfChildren extends HashMap<String, Value> {
 					 * are all marked as cached, if yes, we will be confident that
 					 * cached last commits info can complement our last commits 
 					 * info. Note that if some of the queued commit is not marked 
-					 * as cached, then we can not do the complement as ancestors of 
+					 * as cached, then we cannot do the complement as ancestors of 
 					 * those non-cached commits in queue affecting some children 
 					 * might be newer than last commit being cached
 					 */

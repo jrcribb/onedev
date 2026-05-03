@@ -546,7 +546,7 @@ public abstract class Component
 	{
 		if (index > data_length() - 1)
 		{
-			throw new IndexOutOfBoundsException("can not set data at " + index +
+			throw new IndexOutOfBoundsException("cannot set data at " + index +
 				" when data_length() is " + data_length());
 		}
 		else if (index == 0 && !(data instanceof Object[] && !(data instanceof MetaDataEntry<?>[])))
@@ -574,7 +574,7 @@ public abstract class Component
 		}
 		if (position > currentLength)
 		{
-			throw new IndexOutOfBoundsException("can not insert data at " + position +
+			throw new IndexOutOfBoundsException("cannot insert data at " + position +
 				" when data_length() is " + currentLength);
 		}
 		if (currentLength == 0)
@@ -750,7 +750,7 @@ public abstract class Component
 
 			// Don't know how to find the markup
 			throw new MarkupNotFoundException(
-				"Can not determine Markup. Component is not yet connected to a parent. " +
+				"Cannot determine Markup. Component is not yet connected to a parent. " +
 					toString());
 		}
 
@@ -2573,7 +2573,7 @@ public abstract class Component
 
 		if (tag.isOpenClose() && openTag.isOpen())
 		{
-			markupStream.throwMarkupException("You can not modify a open tag to open-close: " + tag);
+			markupStream.throwMarkupException("You cannot modify a open tag to open-close: " + tag);
 		}
 
 		try

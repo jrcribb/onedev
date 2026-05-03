@@ -31,19 +31,19 @@ public class VersionTest {
 
 		try {
 			version = new Version(-1, 2, 1, "build", 1);
-			fail("Can not detect construction errors.");
+			fail("Cannot detect construction errors.");
 		} catch (Exception e) {
 		}
 
 		try {
 			version = new Version(1, 2, -1, null, 1);
-			fail("Can not detect construction errors.");
+			fail("Cannot detect construction errors.");
 		} catch (Exception e) {
 		}
 
 		try {
 			version = new Version(1, -1, 0, null, -1);
-			fail("Can not detect construction errors.");
+			fail("Cannot detect construction errors.");
 		} catch (Exception e) {
 		}
 	}

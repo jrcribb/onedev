@@ -231,12 +231,12 @@ public class ReflectionUtils {
 	 * @return
 	 * 			method matching specified name and parameter types 
 	 * @throws 
-	 * 			RuntimeException if the method can not be found
+	 * 			RuntimeException if the method cannot be found
 	 */
 	public static Method getMethod(Class<?> clazz, String methodName, Class<?>...paramTypes) {
 		Method method = findMethod(clazz, methodName, paramTypes);
 		if (method == null) {
-			throw new RuntimeException("Can not find method named '" + 
+			throw new RuntimeException("Cannot find method named '" + 
 					methodName + "' in class hierarchy of '" + clazz.getName() + 
 					"'.");
 		} else {
@@ -329,7 +329,7 @@ public class ReflectionUtils {
 	 * 			instance of the class
 	 * @throws
 	 * 			RuntimeException if constructor with parameter types
-	 * 			matching specified parameters can not be found
+	 * 			matching specified parameters cannot be found
 	 */
 	public static <T> T instantiateClass(Class<T> clazz, Object... params) {
 		Class<?>[] paramTypes = new Class<?>[params.length];

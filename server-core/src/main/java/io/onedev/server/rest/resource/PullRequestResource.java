@@ -247,7 +247,7 @@ public class PullRequestResource {
 			for (Long reviewerId: data.getReviewerIds()) {
 				User reviewer = userService.load(reviewerId);
 				if (reviewer.equals(request.getSubmitter()))
-					return Response.status(NOT_ACCEPTABLE).entity("Pull request submitter can not be reviewer").build();
+					return Response.status(NOT_ACCEPTABLE).entity("Pull request submitter cannot be reviewer").build();
 
 				if (request.getReview(reviewer) == null) {
 					PullRequestReview review = new PullRequestReview();

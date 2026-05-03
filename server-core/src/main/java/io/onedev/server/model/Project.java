@@ -795,7 +795,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	 * @return
 	 * 			blob of specified blob ident
 	 * @throws
-	 * 			ObjectNotFoundException if blob of specified ident can not be found in repository 
+	 * 			ObjectNotFoundException if blob of specified ident cannot be found in repository 
 	 * 			
 	 */
 	@Nullable

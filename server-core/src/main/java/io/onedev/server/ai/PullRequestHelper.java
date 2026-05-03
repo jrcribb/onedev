@@ -8,15 +8,40 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.ws.rs.NotAcceptableException;
+import javax.ws.rs.NotFoundException;
+
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+import org.eclipse.jgit.diff.DiffEntry.ChangeType;
+import org.eclipse.jgit.lib.FileMode;
+import org.eclipse.jgit.lib.ObjectId;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
+import io.onedev.server.git.BlobChange;
+import io.onedev.server.git.BlobIdent;
+import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.service.DiffEntryFacade;
+import io.onedev.server.git.service.GitService;
+import io.onedev.server.model.CodeComment;
+import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.model.PullRequestReview;
+import io.onedev.server.model.User;
+import io.onedev.server.model.support.CompareContext;
+import io.onedev.server.model.support.Mark;
+import io.onedev.server.service.CodeCommentService;
+import io.onedev.server.service.PullRequestService;
 import io.onedev.server.service.UrlService;
+import io.onedev.server.util.diff.DiffUtils;
+import io.onedev.server.util.diff.WhitespaceOption;
+import io.onedev.server.web.util.DiffPlanarRange;
 
 public class PullRequestHelper {
     
@@ -97,6 +122,141 @@ public class PullRequestHelper {
             comments.add(commentMap);
         });
         return comments;
+    }
+
+    public static void addCodeComment(PullRequest pullRequest, User user, String filePath,
+            int fromLineNumber, int toLineNumber, String commentContent) {
+        if (fromLineNumber <= 0)
+            throw new NotAcceptableException("'fromLineNumber' must be greater than 0");
+        if (fromLineNumber > toLineNumber)
+            throw new NotAcceptableException("'fromLineNumber' must be less than or equal to 'toLineNumber'");
+
+        var project = pullRequest.getProject();
+        var pullRequestService = OneDev.getInstance(PullRequestService.class);
+        var gitService = OneDev.getInstance(GitService.class);
+        var codeCommentService = OneDev.getInstance(CodeCommentService.class);
+
+        var oldCommitId = ObjectId.fromString(pullRequest.getBaseCommitHash());
+        var newCommitId = ObjectId.fromString(pullRequest.getLatestUpdate().getHeadCommitHash());
+        var comparisonBase = pullRequestService.getComparisonBase(pullRequest, oldCommitId, newCommitId);
+
+        var newBlobIdent = new BlobIdent(newCommitId.name(), filePath, FileMode.REGULAR_FILE.getBits());
+        var lines = project.readLines(newBlobIdent, WhitespaceOption.IGNORE_TRAILING, false);
+        if (lines == null)
+            throw new NotFoundException("File not found or not a text file in head commit: " + filePath);
+        if (toLineNumber > lines.size())
+            throw new NotAcceptableException("'toLineNumber' must not exceed number of lines in the file");
+
+        DiffEntryFacade matchingEntry = null;
+        for (var entry : gitService.diff(project, comparisonBase, newCommitId)) {
+            if (filePath.equals(entry.getNewPath()) && entry.getChangeType() != ChangeType.DELETE) {
+                matchingEntry = entry;
+                break;
+            }
+        }
+        if (matchingEntry == null)
+            throw new NotAcceptableException("Cannot add code comment outside of diff: '" + filePath + "' is not changed");
+
+        var changeType = matchingEntry.getChangeType();
+        if (changeType == ChangeType.RENAME && matchingEntry.getOldPath().equals(matchingEntry.getNewPath()))
+            changeType = ChangeType.MODIFY;
+        var oldDiffBlobIdent = GitUtils.getOldBlobIdent(matchingEntry, comparisonBase.name());
+        var newDiffBlobIdent = GitUtils.getNewBlobIdent(matchingEntry, newCommitId.name());
+        var blobChange = new BlobChange(changeType, oldDiffBlobIdent, newDiffBlobIdent, WhitespaceOption.IGNORE_TRAILING) {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Project getProject() {
+                return project;
+            }
+
+        };
+
+        var range = new PlanarRange(fromLineNumber - 1, 0, toLineNumber - 1, lines.get(toLineNumber - 1).length());
+        if (!blobChange.isVisible(new DiffPlanarRange(false, range)))
+            throw new NotAcceptableException("Cannot add code comment outside of diff");
+
+        var comment = new CodeComment();
+        comment.setProject(project);
+        comment.setUser(user);
+        comment.setContent(commentContent);
+
+        var mark = new Mark();
+        mark.setCommitHash(newCommitId.name());
+        mark.setPath(filePath);
+        mark.setRange(range);
+        comment.setMark(mark);
+
+        var compareContext = new CompareContext();
+        compareContext.setPullRequest(pullRequest);
+        compareContext.setOldCommitHash(oldCommitId.name());
+        compareContext.setNewCommitHash(newCommitId.name());
+        compareContext.setPathFilter(filePath);
+        comment.setCompareContext(compareContext);
+
+        codeCommentService.create(comment);
+    }
+
+    public static List<Map<String, Object>> getCodeComments(PullRequest pullRequest) {
+        var project = pullRequest.getProject();
+        var headCommitId = ObjectId.fromString(pullRequest.getLatestUpdate().getHeadCommitHash());
+        Map<Pair<String, String>, Map<Integer, Integer>> lineMappingCache = new HashMap<>();
+
+        var codeComments = new ArrayList<Map<String, Object>>();
+        pullRequest.getCodeComments().stream()
+                .sorted(Comparator.comparing(CodeComment::getId))
+                .forEach(comment -> {
+                    Mark mark = comment.getMark();
+                    String commentCommitHash = mark.getCommitHash();
+                    String path = mark.getPath();
+
+                    PlanarRange mappedRange;
+                    if (commentCommitHash.equals(headCommitId.name())) {
+                        mappedRange = mark.getRange();
+                    } else {
+                        var key = new ImmutablePair<>(commentCommitHash, path);
+                        var lineMapping = lineMappingCache.computeIfAbsent(key, k -> {
+                            BlobIdent newBlobIdent = new BlobIdent(headCommitId.name(), path, FileMode.REGULAR_FILE.getBits());
+                            List<String> newLines = project.readLines(newBlobIdent, WhitespaceOption.IGNORE_TRAILING, false);
+                            if (newLines != null) {
+                                BlobIdent oldBlobIdent = new BlobIdent(commentCommitHash, path, FileMode.REGULAR_FILE.getBits());
+                                List<String> oldLines = project.readLines(oldBlobIdent, WhitespaceOption.IGNORE_TRAILING, false);
+                                if (oldLines != null)
+                                    return DiffUtils.mapLines(oldLines, newLines);
+                            }
+                            return new HashMap<Integer, Integer>();
+                        });
+                        mappedRange = DiffUtils.mapRange(lineMapping, mark.getRange());
+                    }
+                    if (mappedRange == null)
+                        return;
+
+                    var commentMap = new LinkedHashMap<String, Object>();
+                    commentMap.put("id", comment.getId());
+                    commentMap.put("filePath", path);
+                    commentMap.put("startLine", mappedRange.getFromRow() + 1);
+                    commentMap.put("endLine", mappedRange.getToRow() + 1);
+                    commentMap.put("user", comment.getUser().getName());
+                    commentMap.put("date", comment.getCreateDate());
+                    commentMap.put("content", comment.getContent());
+                    commentMap.put("resolved", comment.isResolved());
+
+                    var replies = new ArrayList<Map<String, Object>>();
+                    comment.getReplies().stream()
+                            .sorted(Comparator.comparing(CodeCommentReply::getId))
+                            .forEach(reply -> {
+                                var replyMap = new LinkedHashMap<String, Object>();
+                                replyMap.put("user", reply.getUser().getName());
+                                replyMap.put("date", reply.getDate());
+                                replyMap.put("content", reply.getContent());
+                                replies.add(replyMap);
+                            });
+                    commentMap.put("replies", replies);
+
+                    codeComments.add(commentMap);
+                });
+        return codeComments;
     }
 
 }

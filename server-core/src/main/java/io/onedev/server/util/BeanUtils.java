@@ -260,7 +260,7 @@ public class BeanUtils {
 	public static Method getSetter(Method getter) {
 		Method setter = findSetter(getter);
 		if (setter == null) {
-			String message = String.format("Can not find setter (class: %s, property: %s, type: %s)", 
+			String message = String.format("Cannot find setter (class: %s, property: %s, type: %s)", 
 					getter.getDeclaringClass().getName(), getPropertyName(getter), getter.getReturnType().getName());
 			throw new RuntimeException(message);
 		}

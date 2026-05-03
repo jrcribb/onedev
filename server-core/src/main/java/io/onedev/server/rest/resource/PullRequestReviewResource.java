@@ -58,7 +58,7 @@ public class PullRequestReviewResource {
 		}
 
 		if (review.getUser().equals(review.getRequest().getSubmitter()))
-			throw new ExplicitException("Pull request submitter can not be reviewer");
+			throw new ExplicitException("Pull request submitter cannot be reviewer");
 		
 		if (review.getRequest().isMerged())
 			throw new ExplicitException("Pull request is merged");
@@ -95,7 +95,7 @@ public class PullRequestReviewResource {
 			return Response.ok().build();
 		} else {
 			throw new NotAcceptableException("Reviewer '" + reviewer.getDisplayName()
-					+ "' is required and can not be removed");
+					+ "' is required and cannot be removed");
 		}
 	}
 	

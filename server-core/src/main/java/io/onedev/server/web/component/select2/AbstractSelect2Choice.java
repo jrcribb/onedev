@@ -166,7 +166,7 @@ abstract class AbstractSelect2Choice<T, M> extends HiddenField<M> implements IRe
 					getJquerySafeMarkupId(), settings.toJson())));
 		} else {
 			// Use OnLoad instead of OnDomReady here as otherwise the placeholder 
-			// of multi-choice can not be displayed in a modal dialog
+			// of multi-choice cannot be displayed in a modal dialog
 			response.render(OnLoadHeaderItem.forScript(JQuery.execute("$('#%s').select2(%s);", 
 					getJquerySafeMarkupId(), settings.toJson())));
 		}

@@ -321,7 +321,7 @@ public class DefaultResourceService implements ResourceService, Serializable, Sc
 			if (agentId != null) {
 				var server = agentService.getAgentServer(agentId);
 				if (server == null)
-					throw new ExplicitException("Can not find server managing allocated agent, please retry later");
+					throw new ExplicitException("Cannot find server managing allocated agent, please retry later");
 
 				return clusterService.runOnServer(server, () -> {
 					var effectiveTotalConcurrency = getEffectiveTotalConcurrency(agentIdString, totalConcurrency);

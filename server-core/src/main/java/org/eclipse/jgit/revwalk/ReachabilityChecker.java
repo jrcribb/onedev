@@ -48,7 +48,7 @@ public interface ReachabilityChecker {
 	 * @throws IncorrectObjectTypeException
 	 *             if any of the incoming objects is not a commit or a tag.
 	 * @throws IOException
-	 *             if any of the underlying indexes or readers can not be
+	 *             if any of the underlying indexes or readers cannot be
 	 *             opened.
 	 *
 	 * @deprecated see {{@link #areAllReachable(Collection, Stream)}
@@ -81,7 +81,7 @@ public interface ReachabilityChecker {
 	 * @throws IncorrectObjectTypeException
 	 *             if any of the incoming objects is not a commit or a tag.
 	 * @throws IOException
-	 *             if any of the underlying indexes or readers can not be
+	 *             if any of the underlying indexes or readers cannot be
 	 *             opened.
 	 * @since 5.6
 	 */

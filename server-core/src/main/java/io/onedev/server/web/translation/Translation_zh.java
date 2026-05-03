@@ -90,7 +90,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("<a wicket:id=\"dependents\"><span wicket:id=\"label\"></span></a> depends on me", "<a wicket:id=\"dependents\"><span wicket:id=\"label\"></span></a> 依赖于我");
 		m.put("<a wicket:id=\"removePassword\">Remove password</a> to force the user to authenticate via external system", 
 			"<a wicket:id=\"removePassword\">移除密码</a> 以强制用户通过外部系统进行身份验证");
-		m.put("<a wicket:id=\"verifyRecoveryCode\">Verify by recovery code</a> if you can not access your TOTP authenticator", 
+		m.put("<a wicket:id=\"verifyRecoveryCode\">Verify by recovery code</a> if you cannot access your TOTP authenticator", 
 			"<a wicket:id=\"verifyRecoveryCode\">通过恢复代码验证</a>（如果您无法访问 TOTP 认证器）");
 		m.put("<b class='text-danger'>NOTE: </b> This requires an enterprise subscription. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
 			"<b class='text-danger'>注意：</b> 这需要企业订阅。<a href='https://onedev.io/pricing' target='_blank'>免费试用</a> 30 天");
@@ -184,9 +184,9 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Access Token Secret", "访问令牌密钥");
 		m.put("Access Token for Target Project", "目标项目的访问令牌");
 		m.put("Access Tokens", "访问令牌");
-		m.put("Access token is intended for api access and repository pull/push. It can not be used to sign in to web ui", 
+		m.put("Access token is intended for api access and repository pull/push. It cannot be used to sign in to web ui", 
 			"访问令牌用于 API 访问和仓库拉取/推送。它不能用于登录 Web 界面");
-		m.put("Access token is intended for api access or repository pull/push. It can not be used to sign in to web ui", 
+		m.put("Access token is intended for api access or repository pull/push. It cannot be used to sign in to web ui", 
 			"访问令牌用于 API 访问或仓库拉取/推送。它不能用于登录 Web 界面");
 		m.put("Access token regenerated successfully", "访问令牌重新生成成功");
 		m.put("Access token regenerated, make sure to update the token at agent side", "访问令牌已重新生成，请确保在代理端更新令牌");
@@ -627,22 +627,22 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Can Be Used By Workspaces", "可用于工作区");
 		m.put("Can Create Root Projects", "可以创建根项目");
 		m.put("Can Edit Estimated Time", "可以编辑预估时间");
-		m.put("Can not convert root user to service account", "无法将 root 用户转换为服务账户");
-		m.put("Can not convert yourself to service account", "无法将自己转换为服务账户");
-		m.put("Can not delete branch \"{0}\" as there are workspaces on it", "无法删除分支 \"{0}\"，因为上面有工作区");
-		m.put("Can not delete default branch", "不能删除默认分支");
-		m.put("Can not delete root account", "不能删除根账户");
-		m.put("Can not delete yourself", "不能删除自己");
-		m.put("Can not disable root account", "不能禁用根账户");
-		m.put("Can not disable yourself", "不能禁用自己");
-		m.put("Can not find issue board: ", "找不到工单看板：");
-		m.put("Can not move project \"{0}\" to be under itself or its descendants", "不能将项目 \"{0}\" 移动到其自身或其子项目下");
-		m.put("Can not perform this operation now", "当前无法执行此操作");
-		m.put("Can not reset password for disabled account", "无法为已禁用账户重置密码");
-		m.put("Can not reset password for service or AI account", "无法为服务或 AI 账户重置密码");
-		m.put("Can not reset password for user authenticating via external system", "无法重置通过外部系统认证的用户密码");
-		m.put("Can not save malformed query", "无法保存格式错误的查询");
-		m.put("Can not use current or descendant project as parent", "不能使用当前或子项目作为父项目");
+		m.put("Cannot convert root user to service account", "无法将 root 用户转换为服务账户");
+		m.put("Cannot convert yourself to service account", "无法将自己转换为服务账户");
+		m.put("Cannot delete branch \"{0}\" as there are workspaces on it", "无法删除分支 \"{0}\"，因为上面有工作区");
+		m.put("Cannot delete default branch", "不能删除默认分支");
+		m.put("Cannot delete root account", "不能删除根账户");
+		m.put("Cannot delete yourself", "不能删除自己");
+		m.put("Cannot disable root account", "不能禁用根账户");
+		m.put("Cannot disable yourself", "不能禁用自己");
+		m.put("Cannot find issue board: ", "找不到工单看板：");
+		m.put("Cannot move project \"{0}\" to be under itself or its descendants", "不能将项目 \"{0}\" 移动到其自身或其子项目下");
+		m.put("Cannot perform this operation now", "当前无法执行此操作");
+		m.put("Cannot reset password for disabled account", "无法为已禁用账户重置密码");
+		m.put("Cannot reset password for service or AI account", "无法为服务或 AI 账户重置密码");
+		m.put("Cannot reset password for user authenticating via external system", "无法重置通过外部系统认证的用户密码");
+		m.put("Cannot save malformed query", "无法保存格式错误的查询");
+		m.put("Cannot use current or descendant project as parent", "不能使用当前或子项目作为父项目");
 		m.put("Can only compare with common ancestor when different projects are involved", "跨项目比较时只能使用共同祖先");
 		m.put("Cancel", "取消");
 		m.put("Cancel All Queried Builds", "取消所有查询的构建");
@@ -1405,7 +1405,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Event Types", "事件类型");
 		m.put("Events", "事件");
 		m.put("Ever Used Since", "上次使用时间");
-		m.put("Everything inside this project and all child projects will be deleted and can not be recovered, please type project path <code>{0}</code> below to confirm deletion.", 
+		m.put("Everything inside this project and all child projects will be deleted and cannot be recovered, please type project path <code>{0}</code> below to confirm deletion.", 
 			"此项目及其所有子项目将被删除且无法恢复，请在下方输入项目路径 <code>{0}</code> 以确认删除。");
 		m.put("Example", "示例");
 		m.put("Example Plugin Setting", "示例插件设置");
@@ -2481,7 +2481,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("OneDev requires git command line to manage repositories. The minimum required version is 2.11.1. Also make sure that git-lfs is installed if you want to retrieve LFS files in build job", 
 			"OneDev 需要 git 命令行来管理仓库。最低要求版本为 2.11.1。另外，如果要在构建任务中获取 LFS 文件，请确保安装了 git-lfs");
 		m.put("Online", "在线");
-		m.put("Only create merge commit if target branch can not be fast-forwarded to source branch", 
+		m.put("Only create merge commit if target branch cannot be fast-forwarded to source branch", 
 			"仅当目标分支不能 fast-forward 到源分支时才创建合并提交");
 		m.put("Only projects manageable by access token owner can be authorized", "只有受访问令牌所有者管理的项目才能被授权");
 		m.put("Only system level audit events are displayed here. To view audit events for a specific project, please visit the project audit log page", 
@@ -2923,7 +2923,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Plain text expected", "需要纯文本");
 		m.put("Platform", "平台");
 		m.put("Platforms", "平台");
-		m.put("Please <a wicket:id=\"download\" class=\"font-weight-bolder\">download</a> recovery codes below and keep them secret. These codes can be used to provide one-time access to your account in case you can not access the authentication application. They will <b>NOT</b> be displayed again", 
+		m.put("Please <a wicket:id=\"download\" class=\"font-weight-bolder\">download</a> recovery codes below and keep them secret. These codes can be used to provide one-time access to your account in case you cannot access the authentication application. They will <b>NOT</b> be displayed again", 
 			"请<a wicket:id=\"download\" class=\"font-weight-bolder\">下载</a>下方的恢复代码并妥善保管。这些代码可用于在您无法访问认证应用程序时提供一次性账户访问权限。它们<b>不会</b>再次显示");
 		m.put("Please Confirm", "请确认");
 		m.put("Please Note", "请注意");
@@ -3124,15 +3124,15 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Pull request already closed", "合并请求已关闭");
 		m.put("Pull request already opened", "合并请求已打开");
 		m.put("Pull request and code review", "合并请求和代码评审");
-		m.put("Pull request can not be merged now as <a class=\"more-info d-inline link-primary\">some required builds</a> are not finished yet", 
+		m.put("Pull request cannot be merged now as <a class=\"more-info d-inline link-primary\">some required builds</a> are not finished yet", 
 			"合并请求现在无法合并，因为<a class=\"more-info d-inline link-primary\">一些必需的构建</a>尚未完成");
-		m.put("Pull request can not be merged now as <a class=\"more-info d-inline link-primary\">some required builds</a> are not successful", 
+		m.put("Pull request cannot be merged now as <a class=\"more-info d-inline link-primary\">some required builds</a> are not successful", 
 			"合并请求现在无法合并，因为<a class=\"more-info d-inline link-primary\">一些必需的构建</a>不成功");
-		m.put("Pull request can not be merged now as it is <a class=\"more-info d-inline link-primary\">pending review</a>", 
+		m.put("Pull request cannot be merged now as it is <a class=\"more-info d-inline link-primary\">pending review</a>", 
 			"合并请求现在无法合并，因为它正<a class=\"more-info d-inline link-primary\">等待审查</a>");
-		m.put("Pull request can not be merged now as it was <a class=\"more-info d-inline link-primary\">requested for changes</a>", 
+		m.put("Pull request cannot be merged now as it was <a class=\"more-info d-inline link-primary\">requested for changes</a>", 
 			"合并请求现在无法合并，因为它<a class=\"more-info d-inline link-primary\">请求了更改</a>");
-		m.put("Pull request can not be merged now as valid signature is required for head commit", 
+		m.put("Pull request cannot be merged now as valid signature is required for head commit", 
 			"合并请求现在无法合并，因为头部提交需要有效的签名");
 		m.put("Pull request can only be merged after getting approvals from all reviewers", "合并请求只能在获得所有审查人员的批准后合并");
 		m.put("Pull request can only be merged by users with code write permission", "合并请求只能由具有代码写入权限的用户合并");
@@ -4254,7 +4254,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("This installation's subscription has expired and is now running as the community edition", 
 			"此安装的订阅已过期，现在以社区版运行");
 		m.put("This is a Git LFS object, but the storage file is missing", "这是一个 Git LFS 对象，但存储文件缺失");
-		m.put("This is a built-in role and can not be deleted", "这是一个内置角色，无法删除");
+		m.put("This is a built-in role and cannot be deleted", "这是一个内置角色，无法删除");
 		m.put("This is a disabled AI account", "这是一个已禁用的 AI 账户");
 		m.put("This is a disabled service account", "这是一个已禁用的服务账户");
 		m.put("This is a layer cache. To use the cache, add below option to your docker buildx command", 
@@ -4742,7 +4742,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Whether or not to show branch/tag column", "是否显示分支/标签列");
 		m.put("Whether or not to show duration column", "是否显示持续时间列");
 		m.put("Whether or not to use user avatar from a public service", "是否使用公共服务提供的用户头像");
-		m.put("Whether or not use force option to overwrite changes in case ref updating can not be fast-forwarded", 
+		m.put("Whether or not use force option to overwrite changes in case ref updating cannot be fast-forwarded", 
 			"在引用更新无法快进的情况下，是否使用强制选项覆盖更改");
 		m.put("Whether or not user can remove own account", "用户是否可以删除自己的账户");
 		m.put("Whether the password must contain at least one lowercase letter", "密码是否必须至少包含一个小写字母");
@@ -4827,7 +4827,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("add another order", "添加另一个排序");
 		m.put("adding .onedev-buildspec.yml", "添加 .onedev-buildspec.yml");
 		m.put("after specified date", "在指定日期之后");
-		m.put("an <a href='https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/notification/Unsubscribable.java' target='_blank'>object</a> holding unsubscribe information.  A <code>null</code> value means that the notification can not be unsubscribed", 
+		m.put("an <a href='https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/notification/Unsubscribable.java' target='_blank'>object</a> holding unsubscribe information.  A <code>null</code> value means that the notification cannot be unsubscribed", 
 			"一个包含取消订阅信息的 <a href='https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/notification/Unsubscribable.java' target='_blank'>对象</a>。<code>null</code> 值表示该通知无法取消订阅");
 		m.put("and more", "更多");
 		m.put("archived", "已归档");

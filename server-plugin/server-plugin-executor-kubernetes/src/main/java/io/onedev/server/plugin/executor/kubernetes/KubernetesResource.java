@@ -124,7 +124,7 @@ public class KubernetesResource {
 
 					@Override
 					public void log(String message, String sessionId) {
-						// While testing, ngrok.io buffers response and build can not get log entries 
+						// While testing, ngrok.io buffers response and build cannot get log entries 
 						// timely. This won't happen on pagekite however
 						KubernetesHelper.writeInt(os, 1);
 						KubernetesHelper.writeString(os, message);

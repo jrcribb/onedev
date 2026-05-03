@@ -296,7 +296,7 @@ public class ProjectResource {
 		checkProjectCreationPermission(subject, project.getParent());
 	
 		if (project.getParent() != null && project.isSelfOrAncestorOf(project.getParent())) 
-			throw new ExplicitException("Can not use current or descendant project as parent");
+			throw new ExplicitException("Cannot use current or descendant project as parent");
 		
 		checkProjectNameDuplication(project);		
 
@@ -341,7 +341,7 @@ public class ProjectResource {
 			checkProjectCreationPermission(subject, parent);
 
 		if (parent != null && project.isSelfOrAncestorOf(parent))
-			throw new ExplicitException("Can not use current or descendant project as parent");
+			throw new ExplicitException("Cannot use current or descendant project as parent");
 
 		checkProjectNameDuplication(project);
 

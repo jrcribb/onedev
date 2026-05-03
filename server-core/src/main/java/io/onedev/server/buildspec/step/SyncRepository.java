@@ -111,7 +111,7 @@ public abstract class SyncRepository extends ServerSideStep {
 	}
 	
 	@Editable(order=1000, description="Whether or not use force option to overwrite changes in case ref updating "
-			+ "can not be fast-forwarded")
+			+ "cannot be fast-forwarded")
 	public boolean isForce() {
 		return force;
 	}

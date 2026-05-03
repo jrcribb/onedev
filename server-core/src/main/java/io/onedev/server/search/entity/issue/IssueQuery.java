@@ -512,7 +512,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 					if (validate && !(fieldSpec instanceof ChoiceField) && !(fieldSpec instanceof DateField)
 							&& !(fieldSpec instanceof DateTimeField) && !(fieldSpec instanceof IntegerField)
 							&& !(fieldSpec instanceof IterationChoiceField)) {
-						throw new ExplicitException("Can not order by field: " + fieldName);
+						throw new ExplicitException("Cannot order by field: " + fieldName);
 					}
 				}
 

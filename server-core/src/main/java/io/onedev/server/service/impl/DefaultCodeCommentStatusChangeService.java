@@ -17,6 +17,7 @@ import com.google.common.base.Preconditions;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.codecomment.CodeCommentStatusChanged;
 import io.onedev.server.event.project.pullrequest.PullRequestCodeCommentStatusChanged;
+import io.onedev.server.exception.NotAcceptableException;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.CodeCommentStatusChange;
@@ -39,6 +40,9 @@ public class DefaultCodeCommentStatusChangeService extends BaseEntityService<Cod
 		Preconditions.checkState(change.isNew());
 		
 		CodeComment comment = change.getComment();
+		if (comment.isResolved() == change.isResolved())
+			throw new NotAcceptableException("Code comment is already " + (change.isResolved() ? "resolved" : "unresolved"));
+
 		comment.setResolved(change.isResolved());
 		
 		dao.persist(change);
@@ -48,7 +52,7 @@ public class DefaultCodeCommentStatusChangeService extends BaseEntityService<Cod
 			reply.setComment(comment);
 			reply.setCompareContext(change.getCompareContext());
 			reply.setContent(note);
-			reply.setDate(change.getDate());
+			reply.setDate(new Date(change.getDate().getTime() - 100));
 			reply.setUser(change.getUser());
 			dao.persist(reply);
 			

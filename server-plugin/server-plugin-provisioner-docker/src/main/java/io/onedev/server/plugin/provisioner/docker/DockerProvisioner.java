@@ -377,7 +377,7 @@ public class DockerProvisioner extends WorkspaceProvisioner implements DockerAwa
 		envVars.put("TERM", "xterm-256color");
 		envVars.put("LANG", "C.UTF-8");
 		envVars.put("ONEDEV_SERVER_URL", OneDev.getInstance(SettingService.class).getSystemSetting().getServerUrl());
-		envVars.put("ONEDEV_WORKSPACE_TOKEN", context.getToken());
+		envVars.put("ONEDEV_ACCESS_TOKEN", context.getToken());
 
 		envVars.put("ONEDEV_WORKDIR", CONTAINER_WORKSPACE_PATH + "/work");
 

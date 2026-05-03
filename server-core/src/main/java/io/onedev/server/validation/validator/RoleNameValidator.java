@@ -27,7 +27,7 @@ public class RoleNameValidator implements ConstraintValidator<RoleName, String> 
 			constraintContext.disableDefaultConstraintViolation();
 			String message = this.message;
 			if (message.length() == 0) {
-				message = "Role name can not container characters '[', ']', '<', '>', '{', and '}'";
+				message = "Role name cannot container characters '[', ']', '<', '>', '{', and '}'";
 			}
 			constraintContext.buildConstraintViolationWithTemplate(message).addConstraintViolation();
 			return false;

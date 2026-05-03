@@ -134,21 +134,21 @@ public class GitPreReceiveCallback extends HttpServlet {
 					BranchProtection protection = project.getBranchProtection(branchName, user);
 					if (oldObjectId.equals(ObjectId.zeroId())) {
 						if (protection.isPreventCreation()) {
-							errorMessages.add("Can not create this branch according to branch protection setting");
+							errorMessages.add("Cannot create this branch according to branch protection setting");
 						} else if (protection.isCommitSignatureRequired() 
 								&& !project.hasValidCommitSignature(newObjectId, gitEnvs)) {
-							errorMessages.add("Can not create this branch as branch protection setting "
+							errorMessages.add("Cannot create this branch as branch protection setting "
 									+ "requires valid signature on head commit");
 						}
 					} else if (newObjectId.equals(ObjectId.zeroId())) {
 						if (protection.isPreventDeletion()) 
-							errorMessages.add("Can not delete this branch according to branch protection setting");
+							errorMessages.add("Cannot delete this branch according to branch protection setting");
 					} else if (protection.isPreventForcedPush() 
 							&& !GitUtils.isMergedInto(projectService.getRepository(project.getId()), gitEnvs, oldObjectId, newObjectId)) {
-						errorMessages.add("Can not force-push to this branch according to branch protection setting");
+						errorMessages.add("Cannot force-push to this branch according to branch protection setting");
 					} else if (protection.isCommitSignatureRequired() 
 							&& !project.hasValidCommitSignature(newObjectId, gitEnvs)) {
-						errorMessages.add("Can not push to this branch as branch protection rule requires "
+						errorMessages.add("Cannot push to this branch as branch protection rule requires "
 								+ "valid signature for head commit");
 					} else if (protection.isReviewRequiredForPush(project, oldObjectId, newObjectId, gitEnvs)) {
 						errorMessages.add("Review required for your change. Please submit pull request instead");
@@ -192,20 +192,20 @@ public class GitPreReceiveCallback extends HttpServlet {
 					TagProtection protection = project.getTagProtection(tagName, user);
 					if (oldObjectId.equals(ObjectId.zeroId())) {
 						if (protection.isPreventCreation()) {
-							errorMessages.add("Can not create this tag according to tag protection setting");
+							errorMessages.add("Cannot create this tag according to tag protection setting");
 						} else if (protection.isCommitSignatureRequired() 
 								&& !project.hasValidTagSignature(newObjectId, gitEnvs)) {
-							errorMessages.add("Can not create this tag as tag protection setting requires "
+							errorMessages.add("Cannot create this tag as tag protection setting requires "
 									+ "valid tag signature");
 						}
 					} else if (newObjectId.equals(ObjectId.zeroId())) {
 						if (protection.isPreventDeletion())
-							errorMessages.add("Can not delete this tag according to tag protection setting");
+							errorMessages.add("Cannot delete this tag according to tag protection setting");
 					} else if (protection.isPreventUpdate()) {
-						errorMessages.add("Can not update this tag according to tag protection setting");
+						errorMessages.add("Cannot update this tag according to tag protection setting");
 					} else if (protection.isCommitSignatureRequired() 
 							&& !project.hasValidTagSignature(newObjectId, gitEnvs)) {
-						errorMessages.add("Can not update this tag as tag protection setting requires "
+						errorMessages.add("Cannot update this tag as tag protection setting requires "
 								+ "valid tag signature");
 					}
 					if (errorMessages.isEmpty() && !protection.getDisallowedFileTypes().isEmpty()) {

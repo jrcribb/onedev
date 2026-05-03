@@ -73,9 +73,9 @@ public class EmailAddressResource {
 		if (!SecurityUtils.isAdministrator() && !owner.equals(getAuthUser()))
 			throw new UnauthorizedException();
 		else if (owner.isDisabled())
-			throw new ExplicitException("Can not set email address for disabled user");
+			throw new ExplicitException("Cannot set email address for disabled user");
 		else if (owner.getType() != User.Type.ORDINARY)
-			throw new ExplicitException("Can not set email address for service or ai user");
+			throw new ExplicitException("Cannot set email address for service or ai user");
 		else if (emailAddressService.findByValue(emailAddress.getValue()) != null)
 			throw new ExplicitException("This email address is already used by another user");
 		
@@ -133,7 +133,7 @@ public class EmailAddressResource {
 			throw new UnauthorizedException();
 		
 		if (owner.getPassword() == null)
-			throw new ExplicitException("Can not set primary email address for externally authenticated user");
+			throw new ExplicitException("Cannot set primary email address for externally authenticated user");
 		
 		emailAddressService.setAsPrimary(emailAddress);
 
@@ -186,7 +186,7 @@ public class EmailAddressResource {
 			throw new UnauthorizedException();
 		
 		if (emailAddress.isPrimary() && emailAddress.getOwner().getPassword() == null) {
-			throw new ExplicitException("Can not delete primary email address of "
+			throw new ExplicitException("Cannot delete primary email address of "
 					+ "externally authenticated user");
 		}
 		if (emailAddress.getOwner().getEmailAddresses().size() == 1)

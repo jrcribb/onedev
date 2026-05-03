@@ -83,7 +83,7 @@ public class EditableUtils {
 	 * @param element
 	 * 			annotated element to get description from
 	 * @return
-	 * 			defined description, or <tt>null</tt> if description can not be found
+	 * 			defined description, or <tt>null</tt> if description cannot be found
 	 */
 	@Nullable
 	public static String getDescription(AnnotatedElement element) {

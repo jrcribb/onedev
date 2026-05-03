@@ -84,7 +84,7 @@ public class IssueLink extends AbstractEntity {
 
 	public void validate() {
 		if (getSource().equals(getTarget()))
-			throw new ValidationException("Can not link to self");
+			throw new ValidationException("Cannot link to self");
 		if (getSpec().getOpposite() != null) {
 			if (getSource().getTargetLinks().stream()
 					.anyMatch(it -> it.getSpec().equals(getSpec()) && it.getTarget().equals(getTarget())))

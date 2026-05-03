@@ -29,7 +29,7 @@ public abstract class AbstractNotificationTemplatePage extends AbstractTemplateP
 				"eventUrl", _T("a string representing event detail url"),
 				"replyable", _T("a boolean indiciating whether or not topic comment can be created directly by replying the email"),
 				"unsubscribable", _T("an <a href='https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/notification/Unsubscribable.java' target='_blank'>object</a> holding unsubscribe information. "
-						+ " A <code>null</code> value means that the notification can not be unsubscribed")
+						+ " A <code>null</code> value means that the notification cannot be unsubscribed")
 		);
 		currentVaribaleHelp.putAll(variableHelp);
 		

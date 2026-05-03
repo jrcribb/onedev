@@ -64,7 +64,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("<a wicket:id=\"dependents\"><span wicket:id=\"label\"></span></a> depends on me", "<a wicket:id=\"dependents\"><span wicket:id=\"label\"></span></a>가 나를 의존합니다");
 		m.put("<a wicket:id=\"removePassword\">Remove password</a> to force the user to authenticate via external system", 
 			"<a wicket:id=\"removePassword\">비밀번호 제거</a>를 통해 사용자가 외부 시스템을 통해 인증하도록 강제합니다");
-		m.put("<a wicket:id=\"verifyRecoveryCode\">Verify by recovery code</a> if you can not access your TOTP authenticator", 
+		m.put("<a wicket:id=\"verifyRecoveryCode\">Verify by recovery code</a> if you cannot access your TOTP authenticator", 
 			"<a wicket:id=\"verifyRecoveryCode\">복구 코드로 확인</a>을 통해 TOTP 인증기에 접근할 수 없는 경우를 대비합니다");
 		m.put("<b class='text-danger'>NOTE: </b> This requires an enterprise subscription. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
 			"<b class='text-danger'>참고: </b> 이는 엔터프라이즈 구독이 필요합니다. <a href='https://onedev.io/pricing' target='_blank'>30일 무료 체험</a>을 시도해보세요");
@@ -158,9 +158,9 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Access Token Secret", "액세스 토큰 비밀");
 		m.put("Access Token for Target Project", "대상 프로젝트에 대한 액세스 토큰");
 		m.put("Access Tokens", "액세스 토큰들");
-		m.put("Access token is intended for api access and repository pull/push. It can not be used to sign in to web ui", 
+		m.put("Access token is intended for api access and repository pull/push. It cannot be used to sign in to web ui", 
 			"액세스 토큰은 API 접근 및 저장소 풀/푸시를 위한 것입니다. 웹 UI에 로그인하는 데 사용할 수 없습니다");
-		m.put("Access token is intended for api access or repository pull/push. It can not be used to sign in to web ui", 
+		m.put("Access token is intended for api access or repository pull/push. It cannot be used to sign in to web ui", 
 			"액세스 토큰은 API 접근 또는 저장소 풀/푸시를 위한 것입니다. 웹 UI에 로그인하는 데 사용할 수 없습니다");
 		m.put("Access token regenerated successfully", "액세스 토큰이 성공적으로 재생성되었습니다");
 		m.put("Access token regenerated, make sure to update the token at agent side", "액세스 토큰이 재생성되었습니다. 에이전트 측에서 토큰을 업데이트해야 합니다");
@@ -601,22 +601,22 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Can Be Used By Workspaces", "워크스페이스에서 사용할 수 있음");
 		m.put("Can Create Root Projects", "루트 프로젝트 생성 가능");
 		m.put("Can Edit Estimated Time", "예상 시간 수정 가능");
-		m.put("Can not convert root user to service account", "루트 사용자를 서비스 계정으로 변환할 수 없습니다");
-		m.put("Can not convert yourself to service account", "자신을 서비스 계정으로 변환할 수 없습니다");
-		m.put("Can not delete branch \"{0}\" as there are workspaces on it", "해당 브랜치에 워크스페이스가 있어 \"{0}\" 브랜치를 삭제할 수 없습니다");
-		m.put("Can not delete default branch", "기본 브랜치를 삭제할 수 없습니다");
-		m.put("Can not delete root account", "루트 계정을 삭제할 수 없습니다");
-		m.put("Can not delete yourself", "자신을 삭제할 수 없습니다");
-		m.put("Can not disable root account", "루트 계정을 비활성화할 수 없습니다");
-		m.put("Can not disable yourself", "자신을 비활성화할 수 없습니다");
-		m.put("Can not find issue board: ", "이슈 보드를 찾을 수 없습니다:");
-		m.put("Can not move project \"{0}\" to be under itself or its descendants", "프로젝트 \"{0}\"를 자신 또는 하위 프로젝트 아래로 이동할 수 없습니다");
-		m.put("Can not perform this operation now", "지금 이 작업을 수행할 수 없습니다");
-		m.put("Can not reset password for disabled account", "비활성화된 계정의 비밀번호를 재설정할 수 없습니다");
-		m.put("Can not reset password for service or AI account", "서비스 또는 AI 계정의 비밀번호를 재설정할 수 없습니다");
-		m.put("Can not reset password for user authenticating via external system", "외부 시스템을 통해 인증하는 사용자의 비밀번호를 재설정할 수 없습니다");
-		m.put("Can not save malformed query", "잘못된 쿼리를 저장할 수 없습니다");
-		m.put("Can not use current or descendant project as parent", "현재 또는 하위 프로젝트를 부모로 사용할 수 없습니다");
+		m.put("Cannot convert root user to service account", "루트 사용자를 서비스 계정으로 변환할 수 없습니다");
+		m.put("Cannot convert yourself to service account", "자신을 서비스 계정으로 변환할 수 없습니다");
+		m.put("Cannot delete branch \"{0}\" as there are workspaces on it", "해당 브랜치에 워크스페이스가 있어 \"{0}\" 브랜치를 삭제할 수 없습니다");
+		m.put("Cannot delete default branch", "기본 브랜치를 삭제할 수 없습니다");
+		m.put("Cannot delete root account", "루트 계정을 삭제할 수 없습니다");
+		m.put("Cannot delete yourself", "자신을 삭제할 수 없습니다");
+		m.put("Cannot disable root account", "루트 계정을 비활성화할 수 없습니다");
+		m.put("Cannot disable yourself", "자신을 비활성화할 수 없습니다");
+		m.put("Cannot find issue board: ", "이슈 보드를 찾을 수 없습니다:");
+		m.put("Cannot move project \"{0}\" to be under itself or its descendants", "프로젝트 \"{0}\"를 자신 또는 하위 프로젝트 아래로 이동할 수 없습니다");
+		m.put("Cannot perform this operation now", "지금 이 작업을 수행할 수 없습니다");
+		m.put("Cannot reset password for disabled account", "비활성화된 계정의 비밀번호를 재설정할 수 없습니다");
+		m.put("Cannot reset password for service or AI account", "서비스 또는 AI 계정의 비밀번호를 재설정할 수 없습니다");
+		m.put("Cannot reset password for user authenticating via external system", "외부 시스템을 통해 인증하는 사용자의 비밀번호를 재설정할 수 없습니다");
+		m.put("Cannot save malformed query", "잘못된 쿼리를 저장할 수 없습니다");
+		m.put("Cannot use current or descendant project as parent", "현재 또는 하위 프로젝트를 부모로 사용할 수 없습니다");
 		m.put("Can only compare with common ancestor when different projects are involved", "다른 프로젝트가 포함된 경우 공통 조상과만 비교할 수 있습니다");
 		m.put("Cancel", "취소");
 		m.put("Cancel All Queried Builds", "쿼리된 모든 빌드 취소");
@@ -1379,7 +1379,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Event Types", "이벤트 유형들");
 		m.put("Events", "이벤트");
 		m.put("Ever Used Since", "이후로 사용됨");
-		m.put("Everything inside this project and all child projects will be deleted and can not be recovered, please type project path <code>{0}</code> below to confirm deletion.", 
+		m.put("Everything inside this project and all child projects will be deleted and cannot be recovered, please type project path <code>{0}</code> below to confirm deletion.", 
 			"이 프로젝트와 모든 하위 프로젝트 내의 모든 것이 삭제되며 복구할 수 없습니다. 삭제를 확인하려면 아래에 프로젝트 경로 <code>{0}</code>를 입력하세요");
 		m.put("Example", "예제");
 		m.put("Example Plugin Setting", "예제 플러그인 설정");
@@ -2455,7 +2455,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("OneDev requires git command line to manage repositories. The minimum required version is 2.11.1. Also make sure that git-lfs is installed if you want to retrieve LFS files in build job", 
 			"OneDev는 저장소를 관리하기 위해 git 명령줄을 필요로 합니다. 최소 요구 버전은 2.11.1입니다. 또한 빌드 작업에서 LFS 파일을 검색하려면 git-lfs가 설치되어 있는지 확인하십시오");
 		m.put("Online", "온라인");
-		m.put("Only create merge commit if target branch can not be fast-forwarded to source branch", 
+		m.put("Only create merge commit if target branch cannot be fast-forwarded to source branch", 
 			"대상 브랜치를 소스 브랜치로 빠르게 병합할 수 없는 경우에만 병합 커밋 생성");
 		m.put("Only projects manageable by access token owner can be authorized", "액세스 토큰 소유자가 관리할 수 있는 프로젝트만 승인 가능");
 		m.put("Only system level audit events are displayed here. To view audit events for a specific project, please visit the project audit log page", 
@@ -2897,7 +2897,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Plain text expected", "일반 텍스트 예상됨");
 		m.put("Platform", "플랫폼");
 		m.put("Platforms", "플랫폼들");
-		m.put("Please <a wicket:id=\"download\" class=\"font-weight-bolder\">download</a> recovery codes below and keep them secret. These codes can be used to provide one-time access to your account in case you can not access the authentication application. They will <b>NOT</b> be displayed again", 
+		m.put("Please <a wicket:id=\"download\" class=\"font-weight-bolder\">download</a> recovery codes below and keep them secret. These codes can be used to provide one-time access to your account in case you cannot access the authentication application. They will <b>NOT</b> be displayed again", 
 			"아래 복구 코드를 <a wicket:id=\"download\" class=\"font-weight-bolder\">다운로드</a>하고 비밀로 유지하세요. 이 코드는 인증 애플리케이션에 접근할 수 없는 경우 계정에 일회성 접근을 제공하는 데 사용됩니다. 이 코드는 <b>다시 표시되지 않습니다</b>");
 		m.put("Please Confirm", "확인해주세요");
 		m.put("Please Note", "참고해주세요");
@@ -3098,15 +3098,15 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Pull request already closed", "풀 리퀘스트가 이미 닫혔습니다");
 		m.put("Pull request already opened", "풀 리퀘스트가 이미 열렸습니다");
 		m.put("Pull request and code review", "풀 리퀘스트 및 코드 리뷰");
-		m.put("Pull request can not be merged now as <a class=\"more-info d-inline link-primary\">some required builds</a> are not finished yet", 
+		m.put("Pull request cannot be merged now as <a class=\"more-info d-inline link-primary\">some required builds</a> are not finished yet", 
 			"<a class=\"more-info d-inline link-primary\">필요한 빌드</a>가 아직 완료되지 않아 풀 리퀘스트를 지금 병합할 수 없습니다");
-		m.put("Pull request can not be merged now as <a class=\"more-info d-inline link-primary\">some required builds</a> are not successful", 
+		m.put("Pull request cannot be merged now as <a class=\"more-info d-inline link-primary\">some required builds</a> are not successful", 
 			"<a class=\"more-info d-inline link-primary\">필요한 빌드</a>가 성공하지 않아 풀 리퀘스트를 지금 병합할 수 없습니다");
-		m.put("Pull request can not be merged now as it is <a class=\"more-info d-inline link-primary\">pending review</a>", 
+		m.put("Pull request cannot be merged now as it is <a class=\"more-info d-inline link-primary\">pending review</a>", 
 			"풀 리퀘스트를 지금 병합할 수 없습니다. <a class=\"more-info d-inline link-primary\">검토 대기 중</a>입니다");
-		m.put("Pull request can not be merged now as it was <a class=\"more-info d-inline link-primary\">requested for changes</a>", 
+		m.put("Pull request cannot be merged now as it was <a class=\"more-info d-inline link-primary\">requested for changes</a>", 
 			"풀 리퀘스트를 지금 병합할 수 없습니다. <a class=\"more-info d-inline link-primary\">변경 요청됨</a>입니다");
-		m.put("Pull request can not be merged now as valid signature is required for head commit", 
+		m.put("Pull request cannot be merged now as valid signature is required for head commit", 
 			"풀 리퀘스트를 지금 병합할 수 없습니다. 헤드 커밋에 유효한 서명이 필요합니다");
 		m.put("Pull request can only be merged after getting approvals from all reviewers", "모든 리뷰어의 승인을 받은 후에만 풀 리퀘스트를 병합할 수 있습니다");
 		m.put("Pull request can only be merged by users with code write permission", "코드 쓰기 권한이 있는 사용자만 풀 리퀘스트를 병합할 수 있습니다");
@@ -4228,7 +4228,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("This installation's subscription has expired and is now running as the community edition", 
 			"이 설치의 구독이 만료되어 현재 커뮤니티 에디션으로 실행 중입니다");
 		m.put("This is a Git LFS object, but the storage file is missing", "이것은 Git LFS 객체이지만 저장 파일이 누락되었습니다");
-		m.put("This is a built-in role and can not be deleted", "이것은 내장된 역할이며 삭제할 수 없습니다");
+		m.put("This is a built-in role and cannot be deleted", "이것은 내장된 역할이며 삭제할 수 없습니다");
 		m.put("This is a disabled AI account", "이것은 비활성화된 AI 계정입니다");
 		m.put("This is a disabled service account", "이것은 비활성화된 서비스 계정입니다");
 		m.put("This is a layer cache. To use the cache, add below option to your docker buildx command", 
@@ -4716,7 +4716,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Whether or not to show branch/tag column", "브랜치/태그 열을 표시할지 여부");
 		m.put("Whether or not to show duration column", "지속 시간 열을 표시할지 여부");
 		m.put("Whether or not to use user avatar from a public service", "공개 서비스에서 사용자 아바타를 사용할지 여부");
-		m.put("Whether or not use force option to overwrite changes in case ref updating can not be fast-forwarded", 
+		m.put("Whether or not use force option to overwrite changes in case ref updating cannot be fast-forwarded", 
 			"참조 업데이트가 빠르게 진행될 수 없는 경우 변경 사항을 덮어쓰도록 강제 옵션을 사용할지 여부");
 		m.put("Whether or not user can remove own account", "사용자가 자신의 계정을 제거할 수 있는지 여부");
 		m.put("Whether the password must contain at least one lowercase letter", "비밀번호에 최소한 하나의 소문자가 포함되어야 하는지 여부");
@@ -4801,7 +4801,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("add another order", "다른 주문 추가");
 		m.put("adding .onedev-buildspec.yml", ".onedev-buildspec.yml 추가 중");
 		m.put("after specified date", "지정된 날짜 이후");
-		m.put("an <a href='https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/notification/Unsubscribable.java' target='_blank'>object</a> holding unsubscribe information.  A <code>null</code> value means that the notification can not be unsubscribed", 
+		m.put("an <a href='https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/notification/Unsubscribable.java' target='_blank'>object</a> holding unsubscribe information.  A <code>null</code> value means that the notification cannot be unsubscribed", 
 			"구독 취소 정보를 보유한 <a href='https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/notification/Unsubscribable.java' target='_blank'>객체</a>. <code>null</code> 값은 알림을 구독 취소할 수 없음을 의미합니다");
 		m.put("and more", "그리고 더 많은 것");
 		m.put("archived", "보관됨");

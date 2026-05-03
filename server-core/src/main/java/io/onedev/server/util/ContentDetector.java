@@ -22,7 +22,7 @@ public class ContentDetector {
 	 * @param bytes
 	 * 			content to be detected
 	 * @return
-	 * 			charset of the content, or <tt>null</tt> if charset can not be detected
+	 * 			charset of the content, or <tt>null</tt> if charset cannot be detected
 	 */
 	@Nullable
 	public static Charset detectCharset(byte[] bytes) {
@@ -79,7 +79,7 @@ public class ContentDetector {
 	 * 			file name to help deciding if supplied content bytes represents text
 	 * @return
 	 * 			text representation of content bytes, or <tt>null</tt> if content 
-	 * 			can not be converted to text
+	 * 			cannot be converted to text
 	 */
 	@Nullable
 	public static String convertToText(byte[] contentBytes, @Nullable String fileName) {

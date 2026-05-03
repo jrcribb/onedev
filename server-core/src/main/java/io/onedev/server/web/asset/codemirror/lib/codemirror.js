@@ -4947,7 +4947,7 @@
         cur.changes.push(historyChangeFromChange(doc, change));
       }
     } else {
-      // Can not be merged, start a new event.
+      // Cannot be merged, start a new event.
       var before = lst(hist.done);
       if (!before || !before.ranges)
         { pushSelectionToHistory(doc.sel, hist.done); }
@@ -7791,7 +7791,7 @@
     option("specialCharPlaceholder", defaultSpecialCharPlaceholder, function (cm) { return cm.refresh(); }, true);
     option("electricChars", true);
     option("inputStyle", mobile ? "contenteditable" : "textarea", function () {
-      throw new Error("inputStyle can not (yet) be changed in a running editor") // FIXME
+      throw new Error("inputStyle cannot (yet) be changed in a running editor") // FIXME
     }, true);
     option("spellcheck", false, function (cm, val) { return cm.getInputField().spellcheck = val; }, true);
     option("autocorrect", false, function (cm, val) { return cm.getInputField().autocorrect = val; }, true);

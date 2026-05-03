@@ -337,7 +337,7 @@ public class ProjectListPanel extends Panel {
 				if (!querySubmitted)
 					tag.put("data-tippy-content", _T("Query not submitted"));
 				else if (queryModel.getObject() == null)
-					tag.put("data-tippy-content", _T("Can not save malformed query"));
+					tag.put("data-tippy-content", _T("Cannot save malformed query"));
 			}
 
 			@Override
@@ -454,7 +454,7 @@ public class ProjectListPanel extends Panel {
 												errorMessage = MessageFormat.format(_T("Project manage privilege required to move \"{0}\""), eachProject);
 												break;
 											} else if (eachProject.isSelfOrAncestorOf(project)) {
-												errorMessage = MessageFormat.format(_T("Can not move project \"{0}\" to be under itself or its descendants"), eachProject);
+												errorMessage = MessageFormat.format(_T("Cannot move project \"{0}\" to be under itself or its descendants"), eachProject);
 												break;	
 											} else {
 												Project projectWithSameName = projectService.find(project, eachProject.getName());
@@ -744,7 +744,7 @@ public class ProjectListPanel extends Panel {
 												errorMessage = MessageFormat.format(_T("Project manage privilege required to move \"{0}\""), eachProject);
 												break;
 											} else if (eachProject.isSelfOrAncestorOf(project)) {
-												errorMessage = MessageFormat.format(_T("Can not move project \"{0}\" to be under itself or its descendants"), eachProject);
+												errorMessage = MessageFormat.format(_T("Cannot move project \"{0}\" to be under itself or its descendants"), eachProject);
 												break;
 											} else {
 												Project projectWithSameName = projectService.find(project, eachProject.getName());

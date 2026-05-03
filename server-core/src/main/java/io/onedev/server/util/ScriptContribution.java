@@ -12,7 +12,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Use abstract class instead of interface here as otherwise groovy can not invoke static methods defined here
+ * Use abstract class instead of interface here as otherwise groovy cannot invoke static methods defined here
  * @author robin
  *
  */

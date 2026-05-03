@@ -79,8 +79,8 @@ public class DefaultAlertService extends BaseEntityService<Alert> implements Ale
 	public void on(NodeDisconnected event) {
 		if (clusterService.isLeaderServer() && event.isAbnormal()) {
 			var server = event.getServer() + " (" + clusterService.getServerName(event.getServer()) + ")";
-			alert("Server '" + server + "' can not be reached", 
-					"Server '" + server + "' is part of OneDev cluster, but can not be reached for some reason", 
+			alert("Server '" + server + "' cannot be reached", 
+					"Server '" + server + "' is part of OneDev cluster, but cannot be reached for some reason", 
 					false);
 		}
 	}

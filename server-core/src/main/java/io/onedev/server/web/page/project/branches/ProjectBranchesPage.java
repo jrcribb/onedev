@@ -572,7 +572,7 @@ public class ProjectBranchesPage extends ProjectPage {
 						super.disableLink(tag);
 						tag.append("class", "disabled", " ");
 						if (getProject().getDefaultBranch().equals(branch)) {
-							tag.put("data-tippy-content", _T("Can not delete default branch"));
+							tag.put("data-tippy-content", _T("Cannot delete default branch"));
 						} else {
 							tag.put("data-tippy-content", _T("Deletion not allowed due to branch protection rule"));
 						}
@@ -600,7 +600,7 @@ public class ProjectBranchesPage extends ProjectPage {
 							public void onClick(AjaxRequestTarget target) {
 								if (workspaceService.count(getProject(), branch) > 0) {
 									getSession().error(MessageFormat.format(
-											_T("Can not delete branch \"{0}\" as there are workspaces on it"), branch));
+											_T("Cannot delete branch \"{0}\" as there are workspaces on it"), branch));
 								} else {							
 									projectService.deleteBranch(getProject(), branch);
 									getSession().success(MessageFormat.format(_T("Branch \"{0}\" deleted"), branch));

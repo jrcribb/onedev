@@ -440,7 +440,7 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 				String fieldName = getValue(order.Quoted().getText());
 				var sortField = SORT_FIELDS.get(fieldName);
 				if (sortField == null)
-					throw new ExplicitException("Can not order by field: " + fieldName);
+					throw new ExplicitException("Cannot order by field: " + fieldName);
 
 				EntitySort requestSort = new EntitySort();
 				requestSort.setField(fieldName);

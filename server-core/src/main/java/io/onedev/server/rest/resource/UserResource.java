@@ -482,9 +482,9 @@ public class UserResource {
 				auditService.audit(null, "changed password of account \"" + user.getName() + "\" via RESTful API", null, null);
 			return Response.ok().build();
 		} else if (user.isDisabled()) {
-			throw new ExplicitException("Can not set password for disabled account");
+			throw new ExplicitException("Cannot set password for disabled account");
 		} else if (user.getType() != ORDINARY) {
-			throw new ExplicitException("Can not set password for service or AI account");
+			throw new ExplicitException("Cannot set password for service or AI account");
 		} else if (user.equals(getAuthUser())) {
 			if (user.getPassword() == null) {
 				throw new ExplicitException("The user is currently authenticated via external system, "
@@ -508,9 +508,9 @@ public class UserResource {
 
 		User user = userService.load(userId);		
 		if (user.isDisabled()) {
-			throw new ExplicitException("Can not reset two factor authentication for disabled account");
+			throw new ExplicitException("Cannot reset two factor authentication for disabled account");
 		} else if (user.getType() != ORDINARY) {
-			throw new ExplicitException("Can not reset two factor authentication for service or AI account");
+			throw new ExplicitException("Cannot reset two factor authentication for service or AI account");
 		} else {
 			user.setTwoFactorAuthentication(null);
 			userService.update(user, null);
@@ -528,9 +528,9 @@ public class UserResource {
 			throw new UnauthorizedException();
 
 		if (user.isDisabled()) 
-			throw new ExplicitException("Can not set queries and watches for disabled user");
+			throw new ExplicitException("Cannot set queries and watches for disabled user");
 		else if (user.getType() != ORDINARY) 
-			throw new ExplicitException("Can not set queries and watches for service or ai account");
+			throw new ExplicitException("Cannot set queries and watches for service or ai account");
 
 		var oldAuditContent = VersionedXmlDoc.fromBean(getQueriesAndWatches(user)).toXML();
 
@@ -564,7 +564,7 @@ public class UserResource {
 			throw new UnauthorizedException();
 		
 		if (user.isDisabled())
-			throw new ExplicitException("Can not add ssh key for disabled user");
+			throw new ExplicitException("Cannot add ssh key for disabled user");
 
 		SshKey sshKey = new SshKey();
 		sshKey.setContent(content);
@@ -591,9 +591,9 @@ public class UserResource {
 
     	User user = userService.load(userId);
     	if (user.isRoot())
-			throw new ExplicitException("Root user can not be deleted");
+			throw new ExplicitException("Root user cannot be deleted");
     	else if (user.equals(getAuthUser()))
-    		throw new ExplicitException("Can not delete yourself");
+    		throw new ExplicitException("Cannot delete yourself");
     	else
     		userService.delete(user);
 

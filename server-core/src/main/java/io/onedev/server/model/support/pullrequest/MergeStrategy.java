@@ -26,7 +26,7 @@ public enum MergeStrategy {
 		}
 		
 	}, 
-	CREATE_MERGE_COMMIT_IF_NECESSARY("Only create merge commit if target branch can not be fast-forwarded to source branch") {
+	CREATE_MERGE_COMMIT_IF_NECESSARY("Only create merge commit if target branch cannot be fast-forwarded to source branch") {
 
 		@Override
 		public ObjectId merge(PullRequest request, String commitMessage) {

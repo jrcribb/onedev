@@ -557,7 +557,7 @@ onedev.server.sourceView = {
 		$(".comment-popover a").removeClass("active");
 		
 		/*
-		 * we can not simply select all comment triggers via jQuery 
+		 * we cannot simply select all comment triggers via jQuery 
 		 * as comment gutter may be create/destroy dynamically by 
 		 * CodeMirror 
 		 */

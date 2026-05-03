@@ -176,7 +176,7 @@ class SshCommand implements Command, ServerSessionAware {
 					clientChannel.setErr(err);
 					clientChannel.open().await(CHANNEL_OPEN_TIMEOUT);
 					
-					// Do not use clientChannel.waitFor here as it can not be interrupted
+					// Do not use clientChannel.waitFor here as it cannot be interrupted
 					while (!clientChannel.isClosed())
 						Thread.sleep(1000);
 					if (clientChannel.getExitStatus() != null)

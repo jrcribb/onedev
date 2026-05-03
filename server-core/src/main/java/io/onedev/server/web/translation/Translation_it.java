@@ -64,7 +64,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("<a wicket:id=\"dependents\"><span wicket:id=\"label\"></span></a> depends on me", "<a wicket:id=\"dependents\"><span wicket:id=\"label\"></span></a> dipende da me");
 		m.put("<a wicket:id=\"removePassword\">Remove password</a> to force the user to authenticate via external system", 
 			"<a wicket:id=\"removePassword\">Rimuovi password</a> per forzare l'utente ad autenticarsi tramite sistema esterno");
-		m.put("<a wicket:id=\"verifyRecoveryCode\">Verify by recovery code</a> if you can not access your TOTP authenticator", 
+		m.put("<a wicket:id=\"verifyRecoveryCode\">Verify by recovery code</a> if you cannot access your TOTP authenticator", 
 			"<a wicket:id=\"verifyRecoveryCode\">Verifica tramite codice di recupero</a> se non puoi accedere al tuo autenticatore TOTP");
 		m.put("<b class='text-danger'>NOTE: </b> This requires an enterprise subscription. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
 			"<b class='text-danger'>NOTA: </b> Questo richiede un abbonamento Enterprise. <a href='https://onedev.io/pricing' target='_blank'>Prova gratis</a> per 30 giorni");
@@ -158,9 +158,9 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Access Token Secret", "Segreto del token di accesso");
 		m.put("Access Token for Target Project", "Token di accesso per il progetto di destinazione");
 		m.put("Access Tokens", "Token di accesso");
-		m.put("Access token is intended for api access and repository pull/push. It can not be used to sign in to web ui", 
+		m.put("Access token is intended for api access and repository pull/push. It cannot be used to sign in to web ui", 
 			"Il token di accesso è destinato all'accesso API e al pull/push del repository. Non può essere utilizzato per accedere all'interfaccia web");
-		m.put("Access token is intended for api access or repository pull/push. It can not be used to sign in to web ui", 
+		m.put("Access token is intended for api access or repository pull/push. It cannot be used to sign in to web ui", 
 			"Il token di accesso è destinato all'accesso API o al pull/push del repository. Non può essere utilizzato per accedere all'interfaccia web");
 		m.put("Access token regenerated successfully", "Token di accesso rigenerato con successo");
 		m.put("Access token regenerated, make sure to update the token at agent side", "Token di accesso rigenerato, assicurati di aggiornare il token sul lato agente");
@@ -601,22 +601,22 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Can Be Used By Workspaces", "Può essere utilizzato da Workspaces");
 		m.put("Can Create Root Projects", "Può creare progetti root");
 		m.put("Can Edit Estimated Time", "Può modificare il tempo stimato");
-		m.put("Can not convert root user to service account", "Impossibile convertire l'utente root in account di servizio");
-		m.put("Can not convert yourself to service account", "Impossibile convertirti in account di servizio");
-		m.put("Can not delete branch \"{0}\" as there are workspaces on it", "Impossibile eliminare il branch \"{0}\" poiché ci sono workspaces su di esso");
-		m.put("Can not delete default branch", "Non è possibile eliminare il branch predefinito");
-		m.put("Can not delete root account", "Non è possibile eliminare l'account root");
-		m.put("Can not delete yourself", "Non è possibile eliminare te stesso");
-		m.put("Can not disable root account", "Non è possibile disabilitare l'account root");
-		m.put("Can not disable yourself", "Non è possibile disabilitare te stesso");
-		m.put("Can not find issue board: ", "Impossibile trovare la bacheca dei problemi:");
-		m.put("Can not move project \"{0}\" to be under itself or its descendants", "Non è possibile spostare il progetto \"{0}\" sotto se stesso o i suoi discendenti");
-		m.put("Can not perform this operation now", "Non è possibile eseguire questa operazione ora");
-		m.put("Can not reset password for disabled account", "Impossibile reimpostare la password per l'account disabilitato");
-		m.put("Can not reset password for service or AI account", "Impossibile reimpostare la password per l'account di servizio o AI");
-		m.put("Can not reset password for user authenticating via external system", "Impossibile reimpostare la password per utente che si autentica tramite sistema esterno");
-		m.put("Can not save malformed query", "Non è possibile salvare una query malformata");
-		m.put("Can not use current or descendant project as parent", "Non è possibile utilizzare il progetto corrente o un discendente come genitore");
+		m.put("Cannot convert root user to service account", "Impossibile convertire l'utente root in account di servizio");
+		m.put("Cannot convert yourself to service account", "Impossibile convertirti in account di servizio");
+		m.put("Cannot delete branch \"{0}\" as there are workspaces on it", "Impossibile eliminare il branch \"{0}\" poiché ci sono workspaces su di esso");
+		m.put("Cannot delete default branch", "Non è possibile eliminare il branch predefinito");
+		m.put("Cannot delete root account", "Non è possibile eliminare l'account root");
+		m.put("Cannot delete yourself", "Non è possibile eliminare te stesso");
+		m.put("Cannot disable root account", "Non è possibile disabilitare l'account root");
+		m.put("Cannot disable yourself", "Non è possibile disabilitare te stesso");
+		m.put("Cannot find issue board: ", "Impossibile trovare la bacheca dei problemi:");
+		m.put("Cannot move project \"{0}\" to be under itself or its descendants", "Non è possibile spostare il progetto \"{0}\" sotto se stesso o i suoi discendenti");
+		m.put("Cannot perform this operation now", "Non è possibile eseguire questa operazione ora");
+		m.put("Cannot reset password for disabled account", "Impossibile reimpostare la password per l'account disabilitato");
+		m.put("Cannot reset password for service or AI account", "Impossibile reimpostare la password per l'account di servizio o AI");
+		m.put("Cannot reset password for user authenticating via external system", "Impossibile reimpostare la password per utente che si autentica tramite sistema esterno");
+		m.put("Cannot save malformed query", "Non è possibile salvare una query malformata");
+		m.put("Cannot use current or descendant project as parent", "Non è possibile utilizzare il progetto corrente o un discendente come genitore");
 		m.put("Can only compare with common ancestor when different projects are involved", "È possibile confrontare solo con un antenato comune quando sono coinvolti progetti diversi");
 		m.put("Cancel", "Annulla");
 		m.put("Cancel All Queried Builds", "Annulla tutte le build interrogate");
@@ -1379,7 +1379,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Event Types", "Tipi di Evento");
 		m.put("Events", "Eventi");
 		m.put("Ever Used Since", "Mai Usato Da");
-		m.put("Everything inside this project and all child projects will be deleted and can not be recovered, please type project path <code>{0}</code> below to confirm deletion.", 
+		m.put("Everything inside this project and all child projects will be deleted and cannot be recovered, please type project path <code>{0}</code> below to confirm deletion.", 
 			"Tutto all'interno di questo progetto e tutti i progetti figli saranno eliminati e non potranno essere recuperati, per favore digita il percorso del progetto <code>{0}</code> qui sotto per confermare l'eliminazione.");
 		m.put("Example", "Esempio");
 		m.put("Example Plugin Setting", "Esempio di Impostazione Plugin");
@@ -2455,7 +2455,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("OneDev requires git command line to manage repositories. The minimum required version is 2.11.1. Also make sure that git-lfs is installed if you want to retrieve LFS files in build job", 
 			"OneDev richiede la linea di comando git per gestire i repository. La versione minima richiesta è 2.11.1. Assicurati anche che git-lfs sia installato se desideri recuperare file LFS nel job di build");
 		m.put("Online", "Online");
-		m.put("Only create merge commit if target branch can not be fast-forwarded to source branch", 
+		m.put("Only create merge commit if target branch cannot be fast-forwarded to source branch", 
 			"Crea il commit di merge solo se il branch di destinazione non può essere avanzato velocemente al branch sorgente");
 		m.put("Only projects manageable by access token owner can be authorized", "Solo i progetti gestibili dal proprietario del token di accesso possono essere autorizzati");
 		m.put("Only system level audit events are displayed here. To view audit events for a specific project, please visit the project audit log page", 
@@ -2897,7 +2897,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Plain text expected", "Testo semplice previsto");
 		m.put("Platform", "Piattaforma");
 		m.put("Platforms", "Piattaforme");
-		m.put("Please <a wicket:id=\"download\" class=\"font-weight-bolder\">download</a> recovery codes below and keep them secret. These codes can be used to provide one-time access to your account in case you can not access the authentication application. They will <b>NOT</b> be displayed again", 
+		m.put("Please <a wicket:id=\"download\" class=\"font-weight-bolder\">download</a> recovery codes below and keep them secret. These codes can be used to provide one-time access to your account in case you cannot access the authentication application. They will <b>NOT</b> be displayed again", 
 			"Si prega di <a wicket:id=\"download\" class=\"font-weight-bolder\">scaricare</a> i codici di recupero qui sotto e di mantenerli segreti. Questi codici possono essere utilizzati per fornire accesso temporaneo al tuo account nel caso in cui non sia possibile accedere all'applicazione di autenticazione. Non saranno <b>MAI</b> visualizzati di nuovo");
 		m.put("Please Confirm", "Si prega di confermare");
 		m.put("Please Note", "Si prega di notare");
@@ -3098,15 +3098,15 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Pull request already closed", "Richiesta di pull già chiusa");
 		m.put("Pull request already opened", "Richiesta di pull già aperta");
 		m.put("Pull request and code review", "Richiesta di pull e revisione del codice");
-		m.put("Pull request can not be merged now as <a class=\"more-info d-inline link-primary\">some required builds</a> are not finished yet", 
+		m.put("Pull request cannot be merged now as <a class=\"more-info d-inline link-primary\">some required builds</a> are not finished yet", 
 			"La richiesta di pull non può essere unita ora poiché <a class=\"more-info d-inline link-primary\">alcune build richieste</a> non sono ancora terminate");
-		m.put("Pull request can not be merged now as <a class=\"more-info d-inline link-primary\">some required builds</a> are not successful", 
+		m.put("Pull request cannot be merged now as <a class=\"more-info d-inline link-primary\">some required builds</a> are not successful", 
 			"La richiesta di pull non può essere unita ora poiché <a class=\"more-info d-inline link-primary\">alcune build richieste</a> non hanno avuto successo");
-		m.put("Pull request can not be merged now as it is <a class=\"more-info d-inline link-primary\">pending review</a>", 
+		m.put("Pull request cannot be merged now as it is <a class=\"more-info d-inline link-primary\">pending review</a>", 
 			"La richiesta di pull non può essere unita ora poiché è <a class=\"more-info d-inline link-primary\">in attesa di revisione</a>");
-		m.put("Pull request can not be merged now as it was <a class=\"more-info d-inline link-primary\">requested for changes</a>", 
+		m.put("Pull request cannot be merged now as it was <a class=\"more-info d-inline link-primary\">requested for changes</a>", 
 			"La richiesta di pull non può essere unita ora poiché è stata <a class=\"more-info d-inline link-primary\">richiesta una modifica</a>");
-		m.put("Pull request can not be merged now as valid signature is required for head commit", 
+		m.put("Pull request cannot be merged now as valid signature is required for head commit", 
 			"La richiesta di pull non può essere unita ora poiché è richiesta una firma valida per il commit principale");
 		m.put("Pull request can only be merged after getting approvals from all reviewers", "La richiesta di pull può essere unita solo dopo aver ottenuto l'approvazione di tutti i revisori");
 		m.put("Pull request can only be merged by users with code write permission", "La richiesta di pull può essere unita solo dagli utenti con permesso di scrittura del codice");
@@ -4228,7 +4228,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("This installation's subscription has expired and is now running as the community edition", 
 			"L'abbonamento di questa installazione è scaduto ed è ora in esecuzione come edizione community");
 		m.put("This is a Git LFS object, but the storage file is missing", "Questo è un oggetto Git LFS, ma il file di archiviazione è mancante");
-		m.put("This is a built-in role and can not be deleted", "Questo è un ruolo integrato e non può essere eliminato");
+		m.put("This is a built-in role and cannot be deleted", "Questo è un ruolo integrato e non può essere eliminato");
 		m.put("This is a disabled AI account", "Questo è un account AI disabilitato");
 		m.put("This is a disabled service account", "Questo è un account di servizio disabilitato");
 		m.put("This is a layer cache. To use the cache, add below option to your docker buildx command", 
@@ -4716,7 +4716,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Whether or not to show branch/tag column", "Se mostrare la colonna branch/tag o meno");
 		m.put("Whether or not to show duration column", "Se mostrare la colonna durata o meno");
 		m.put("Whether or not to use user avatar from a public service", "Se utilizzare l'avatar utente da un servizio pubblico o meno");
-		m.put("Whether or not use force option to overwrite changes in case ref updating can not be fast-forwarded", 
+		m.put("Whether or not use force option to overwrite changes in case ref updating cannot be fast-forwarded", 
 			"Se utilizzare l'opzione forza per sovrascrivere le modifiche nel caso in cui l'aggiornamento del riferimento non possa essere avanzato rapidamente o meno");
 		m.put("Whether or not user can remove own account", "Se l'utente può rimuovere il proprio account o meno");
 		m.put("Whether the password must contain at least one lowercase letter", "Se la password deve contenere almeno una lettera minuscola");
@@ -4801,7 +4801,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("add another order", "aggiungi un altro ordine");
 		m.put("adding .onedev-buildspec.yml", "aggiungendo .onedev-buildspec.yml");
 		m.put("after specified date", "dopo la data specificata");
-		m.put("an <a href='https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/notification/Unsubscribable.java' target='_blank'>object</a> holding unsubscribe information.  A <code>null</code> value means that the notification can not be unsubscribed", 
+		m.put("an <a href='https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/notification/Unsubscribable.java' target='_blank'>object</a> holding unsubscribe information.  A <code>null</code> value means that the notification cannot be unsubscribed", 
 			"un <a href='https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/notification/Unsubscribable.java' target='_blank'>oggetto</a> che contiene informazioni di disiscrizione. Un valore <code>null</code> significa che la notifica non può essere disiscritta");
 		m.put("and more", "e altro");
 		m.put("archived", "archiviato");

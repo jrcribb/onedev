@@ -131,7 +131,7 @@ public class ShellProvisioner extends WorkspaceProvisioner implements Testable<T
 		var workDir = Workspace.getWorkDir(context.getProjectId(), context.getWorkspaceNumber());
 		envVars.put("ONEDEV_WORKDIR", workDir.getAbsolutePath());
 		envVars.put("ONEDEV_SERVER_URL", OneDev.getInstance(SettingService.class).getSystemSetting().getServerUrl());
-		envVars.put("ONEDEV_WORKSPACE_TOKEN", context.getToken());
+		envVars.put("ONEDEV_ACCESS_TOKEN", context.getToken());
 
 		logger.log("Setting up cache...");
 

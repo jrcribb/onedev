@@ -166,7 +166,7 @@ public abstract class ReviewListPanel extends Panel {
 						}
 						if (reviewerRequired) {
 							getSession().warn("Reviewer '" + reviewer.getDisplayName()
-									+ "' is required and can not be removed");
+									+ "' is required and cannot be removed");
 						} else if (request.isNew()) {
 							target.add(ReviewListPanel.this);
 						}
