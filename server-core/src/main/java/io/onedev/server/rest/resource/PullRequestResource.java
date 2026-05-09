@@ -248,6 +248,8 @@ public class PullRequestResource {
 				User reviewer = userService.load(reviewerId);
 				if (reviewer.equals(request.getSubmitter()))
 					return Response.status(NOT_ACCEPTABLE).entity("Pull request submitter cannot be reviewer").build();
+				if (!SecurityUtils.canReadCode(request.getProject()))
+					throw new NotAcceptableException("Reviewer should have code read permission: " + reviewer.getName());
 
 				if (request.getReview(reviewer) == null) {
 					PullRequestReview review = new PullRequestReview();
@@ -262,7 +264,10 @@ public class PullRequestResource {
 			for (Long assigneeId : data.getAssigneeIds()) {
 				PullRequestAssignment assignment = new PullRequestAssignment();
 				assignment.setRequest(request);
-				assignment.setUser(userService.load(assigneeId));
+				var assignee = userService.load(assigneeId);
+				if (!SecurityUtils.canWriteCode(request.getProject()))
+					throw new NotAcceptableException("Assignee should have code write permission: " + assignee.getName());
+				assignment.setUser(assignee);
 				request.getAssignments().add(assignment);
 			}
 		}

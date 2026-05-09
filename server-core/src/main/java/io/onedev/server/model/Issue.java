@@ -37,6 +37,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.Stack;
 import java.util.UUID;
@@ -69,6 +70,7 @@ import org.jspecify.annotations.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
@@ -85,6 +87,7 @@ import io.onedev.server.buildspecmodel.inputspec.Input;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.entityreference.EntityReference;
 import io.onedev.server.entityreference.IssueReference;
+import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.ProjectBelonging;
@@ -427,6 +430,8 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 	private transient Collection<User> participants;
 	
 	private transient Collection<User> authorizedUsers;
+
+	private transient Optional<String> branchOptional;
 	
 	public String getState() {
 		return state;
@@ -1380,7 +1385,7 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 				var issue = getIssue(issueId);
 				if (!SecurityUtils.canAccessIssue(subject, issue))
 					throw new UnauthorizedException();
-				return new ToolExecutionResult(convertToJson(IssueHelper.getDetail(issue.getProject(), issue)), false);
+				return new ToolExecutionResult(convertToJson(IssueHelper.getDetail(subject, issue.getProject(), issue)), false);
 			}
 			
 		},
@@ -1405,8 +1410,31 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 		});
 	}
 
+	@Nullable
+	public String getBranch() {
+		if (branchOptional == null) {
+			String fixedPart = "issue-" + getNumber();
+			for (var ref : getProject().getBranchRefs()) {
+				String branch = Preconditions.checkNotNull(GitUtils.ref2branch(ref.getName()));
+				int index = branch.toLowerCase().indexOf(fixedPart);
+				if (index < 0)
+					continue;
+				if (index > 0 && branch.charAt(index - 1) != '/')
+					continue;
+				int end = index + fixedPart.length();
+				if (end < branch.length() && branch.charAt(end) != '-')
+					continue;
+				branchOptional = Optional.of(branch);
+				break;
+			}
+			if (branchOptional == null)
+				branchOptional = Optional.empty();
+		}
+		return branchOptional.orElse(null);
+	}
+
 	private static Issue getIssue(Long issueId) {
 		return OneDev.getInstance(IssueService.class).load(issueId);
 	}
-
+	
 }

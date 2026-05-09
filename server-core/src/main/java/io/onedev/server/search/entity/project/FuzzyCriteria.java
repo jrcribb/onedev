@@ -54,7 +54,6 @@ public class FuzzyCriteria extends Criteria<Project> {
 			else
 				nameOrPathCriteria = new PathCriteria("**/*" + part + "*/**", Is);
 			partCriterias.add(nameOrPathCriteria);
-			partCriterias.add(new DescriptionCriteria(part));
 			if (NumberUtils.isDigits(part))
 				partCriterias.add(new IdCriteria(Integer.parseInt(part), Is));
 			criterias.add(new OrCriteria<Project>(partCriterias));

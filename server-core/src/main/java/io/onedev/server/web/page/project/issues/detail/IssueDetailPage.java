@@ -156,7 +156,8 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 		
 		add(new SideInfoLink("moreInfo"));
 		
-		add(new IssueOperationsPanel("operations") {
+		Component operationsPanel;
+		add(operationsPanel = new IssueOperationsPanel("operations") {
 
 			@Override
 			protected Issue getIssue() {
@@ -300,6 +301,11 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 					@Override
 					protected Issue getIssue() {
 						return IssueDetailPage.this.getIssue();
+					}
+
+					@Override
+					protected void onBranchCreated(AjaxRequestTarget target) {
+						target.add(operationsPanel);
 					}
 
 					@Override

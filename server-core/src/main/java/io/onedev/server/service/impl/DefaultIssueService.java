@@ -1329,6 +1329,8 @@ public class DefaultIssueService extends BaseEntityService<Issue> implements Iss
 	@Sessional
 	@Override
 	public String suggestBranch(Issue issue) {
+		String prefix = issue.getProject().findIssueBranchPrefix();
+		String prefixWithSlash = prefix != null ? prefix + "/" : "";
 		var chatModel = settingService.getAiSetting().getLiteModel();
 		if (chatModel != null) {
 			var systemMessage = new SystemMessage("""
@@ -1341,7 +1343,7 @@ public class DefaultIssueService extends BaseEntityService<Issue> implements Iss
 					var response = chatModel.chat(systemMessage, userMessage).aiMessage().text();
 					response = StringUtils.trimToNull(response);
 					if (response != null && Repository.isValidRefName(GitUtils.branch2ref(response)))
-						return "issue-" + issue.getNumber() + "-" + response;
+						return prefixWithSlash + "issue-" + issue.getNumber() + "-" + response;
 				} catch (Exception e) {
 					logger.warn("Error calling AI model to get normalized title for branch: {}", e);
 					break;
@@ -1351,9 +1353,9 @@ public class DefaultIssueService extends BaseEntityService<Issue> implements Iss
 
 		var normalizedTitle = GitUtils.normalizeForBranch(issue.getTitle());
 		if (normalizedTitle != null)
-			return "issue-" + issue.getNumber() + "-" + normalizedTitle;
+			return prefixWithSlash + "issue-" + issue.getNumber() + "-" + normalizedTitle;
 		else
-			return "issue-" + issue.getNumber();
+			return prefixWithSlash + "issue-" + issue.getNumber();
 	}
 
 }

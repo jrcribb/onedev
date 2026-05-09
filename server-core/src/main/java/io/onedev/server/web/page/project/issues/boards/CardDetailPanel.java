@@ -101,7 +101,8 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 		
 		add(new SideInfoLink("moreInfoTrigger"));
 		
-		add(new IssueOperationsPanel("operations") {
+		Component operationsPanel;
+		add(operationsPanel = new IssueOperationsPanel("operations") {
 
 			@Override
 			protected Issue getIssue() {
@@ -223,7 +224,12 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 			@Override
 			protected Component newBody(String componentId) {
 				return new IssueSidePanel(componentId) {
-					
+
+					@Override
+					protected void onBranchCreated(AjaxRequestTarget target) {
+						target.add(operationsPanel);
+					}
+
 					@Override
 					protected Issue getIssue() {
 						return CardDetailPanel.this.getIssue();

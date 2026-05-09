@@ -2066,6 +2066,18 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		return "**";
 	}
 
+	@Nullable
+	public String findIssueBranchPrefix() {
+		Project current = this;
+		do {
+			if (current.getIssueSetting().getBranchPrefix() != null)
+				return current.getIssueSetting().getBranchPrefix();
+			current = current.getParent();
+		} while (current != null);
+
+		return null;
+	}
+
 	public MergeStrategy findDefaultPullRequestMergeStrategy() {
 		Project current = this;
 		do {

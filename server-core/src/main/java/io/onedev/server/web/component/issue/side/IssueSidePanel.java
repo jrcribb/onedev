@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
 import javax.mail.internet.InternetAddress;
 
 import org.apache.wicket.Component;
@@ -42,15 +43,14 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.eclipse.jgit.revwalk.RevCommit;
 
 import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.Input;
-import io.onedev.server.service.IssueChangeService;
-import io.onedev.server.service.IssueVoteService;
-import io.onedev.server.service.IssueWatchService;
 import io.onedev.server.entityreference.EntityReference;
+import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueVote;
@@ -64,11 +64,17 @@ import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryLexer;
 import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.IssueChangeService;
+import io.onedev.server.service.IssueService;
+import io.onedev.server.service.IssueVoteService;
+import io.onedev.server.service.IssueWatchService;
+import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.Similarities;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.behavior.ChangeObserver;
+import io.onedev.server.web.component.branch.BranchLink;
 import io.onedev.server.web.component.entity.reference.EntityReferencePanel;
 import io.onedev.server.web.component.entity.watches.EntityWatchesPanel;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
@@ -90,7 +96,13 @@ import io.onedev.server.web.page.security.LoginPage;
 public abstract class IssueSidePanel extends Panel {
 
 	private static final int MAX_DISPLAY_AVATARS = 20;
-		
+	
+	@Inject
+	private IssueService issueService;
+
+	@Inject
+	private GitService gitService;
+
 	private boolean confidential;
 	
 	private Component watchesContainer;
@@ -105,6 +117,7 @@ public abstract class IssueSidePanel extends Panel {
 		addOrReplace(newFieldsContainer());
 		addOrReplace(newConfidentialContainer());
 		addOrReplace(newIterationsContainer());
+		addOrReplace(newBranchContainer());
 		addOrReplace(newVotesContainer());
 		
 		addOrReplace(watchesContainer = new EntityWatchesPanel("watches") {
@@ -381,7 +394,81 @@ public abstract class IssueSidePanel extends Panel {
 		
 		return container;
 	}
-	
+
+	private Component newBranchContainer() {
+		String branch = getIssue().getBranch();
+		boolean canCreate = branch == null && canCreateAssociatedBranch();
+		WebMarkupContainer container = new WebMarkupContainer("branch") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(SecurityUtils.canReadCode(getProject()) && (branch != null || canCreate));
+			}
+
+		};
+		if (branch != null) {
+			container.add(new BranchLink("link", new ProjectAndBranch(getProject(), branch), true)
+					.add(AttributeAppender.replace("title", branch)));
+		} else {
+			container.add(new WebMarkupContainer("link").setVisible(false));
+		}
+
+		AjaxLink<Void> createLink = new AjaxLink<Void>("create") {
+
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new AttachAjaxIndicatorListener(false));
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(canCreate);
+			}
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				User user = SecurityUtils.getAuthUser();
+				if (user == null)
+					throw new RestartResponseAtInterceptPageException(LoginPage.class);
+
+				Project project = getProject();
+				String suggestedBranch = issueService.suggestBranch(getIssue());
+
+				if (project.getBranchRef(suggestedBranch) != null) {
+					getSession().error(MessageFormat.format(_T("Branch \"{0}\" already exists"), suggestedBranch));
+				} else {
+					String defaultBranch = project.getDefaultBranch();
+					if (defaultBranch == null) {
+						getSession().error(_T("Default branch is not available"));
+					} else {
+						RevCommit commit = project.getRevCommit(defaultBranch, true);
+						if (!project.isCommitSignatureRequirementSatisfied(user, suggestedBranch, commit)) {
+							getSession().error(_T("Valid signature required for head commit of this branch per branch protection rule"));
+						} else {
+							gitService.createBranch(project, suggestedBranch, defaultBranch);
+							getSession().success(MessageFormat.format(_T("Branch \"{0}\" created"), suggestedBranch));
+						}
+					}
+				}
+				target.add(IssueSidePanel.this);
+				onBranchCreated(target);
+			}
+
+		};
+		container.add(createLink);
+
+		return container;
+	}
+
+	private boolean canCreateAssociatedBranch() {
+		String prefix = getProject().findIssueBranchPrefix();
+		String branchName = (prefix != null ? prefix + "/" : "") + "issue-" + getIssue().getNumber();
+		return SecurityUtils.canCreateBranch(getProject(), branchName);
+	}
+
 	private List<IssueVote> getSortedVotes() {
 		List<IssueVote> votes = new ArrayList<>(getIssue().getVotes());
 		Collections.sort(votes, new Comparator<IssueVote>() {
@@ -583,6 +670,8 @@ public abstract class IssueSidePanel extends Panel {
 	protected abstract Issue getIssue();
 
 	protected abstract Component newDeleteLink(String componentId);
+
+	protected abstract void onBranchCreated(AjaxRequestTarget target);
 
 	private void notifyIssueChange(IPartialPageRequestHandler handler, Issue issue) {
 		((BasePage)getPage()).notifyObservablesChange(handler, issue.getChangeObservables(true));

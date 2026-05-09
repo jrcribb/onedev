@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.service.UserService;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.User;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.security.permission.ReadCode;
+import io.onedev.server.service.UserService;
 import io.onedev.server.util.Similarities;
 import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.web.WebConstants;
@@ -23,8 +25,9 @@ public abstract class ReviewerProvider extends AbstractUserChoiceProvider {
 	public void query(String term, int page, Response<User> response) {
 		PullRequest request = getPullRequest();
 		
+		List<User> users = new ArrayList<>(SecurityUtils.getAuthorizedUsers(request.getProject(), new ReadCode()));
+				
 		UserCache cache = OneDev.getInstance(UserService.class).cloneCache();
-		List<User> users = new ArrayList<>(cache.getUsers());
 		users.sort(cache.comparingDisplayName(request.getParticipants()));
 		
 		for (PullRequestReview review: request.getReviews()) {

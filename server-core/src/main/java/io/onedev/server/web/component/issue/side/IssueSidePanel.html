@@ -38,6 +38,16 @@
 				</wicket:enclosure>
 			</ul>
 		</div>
+		<div wicket:id="branch" class="branch">
+			<div class="head"><wicket:t>Associated Branch</wicket:t></div>
+			<div class="body d-flex align-items-center">
+				<wicket:enclosure child="link">
+					<wicket:svg href="branch" class="icon mr-2 flex-shrink-0"></wicket:svg>
+					<a wicket:id="link" class="text-truncate mr-2"></a>
+				</wicket:enclosure>
+				<a wicket:id="create" class="btn btn-outline-secondary btn-sm flex-shrink-0"><wicket:svg href="plus" class="icon mr-2"></wicket:svg><wicket:t>Create</wicket:t></a>
+			</div>
+		</div>
 		<div wicket:id="votes" class="votes">
 			<div class="head">
 				<wicket:t>Issue Votes</wicket:t> (<span wicket:id="count"></span>) 

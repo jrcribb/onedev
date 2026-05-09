@@ -8,6 +8,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.shiro.subject.Subject;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -15,6 +17,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.Project;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.UrlService;
 
 public class IssueHelper {
@@ -67,8 +70,10 @@ public class IssueHelper {
         return comments;
     }
 
-    public static Map<String, Object> getDetail(Project currentProject, Issue issue) {
+    public static Map<String, Object> getDetail(Subject subject, Project currentProject, Issue issue) {
         var detail = getSummary(currentProject, issue);
+        if (SecurityUtils.canReadCode(subject, issue.getProject()))
+            detail.put("branch", issue.getBranch());
         for (var entry : issue.getFieldInputs().entrySet()) {
             detail.put(entry.getKey(), entry.getValue().getValues());
         }

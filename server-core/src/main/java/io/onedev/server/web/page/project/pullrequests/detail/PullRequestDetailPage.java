@@ -149,6 +149,7 @@ import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
+import io.onedev.server.web.component.workspace.speclist.WorkspaceSpecListPanel;
 import io.onedev.server.web.editable.InplacePropertyEditLink;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.ProjectPage;
@@ -1039,6 +1040,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 						}
 
 					});
+					fragment.add(new WebMarkupContainer("sourceWorkspaces").setVisible(false));
 				}
 
 				fragment.add(newMergeStrategyContainer());
@@ -1649,6 +1651,31 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 				}));
 				setOutputMarkupId(true);
+			}
+
+		});
+
+		statusBarContainer.add(new DropdownLink("workspaces") {
+
+			@Override
+			protected Component newContent(String id, FloatingPanel dropdown) {
+				return new WorkspaceSpecListPanel(id, getPullRequest().getSourceBranch()) {
+
+					@Override
+					protected Project getProject() {
+						return getPullRequest().getSourceProject();
+					}
+
+				};
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				var request = getPullRequest();
+				setVisible(request.getSourceProject() != null 
+						&& SecurityUtils.canWriteCode(request.getSourceProject())
+						&& !request.getSourceProject().getHierarchyWorkspaceSpecs().isEmpty());
 			}
 
 		});

@@ -105,6 +105,7 @@ import io.onedev.server.web.page.project.setting.code.git.GitPackConfigPage;
 import io.onedev.server.web.page.project.setting.code.pullrequest.PullRequestSettingPage;
 import io.onedev.server.web.page.project.setting.code.tagprotection.TagProtectionsPage;
 import io.onedev.server.web.page.project.setting.general.GeneralProjectSettingPage;
+import io.onedev.server.web.page.project.setting.issuesetting.IssueBranchPrefixPage;
 import io.onedev.server.web.page.project.setting.pluginsettings.ContributedProjectSettingPage;
 import io.onedev.server.web.page.project.setting.servicedesk.ServiceDeskSettingPage;
 import io.onedev.server.web.page.project.setting.webhook.WebHooksPage;
@@ -116,7 +117,6 @@ import io.onedev.server.web.page.project.workspaces.ProjectWorkspacesPage;
 import io.onedev.server.web.page.project.workspaces.detail.WorkspaceDetailPage;
 import io.onedev.server.web.page.security.LoginPage;
 import io.onedev.server.web.util.ProjectAware;
-import io.onedev.server.web.util.WicketUtils;
 
 public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 
@@ -309,8 +309,12 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 			settingMenuItems.add(new SidebarMenuItem.Page(null, _T("Pull Request"),
 					PullRequestSettingPage.class, PullRequestSettingPage.paramsOf(getProject())));
 
-			if (getProject().isIssueManagement() && WicketUtils.isSubscriptionActive()) 
-				settingMenuItems.add(new SidebarMenuItem.SubMenu(null, _T("Issue"), new ArrayList<>()));
+			if (getProject().isIssueManagement()) {
+				List<SidebarMenuItem> issueSettingMenuItems = new ArrayList<>();
+				issueSettingMenuItems.add(new SidebarMenuItem.Page(null, _T("Branch Prefix"),
+						IssueBranchPrefixPage.class, IssueBranchPrefixPage.paramsOf(getProject())));
+				settingMenuItems.add(new SidebarMenuItem.SubMenu(null, _T("Issue"), issueSettingMenuItems));
+			}
 					
 			List<SidebarMenuItem> buildSettingMenuItems = new ArrayList<>();
 			

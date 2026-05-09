@@ -2623,4 +2623,39 @@ public class BuildSpec implements Serializable, Validatable {
 		});
 	}
 
+	@SuppressWarnings("unused")
+	private void migrate48(VersionedYamlDoc doc, Stack<Integer> versions) {
+		migrateSteps(doc, versions, stepsNode -> {
+			for (Node stepsNodeItem : stepsNode.getValue()) {
+				MappingNode stepNode = (MappingNode) stepsNodeItem;
+				if (!"CreateBranchStep".equals(getStepType(stepNode)))
+					continue;
+				for (var stepTuple : stepNode.getValue()) {
+					var propName = ((ScalarNode) stepTuple.getKeyNode()).getValue();
+					if (!propName.equals("branchNameProvider"))
+						continue;
+					MappingNode providerNode = (MappingNode) stepTuple.getValueNode();
+					String providerType = null;
+					for (var providerTuple : providerNode.getValue()) {
+						var providerPropName = ((ScalarNode) providerTuple.getKeyNode()).getValue();
+						if (providerPropName.equals("type")) {
+							providerType = ((ScalarNode) providerTuple.getValueNode()).getValue();
+							break;
+						}
+					}
+					if ("GeneratedBranchName".equals(providerType)) {
+						for (var itProviderTuple = providerNode.getValue().iterator(); itProviderTuple.hasNext();) {
+							var providerTuple = itProviderTuple.next();
+							var providerPropName = ((ScalarNode) providerTuple.getKeyNode()).getValue();
+							if (providerPropName.equals("prefix")) {
+								itProviderTuple.remove();
+								break;
+							}
+						}
+					}
+				}
+			}
+		});
+	}
+
 }

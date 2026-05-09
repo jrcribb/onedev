@@ -554,12 +554,13 @@ public class TodResource {
     public Map<String, Object> getIssue(
                 @QueryParam("currentProject") @NotNull String currentProjectPath, 
                 @QueryParam("reference") @NotNull String issueReference) {
-        if (SecurityUtils.getUser() == null)
+        var subject = SecurityUtils.getSubject();
+        if (SecurityUtils.getUser(subject) == null)
             throw new UnauthenticatedException();
 
         var currentProject = getProject(currentProjectPath);
         var issue = getIssue(currentProject, issueReference);                
-        return IssueHelper.getDetail(currentProject, issue);
+        return IssueHelper.getDetail(subject, currentProject, issue);
     }
 
     @Path("/get-project-key")
