@@ -20,6 +20,8 @@ public class IssueQueryParseOption implements Serializable {
 	
 	private boolean withCurrentCommitCriteria;
 	
+	private boolean withCurrentBranchCriteria;
+	
 	private boolean withStateCriteria = true;
 	
 	private boolean withOrder = true;
@@ -89,6 +91,15 @@ public class IssueQueryParseOption implements Serializable {
 		return this;
 	}
 
+	public boolean withCurrentBranchCriteria() {
+		return withCurrentBranchCriteria;
+	}
+
+	public IssueQueryParseOption withCurrentBranchCriteria(boolean withCurrentBranchCriteria) {
+		this.withCurrentBranchCriteria = withCurrentBranchCriteria;
+		return this;
+	}
+
 	public boolean withStateCriteria() {
 		return withStateCriteria;
 	}
@@ -120,6 +131,7 @@ public class IssueQueryParseOption implements Serializable {
 		withCurrentProjectCriteria = enabled;
 		withCurrentBuildCriteria = enabled;
 		withCurrentCommitCriteria = enabled;
+		withCurrentBranchCriteria = enabled;
 		withCurrentIssueCriteria = enabled;
 		withCurrentPullRequestCriteria = enabled;
 		withCurrentUserCriteria = enabled;

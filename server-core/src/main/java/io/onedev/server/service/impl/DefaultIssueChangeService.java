@@ -82,6 +82,7 @@ import io.onedev.server.model.support.issue.changedata.IssueStateChangeData;
 import io.onedev.server.model.support.issue.changedata.IssueTitleChangeData;
 import io.onedev.server.model.support.issue.changedata.IssueTotalEstimatedTimeChangeData;
 import io.onedev.server.model.support.issue.changedata.IssueTotalSpentTimeChangeData;
+import io.onedev.server.model.support.issue.transitionspec.BranchCreatedSpec;
 import io.onedev.server.model.support.issue.transitionspec.BranchUpdatedSpec;
 import io.onedev.server.model.support.issue.transitionspec.BuildSuccessfulSpec;
 import io.onedev.server.model.support.issue.transitionspec.IssueStateTransitedSpec;
@@ -114,6 +115,7 @@ import io.onedev.server.service.SettingService;
 import io.onedev.server.taskschedule.SchedulableTask;
 import io.onedev.server.taskschedule.TaskScheduler;
 import io.onedev.server.util.ProjectScope;
+import io.onedev.server.util.ProjectScopedBranch;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.concurrent.BatchWorkExecutionService;
 import io.onedev.server.util.concurrent.BatchWorker;
@@ -465,18 +467,8 @@ public class DefaultIssueChangeService extends BaseEntityService<IssueChange>
 						Project project = issue.getProject();
 						ProjectScope projectScope = new ProjectScope(project, true, true);
 						IssueStateTransitedSpec issueStateTransitedSpec = (IssueStateTransitedSpec) transition;
-						IssueQuery query = IssueQuery.parse(project, issueStateTransitedSpec.getIssueQuery(), option, true);
-						List<Criteria<Issue>> criterias = new ArrayList<>();
-						
-						List<Criteria<Issue>> fromStateCriterias = new ArrayList<>();
-						for (String fromState: transition.getFromStates()) 
-							fromStateCriterias.add(new StateCriteria(fromState, IssueQueryLexer.Is));
-						
-						if (!fromStateCriterias.isEmpty())
-							criterias.add(Criteria.orCriterias(fromStateCriterias));
-						if (query.getCriteria() != null)
-							criterias.add(query.getCriteria());
-						query = new IssueQuery(Criteria.andCriterias(criterias), new ArrayList<>());
+						IssueQuery query = combineTransitionQuery(transition,
+								IssueQuery.parse(project, issueStateTransitedSpec.getIssueQuery(), option, true));
 						Issue.push(issue);
 						try {
 							for (Issue each: issueService.query(
@@ -521,18 +513,8 @@ public class DefaultIssueChangeService extends BaseEntityService<IssueChange>
 					if ((buildSuccessfulSpec.getJobNames() == null || PatternSet.parse(buildSuccessfulSpec.getJobNames()).matches(new StringMatcher(), build.getJobName())) 
 							&& build.getStatus() == Build.Status.SUCCESSFUL
 							&& (branches == null || project.isCommitOnBranches(commitId, PatternSet.parse(branches)))) {
-						IssueQuery query = IssueQuery.parse(project, buildSuccessfulSpec.getIssueQuery(), option, true);
-						List<Criteria<Issue>> criterias = new ArrayList<>();
-						
-						List<Criteria<Issue>> fromStateCriterias = new ArrayList<>();
-						for (String fromState: transition.getFromStates()) 
-							fromStateCriterias.add(new StateCriteria(fromState, IssueQueryLexer.Is));
-						
-						if (!fromStateCriterias.isEmpty())
-							criterias.add(Criteria.orCriterias(fromStateCriterias));
-						if (query.getCriteria() != null)
-							criterias.add(query.getCriteria());
-						query = new IssueQuery(Criteria.andCriterias(criterias), new ArrayList<>());
+						IssueQuery query = combineTransitionQuery(transition,
+								IssueQuery.parse(project, buildSuccessfulSpec.getIssueQuery(), option, true));
 						Build.push(build);
 						try {
 							for (Issue issue: issueService.query(subject, projectScope, query, true, 0, MAX_VALUE)) {
@@ -552,6 +534,18 @@ public class DefaultIssueChangeService extends BaseEntityService<IssueChange>
 			logger.error("Error changing issue state", e);
 		}
 	}
+
+	private IssueQuery combineTransitionQuery(TransitionSpec transition, IssueQuery query) {
+		List<Criteria<Issue>> criterias = new ArrayList<>();
+		List<Criteria<Issue>> fromStateCriterias = new ArrayList<>();
+		for (String fromState : transition.getFromStates())
+			fromStateCriterias.add(new StateCriteria(fromState, IssueQueryLexer.Is));
+		if (!fromStateCriterias.isEmpty())
+			criterias.add(Criteria.orCriterias(fromStateCriterias));
+		if (query.getCriteria() != null)
+			criterias.add(query.getCriteria());
+		return new IssueQuery(Criteria.andCriterias(criterias), new ArrayList<>());
+	}
 	
 	private void on(PullRequest request, Class<? extends PullRequestSpec> specClass) {
 		try {
@@ -567,18 +561,8 @@ public class DefaultIssueChangeService extends BaseEntityService<IssueChange>
 				if (transition.getClass() == specClass) {
 					PullRequestSpec pullRequestSpec = (PullRequestSpec) transition;
 					if (pullRequestSpec.getBranches() == null || PatternSet.parse(pullRequestSpec.getBranches()).matches(matcher, request.getTargetBranch())) {
-						IssueQuery query = IssueQuery.parse(project, pullRequestSpec.getIssueQuery(), option, true);
-						List<Criteria<Issue>> criterias = new ArrayList<>();
-						
-						List<Criteria<Issue>> fromStateCriterias = new ArrayList<>();
-						for (String fromState: transition.getFromStates()) 
-							fromStateCriterias.add(new StateCriteria(fromState, IssueQueryLexer.Is));
-						
-						if (!fromStateCriterias.isEmpty())
-							criterias.add(Criteria.orCriterias(fromStateCriterias));
-						if (query.getCriteria() != null)
-							criterias.add(query.getCriteria());
-						query = new IssueQuery(Criteria.andCriterias(criterias), new ArrayList<>());
+						IssueQuery query = combineTransitionQuery(transition,
+								IssueQuery.parse(project, pullRequestSpec.getIssueQuery(), option, true));
 						PullRequest.push(request);
 						try {
 							for (Issue issue: issueService.query(subject, projectScope, query, true, 0, MAX_VALUE)) {
@@ -670,6 +654,7 @@ public class DefaultIssueChangeService extends BaseEntityService<IssueChange>
 				
 				var option = new IssueQueryParseOption().withCurrentCommitCriteria(true);
 				Set<Long> transitedIssueIds = new HashSet<>();
+
 				for (var transition: project.getHierarchyTransitionSpecs()) {
 					if (transition instanceof BranchUpdatedSpec) {
 						var branchUpdatedSpec = (BranchUpdatedSpec) transition;
@@ -679,18 +664,8 @@ public class DefaultIssueChangeService extends BaseEntityService<IssueChange>
 						var commitMessagesMatcher = new StringMatcher();
 						if ((branches == null || PatternSet.parse(branches).matches(branchMatcher, branchName))
 								&& (commitMessages == null || PatternSet.parse(commitMessages).matches(commitMessagesMatcher, commitMessage))) {
-							IssueQuery query = IssueQuery.parse(project, branchUpdatedSpec.getIssueQuery(), option, true);
-							List<Criteria<Issue>> criterias = new ArrayList<>();
-							
-							List<Criteria<Issue>> fromStateCriterias = new ArrayList<>();
-							for (String fromState: transition.getFromStates()) 
-								fromStateCriterias.add(new StateCriteria(fromState, IssueQueryLexer.Is));
-							
-							if (!fromStateCriterias.isEmpty())
-								criterias.add(Criteria.orCriterias(fromStateCriterias));
-							if (query.getCriteria() != null)
-								criterias.add(query.getCriteria());
-							query = new IssueQuery(Criteria.andCriterias(criterias), new ArrayList<>());
+							IssueQuery query = combineTransitionQuery(transition,
+									IssueQuery.parse(project, branchUpdatedSpec.getIssueQuery(), option, true));
 							ProjectScopedCommit.push(new ProjectScopedCommit(project, newCommitId) {
 
 								@Override
@@ -717,8 +692,31 @@ public class DefaultIssueChangeService extends BaseEntityService<IssueChange>
 								ProjectScopedCommit.pop();
 							}
 						}
+					} else if (transition instanceof BranchCreatedSpec) {
+						if (oldCommitId.equals(ObjectId.zeroId())) {
+							var branchOption = new IssueQueryParseOption().withCurrentBranchCriteria(true);
+							var branchCreatedSpec = (BranchCreatedSpec) transition;
+							var branches = branchCreatedSpec.getBranches();
+							var branchMatcher = new PathMatcher();
+							if (branches == null || PatternSet.parse(branches).matches(branchMatcher, branchName)) {
+								IssueQuery query = combineTransitionQuery(transition,
+										IssueQuery.parse(project, branchCreatedSpec.getIssueQuery(), branchOption, true));
+								ProjectScopedBranch.push(new ProjectScopedBranch(project, branchName));
+								try {
+									for (Issue issue: issueService.query(subject, projectScope, query, true, 0, MAX_VALUE)) {
+										if (transitedIssueIds.add(issue.getId())) {
+											changeState(user, issue, branchCreatedSpec.getToState(), 
+													new HashMap<>(), new ArrayList<>(), transition.getRemoveFields(),
+													"State changed as branch '" + branchName + "' is created");
+										}
+									}
+								} finally {
+									ProjectScopedBranch.pop();
+								}
+							}
+						}
 					}
-				}
+				}				
 			} catch (Exception e) {
 				logger.error("Error changing issue state", e);
 			}
@@ -733,22 +731,14 @@ public class DefaultIssueChangeService extends BaseEntityService<IssueChange>
 		for (TransitionSpec transition: transitions) {
 			if (transition instanceof NoActivitySpec) {
 				NoActivitySpec noActivitySpec = (NoActivitySpec) transition;
-				IssueQuery query = IssueQuery.parse(parseProject, noActivitySpec.getIssueQuery(), option, parseProject != null);
+				IssueQuery query = combineTransitionQuery(transition,
+						IssueQuery.parse(parseProject, noActivitySpec.getIssueQuery(), option, parseProject != null));
 				List<Criteria<Issue>> criterias = new ArrayList<>();
-				
-				List<Criteria<Issue>> fromStateCriterias = new ArrayList<>();
-				for (String fromState: transition.getFromStates()) 
-					fromStateCriterias.add(new StateCriteria(fromState, IssueQueryLexer.Is));
-				
-				if (!fromStateCriterias.isEmpty())
-					criterias.add(Criteria.orCriterias(fromStateCriterias));
 				if (query.getCriteria() != null)
 					criterias.add(query.getCriteria());
-				
 				criterias.add(new LastActivityDateCriteria(
 						new DateTime().minusDays(noActivitySpec.getDays()).toDate(), 
 						IssueQueryLexer.IsUntil));
-				
 				query = new IssueQuery(Criteria.andCriterias(criterias), new ArrayList<>());
 				
 				for (Issue issue: issueService.query(subject, projectScope, query, true, 0, MAX_VALUE)) {

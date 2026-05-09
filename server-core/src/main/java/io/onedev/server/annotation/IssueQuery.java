@@ -28,6 +28,8 @@ public @interface IssueQuery {
 	
 	boolean withCurrentCommitCriteria() default false;
 	
+	boolean withCurrentBranchCriteria() default false;
+	
 	boolean withStateCriteria() default true;
 	
 	boolean withOrder() default true;

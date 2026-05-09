@@ -46,6 +46,7 @@ import static io.onedev.server.search.entity.issue.IssueQueryParser.IsPrevious;
 import static io.onedev.server.search.entity.issue.IssueQueryParser.IsSince;
 import static io.onedev.server.search.entity.issue.IssueQueryParser.IsUntil;
 import static io.onedev.server.search.entity.issue.IssueQueryParser.MentionedMe;
+import static io.onedev.server.search.entity.issue.IssueQueryParser.ReferencedInCurrentBranch;
 import static io.onedev.server.search.entity.issue.IssueQueryParser.SubmittedByMe;
 import static io.onedev.server.search.entity.issue.IssueQueryParser.WatchedByMe;
 
@@ -217,6 +218,10 @@ public class IssueQuery extends EntityQuery<Issue> {
 								if (!option.withCurrentCommitCriteria())
 									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 								return new FixedInCurrentCommitCriteria();
+							case ReferencedInCurrentBranch:
+								if (!option.withCurrentBranchCriteria())
+									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
+								return new ReferencedInCurrentBranchCriteria();
 							case CurrentIssue:
 								if (!option.withCurrentIssueCriteria())
 									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");

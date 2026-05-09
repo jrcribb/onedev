@@ -151,6 +151,7 @@ public class QueryDescriptions {
                     | 'fixed in current build'
                     | 'fixed in pull request' '"'EntityReference'"'
                     | 'fixed in current pull request'
+                    | 'referenced in current branch'
                     | 'fixed between' revision 'and' revision
                     | '"Submit Date"' 'is' ('until'|'since') '"'DateDescription'"' 
                     | '"Last Activity Date"' 'is' ('until'|'since') '"'DateDescription'"'

@@ -12,9 +12,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.jspecify.annotations.Nullable;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.collect.Lists;
 
@@ -37,6 +38,7 @@ import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 import io.onedev.server.model.support.issue.field.spec.choicefield.defaultvalueprovider.DefaultValue;
 import io.onedev.server.model.support.issue.field.spec.choicefield.defaultvalueprovider.SpecifiedDefaultValue;
 import io.onedev.server.model.support.issue.field.spec.userchoicefield.UserChoiceField;
+import io.onedev.server.model.support.issue.transitionspec.BranchCreatedSpec;
 import io.onedev.server.model.support.issue.transitionspec.BranchUpdatedSpec;
 import io.onedev.server.model.support.issue.transitionspec.IssueStateTransitedSpec;
 import io.onedev.server.model.support.issue.transitionspec.ManualSpec;
@@ -194,6 +196,11 @@ public class GlobalIssueSetting implements Serializable {
 		branchUpdatedSpec.setBranches("main master");
 		branchUpdatedSpec.setIssueQuery("fixed in current commit");		
 		transitionSpecs.add(branchUpdatedSpec);
+
+		var branchCreatedSpec = new BranchCreatedSpec();
+		branchCreatedSpec.setToState("In Progress");
+		branchCreatedSpec.setIssueQuery("referenced in current branch");		
+		transitionSpecs.add(branchCreatedSpec);
 		
 		var pullRequestOpenedSpec = new PullRequestOpenedSpec();
 		pullRequestOpenedSpec.setToState("In Review");

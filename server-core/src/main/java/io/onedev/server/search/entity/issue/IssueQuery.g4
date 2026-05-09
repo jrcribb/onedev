@@ -7,7 +7,7 @@ query
     ;
 
 criteria
-    : operator=(Confidential|SubmittedByMe|WatchedByMe|IgnoredByMe|CommentedByMe|MentionedMe|FixedInCurrentCommit|FixedInCurrentBuild|FixedInCurrentPullRequest|CurrentIssue) #OperatorCriteria
+    : operator=(Confidential|SubmittedByMe|WatchedByMe|IgnoredByMe|CommentedByMe|MentionedMe|FixedInCurrentCommit|FixedInCurrentBuild|FixedInCurrentPullRequest|ReferencedInCurrentBranch|CurrentIssue) #OperatorCriteria
     | operator=(SubmittedBy|WatchedBy|IgnoredBy|CommentedBy|Mentioned|FixedInCommit|FixedInBuild|FixedInPullRequest|HasAny) WS+ criteriaValue=multipleQuoted #OperatorValueCriteria
     | FixedBetween WS+ revisionCriteria WS+ And WS+ revisionCriteria #FixedBetweenCriteria
     | criteriaField=Quoted WS+ operator=(IsMe|IsNotMe|IsEmpty|IsNotEmpty|IsCurrent|IsPrevious) #FieldOperatorCriteria
@@ -79,6 +79,10 @@ FixedInPullRequest
 
 FixedInCurrentPullRequest
 	: 'fixed' WS+ 'in' WS+ 'current' WS+ 'pull' WS+ 'request'
+	;
+
+ReferencedInCurrentBranch
+	: 'referenced' WS+ 'in' WS+ 'current' WS+ 'branch'
 	;
 
 IsCurrent

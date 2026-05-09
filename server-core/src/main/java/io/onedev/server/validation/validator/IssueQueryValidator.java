@@ -22,6 +22,8 @@ public class IssueQueryValidator implements ConstraintValidator<IssueQuery, Stri
 	
 	private boolean withCurrentCommitCriteria;
 	
+	private boolean withCurrentBranchCriteria;
+	
 	private boolean withCurrentIssueCriteria;
 	
 	@Override
@@ -32,6 +34,7 @@ public class IssueQueryValidator implements ConstraintValidator<IssueQuery, Stri
 		withCurrentBuildCriteria = constaintAnnotation.withCurrentBuildCriteria();
 		withCurrentPullRequestCriteria = constaintAnnotation.withCurrentPullRequestCriteria();
 		withCurrentCommitCriteria = constaintAnnotation.withCurrentCommitCriteria();
+		withCurrentBranchCriteria = constaintAnnotation.withCurrentBranchCriteria();
 		withCurrentIssueCriteria = constaintAnnotation.withCurrentIssueCriteria();
 	}
 
@@ -47,6 +50,7 @@ public class IssueQueryValidator implements ConstraintValidator<IssueQuery, Stri
 						.withCurrentUserCriteria(withCurrentUserCriteria)
 						.withCurrentBuildCriteria(withCurrentBuildCriteria)
 						.withCurrentCommitCriteria(withCurrentCommitCriteria)
+						.withCurrentBranchCriteria(withCurrentBranchCriteria)
 						.withCurrentPullRequestCriteria(withCurrentPullRequestCriteria)
 						.withCurrentIssueCriteria(withCurrentIssueCriteria);
 				io.onedev.server.search.entity.issue.IssueQuery.parse(project, value, option, true);

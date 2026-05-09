@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.jgit.lib.Repository;
@@ -54,7 +53,6 @@ public class CreateBranchStep extends ServerSideStep {
 	@Editable(order=1100, placeholder = "Build Commit", description="Optionally specify revision " +
 			"to create branch from. Leave empty to create from build commit")
 	@Interpolative(variableSuggester="suggestVariables", literalSuggester="suggestRevisions")
-	@NotEmpty
 	public String getBranchRevision() {
 		return branchRevision;
 	}

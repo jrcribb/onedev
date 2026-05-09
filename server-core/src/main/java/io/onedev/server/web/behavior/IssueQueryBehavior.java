@@ -41,6 +41,7 @@ import static io.onedev.server.search.entity.issue.IssueQueryLexer.HasAny;
 import static io.onedev.server.search.entity.issue.IssueQueryLexer.Mentioned;
 import static io.onedev.server.search.entity.issue.IssueQueryLexer.MentionedMe;
 import static io.onedev.server.search.entity.issue.IssueQueryLexer.OrderBy;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.ReferencedInCurrentBranch;
 import static io.onedev.server.search.entity.issue.IssueQueryLexer.SubmittedBy;
 import static io.onedev.server.search.entity.issue.IssueQueryLexer.SubmittedByMe;
 import static io.onedev.server.search.entity.issue.IssueQueryLexer.WatchedBy;
@@ -364,6 +365,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 				|| !option.withCurrentBuildCriteria() && suggestedLiteral.equals(getRuleName(FixedInCurrentBuild))
 				|| !option.withCurrentPullRequestCriteria() && suggestedLiteral.equals(getRuleName(FixedInCurrentPullRequest))
 				|| !option.withCurrentCommitCriteria() && suggestedLiteral.equals(getRuleName(FixedInCurrentCommit))
+				|| !option.withCurrentBranchCriteria() && suggestedLiteral.equals(getRuleName(ReferencedInCurrentBranch))
 				|| !option.withCurrentIssueCriteria() && suggestedLiteral.equals(getRuleName(CurrentIssue))) {
 			return null;
 		} else if (suggestedLiteral.equals(",")) {

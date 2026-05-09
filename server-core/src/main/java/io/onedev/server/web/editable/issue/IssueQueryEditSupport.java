@@ -68,6 +68,7 @@ public class IssueQueryEditSupport implements EditSupport {
 							.withCurrentProjectCriteria(issueQuery.withCurrentProjectCriteria())
         					.withCurrentBuildCriteria(issueQuery.withCurrentBuildCriteria())
         					.withCurrentCommitCriteria(issueQuery.withCurrentCommitCriteria())
+        					.withCurrentBranchCriteria(issueQuery.withCurrentBranchCriteria())
         					.withCurrentIssueCriteria(issueQuery.withCurrentIssueCriteria())
         					.withCurrentPullRequestCriteria(issueQuery.withCurrentPullRequestCriteria())
         					.withCurrentUserCriteria(issueQuery.withCurrentUserCriteria())
