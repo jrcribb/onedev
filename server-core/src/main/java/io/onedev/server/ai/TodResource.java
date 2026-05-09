@@ -254,16 +254,16 @@ public class TodResource {
         return project;
     }
 
-    private ProjectInfo getProjectInfo(String projectPath, String currentProjectPath) {
+    private ProjectContext getProjectContext(String projectPath, String currentProjectPath) {
         projectPath = StringUtils.trimToNull(projectPath);
         if (projectPath == null) 
             projectPath = currentProjectPath;
 
-        var projectInfo = new ProjectInfo();
-        projectInfo.project = getProject(projectPath);
-        projectInfo.currentProject = getProject(currentProjectPath);
+        var projectContext = new ProjectContext();
+        projectContext.project = getProject(projectPath);
+        projectContext.currentProject = getProject(currentProjectPath);
         
-        return projectInfo;
+        return projectContext;
     }
 
     private Map<String, Object> getFieldProperties(FieldSpec field) {
@@ -506,7 +506,7 @@ public class TodResource {
         if (SecurityUtils.getUser(subject) == null)
             throw new UnauthenticatedException();
 
-        var projectInfo = getProjectInfo(projectPath, currentProjectPath);
+        var projectContext = getProjectContext(projectPath, currentProjectPath);
 
         if (count > RestConstants.MAX_PAGE_SIZE)
             throw new NotAcceptableException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
@@ -516,7 +516,7 @@ public class TodResource {
             var option = new IssueQueryParseOption();
             option.withCurrentUserCriteria(true);
             try {
-                parsedQuery = IssueQuery.parse(projectInfo.project, query, option, true);
+                parsedQuery = IssueQuery.parse(projectContext.project, query, option, true);
             } catch (ParseCancellationException e) {
                 logger.error("Error parsing query", e);
                 throw new NotAcceptableException("Invalid issue query, check server log for details");
@@ -526,8 +526,8 @@ public class TodResource {
         }
 
         var summaries = new ArrayList<Map<String, Object>>();
-        for (var issue : issueService.query(subject, new ProjectScope(projectInfo.project, true, false), parsedQuery, true, offset, count)) {
-            var summary = IssueHelper.getSummary(projectInfo.currentProject, issue);
+        for (var issue : issueService.query(subject, new ProjectScope(projectContext.project, true, false), parsedQuery, true, offset, count)) {
+            var summary = IssueHelper.getSummary(projectContext.currentProject, issue);
             for (var entry: issue.getFieldInputs().entrySet()) {
                 summary.put(entry.getKey(), entry.getValue().getValues());
             }
@@ -551,7 +551,7 @@ public class TodResource {
     
     @Path("/get-issue")
     @GET
-    public Map<String, Object> getIssue(
+    public Map<String, Object> getIssueInfo(
                 @QueryParam("currentProject") @NotNull String currentProjectPath, 
                 @QueryParam("reference") @NotNull String issueReference) {
         var subject = SecurityUtils.getSubject();
@@ -563,16 +563,35 @@ public class TodResource {
         return IssueHelper.getDetail(subject, currentProject, issue);
     }
 
-    @Path("/get-project-key")
+    @Path("/get-project")
     @GET
     @Nullable
-    public String getProjectKey(@QueryParam("project") @NotNull String projectPath) {
+    public Map<String, Object> getProjectInfo(@QueryParam("project") @NotNull String projectPath) {
         if (SecurityUtils.getUser() == null)
             throw new UnauthenticatedException();
 
+        Map<String, Object> projectInfo;
         var project = getProject(projectPath);
-
-        return project.getKey();
+        if (SecurityUtils.canManageProject(project)) {
+            var typeReference = new TypeReference<LinkedHashMap<String, Object>>() {};
+            projectInfo = objectMapper.convertValue(project, typeReference);
+            projectInfo.remove("lastActivityDateId");
+            projectInfo.remove("pathLen");
+        } else {
+            projectInfo = new HashMap<String, Object>();
+            projectInfo.put("id", project.getId());
+            projectInfo.put("key", project.getKey());
+            projectInfo.put("name", project.getName());
+            projectInfo.put("path", project.getPath());
+            projectInfo.put("description", project.getDescription());
+            projectInfo.put("codeManagement", project.isCodeManagement());
+            projectInfo.put("packManagement", project.isPackManagement());
+            projectInfo.put("issueManagement", project.isIssueManagement());
+            projectInfo.put("timeTracking", project.isTimeTracking());
+        }
+        projectInfo.put("effectiveIssueBranchPrefix", project.findIssueBranchPrefix());
+        projectInfo.put("link", urlService.urlFor(project, true));
+        return projectInfo;
     }
 
     @Path("/get-issue-comments")
@@ -618,7 +637,7 @@ public class TodResource {
         if (SecurityUtils.getUser() == null)
             throw new UnauthenticatedException();
 
-        var projectInfo = getProjectInfo(projectPath, currentProjectPath);
+        var projectContext = getProjectContext(projectPath, currentProjectPath);
 
         normalizeIssueData(data);
 
@@ -639,9 +658,9 @@ public class TodResource {
         if (ownEstimatedTime != null) {
             if (!subscriptionService.isSubscriptionActive())
                 throw new NotAcceptableException("An active subscription is required for this feature");
-            if (!projectInfo.project.isTimeTracking())
+            if (!projectContext.project.isTimeTracking())
                 throw new NotAcceptableException("Time tracking needs to be enabled for the project");
-            if (!SecurityUtils.canScheduleIssues(projectInfo.project))
+            if (!SecurityUtils.canScheduleIssues(projectContext.project))
                 throw new UnauthorizedException("Issue schedule permission required to set own estimated time");
             issue.setOwnEstimatedTime(ownEstimatedTime*60);
         }
@@ -649,10 +668,10 @@ public class TodResource {
         @SuppressWarnings("unchecked")
         List<String> iterationNames = (List<String>) data.remove("iterations");
         if (iterationNames != null) {
-            if (!SecurityUtils.canScheduleIssues(projectInfo.project))
+            if (!SecurityUtils.canScheduleIssues(projectContext.project))
                 throw new UnauthorizedException("Issue schedule permission required to set iterations");
             for (var iterationName : iterationNames) {
-                var iteration = iterationService.findInHierarchy(projectInfo.project, iterationName);
+                var iteration = iterationService.findInHierarchy(projectContext.project, iterationName);
                 if (iteration == null)
                     throw new NotFoundException("Iteration '" + iterationName + "' not found");
                 IssueSchedule schedule = new IssueSchedule();
@@ -662,7 +681,7 @@ public class TodResource {
             }
         }
 
-        issue.setProject(projectInfo.project);
+        issue.setProject(projectContext.project);
         issue.setSubmitDate(new Date());
         issue.setSubmitter(SecurityUtils.getUser());
         issue.setState(issueSetting.getInitialStateSpec().getName());
@@ -671,7 +690,7 @@ public class TodResource {
 
         issueService.open(issue);
 
-        return "Created issue " + issue.getReference().toString(projectInfo.currentProject) + ": " + urlService.urlFor(issue, true);
+        return "Created issue " + issue.getReference().toString(projectContext.currentProject) + ": " + urlService.urlFor(issue, true);
     }
 
     @Path("/edit-issue")
@@ -877,9 +896,9 @@ public class TodResource {
         if (SecurityUtils.getUser(subject) == null)
             throw new UnauthenticatedException();
 
-        var projectInfo = getProjectInfo(projectPath, currentProjectPath);
+        var projectContext = getProjectContext(projectPath, currentProjectPath);
 
-        if (!SecurityUtils.canReadCode(projectInfo.project))
+        if (!SecurityUtils.canReadCode(projectContext.project))
             throw new UnauthorizedException("Code read permission required to query pull requests");
 
         if (count > RestConstants.MAX_PAGE_SIZE)
@@ -888,7 +907,7 @@ public class TodResource {
         EntityQuery<PullRequest> parsedQuery;
         if (query != null) {
             try {
-                parsedQuery = PullRequestQuery.parse(projectInfo.project, query, true);
+                parsedQuery = PullRequestQuery.parse(projectContext.project, query, true);
             } catch (ParseCancellationException e) {
                 logger.error("Error parsing query", e);
                 throw new NotAcceptableException("Invalid pull request query, check server log for details");
@@ -898,8 +917,8 @@ public class TodResource {
         }
 
         var summaries = new ArrayList<Map<String, Object>>();
-        for (var pullRequest : pullRequestService.query(subject, projectInfo.project, parsedQuery, false, offset, count)) {
-            var summary = PullRequestHelper.getSummary(projectInfo.currentProject, pullRequest, false);
+        for (var pullRequest : pullRequestService.query(subject, projectContext.project, parsedQuery, false, offset, count)) {
+            var summary = PullRequestHelper.getSummary(projectContext.currentProject, pullRequest, false);
             summary.put("link", urlService.urlFor(pullRequest, true));
             summaries.add(summary);
         }
@@ -918,7 +937,7 @@ public class TodResource {
         if (SecurityUtils.getUser(subject) == null)
             throw new UnauthenticatedException();
 
-        var projectInfo = getProjectInfo(projectPath, currentProjectPath);
+        var projectContext = getProjectContext(projectPath, currentProjectPath);
 
         if (count > RestConstants.MAX_PAGE_SIZE)
             throw new NotAcceptableException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
@@ -926,7 +945,7 @@ public class TodResource {
         EntityQuery<Build> parsedQuery;
         if (query != null) {
             try {
-                parsedQuery = BuildQuery.parse(projectInfo.project, query, true, true);
+                parsedQuery = BuildQuery.parse(projectContext.project, query, true, true);
             } catch (ParseCancellationException e) {
                 logger.error("Error parsing query", e);
                 throw new NotAcceptableException("Invalid build query, check server log for details");
@@ -935,18 +954,18 @@ public class TodResource {
             parsedQuery = new BuildQuery();
         }
 
-        var builds = new ArrayList<Map<String, Object>>();
-        for (var build : buildService.query(subject, projectInfo.project, parsedQuery, false, offset, count)) {
-            var summary = BuildHelper.getSummary(projectInfo.currentProject, build);
+        var summaries = new ArrayList<Map<String, Object>>();
+        for (var build : buildService.query(subject, projectContext.project, parsedQuery, false, offset, count)) {
+            var summary = BuildHelper.getSummary(projectContext.currentProject, build);
             summary.put("link", urlService.urlFor(build, true));
-            builds.add(summary);
+            summaries.add(summary);
         }
-        return builds;
+        return summaries;
     }
 
     @Path("/get-build")
     @GET
-    public Map<String, Object> getBuild(
+    public Map<String, Object> getBuildInfo(
                 @QueryParam("currentProject") @NotNull String currentProjectPath, 
                 @QueryParam("reference") @NotNull String buildReference) {
         if (SecurityUtils.getUser() == null)
@@ -978,7 +997,7 @@ public class TodResource {
 
     @Path("/get-pull-request")
     @GET
-    public Map<String, Object> getPullRequest(
+    public Map<String, Object> getPullRequestInfo(
                 @QueryParam("currentProject") @NotNull String currentProjectPath, 
                 @QueryParam("reference") @NotNull String pullRequestReference) {
         if (SecurityUtils.getUser() == null)
@@ -1741,7 +1760,7 @@ public class TodResource {
         if (SecurityUtils.getUser(subject) == null)
             throw new UnauthenticatedException();
 
-        var projectInfo = getProjectInfo(projectPath, currentProjectPath);
+        var projectContext = getProjectContext(projectPath, currentProjectPath);
 
         if (count > RestConstants.MAX_PAGE_SIZE)
             throw new NotAcceptableException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
@@ -1749,7 +1768,7 @@ public class TodResource {
         EntityQuery<Pack> parsedQuery;
         if (query != null) {
             try {
-                parsedQuery = PackQuery.parse(projectInfo.project, query, true);
+                parsedQuery = PackQuery.parse(projectContext.project, query, true);
             } catch (ParseCancellationException e) {
                 logger.error("Error parsing query", e);
                 throw new NotAcceptableException("Invalid pack query, check server log for details");
@@ -1759,8 +1778,8 @@ public class TodResource {
         }
 
         var packs = new ArrayList<Map<String, Object>>();
-        for (var pack : packService.query(subject, projectInfo.project, parsedQuery, false, offset, count)) {
-            var packMap = getPackMap(projectInfo.currentProject, pack);
+        for (var pack : packService.query(subject, projectContext.project, parsedQuery, false, offset, count)) {
+            var packMap = getPackMap(projectContext.currentProject, pack);
             packMap.put("link", urlService.urlFor(pack, true));
             packs.add(packMap);
         }
@@ -1788,7 +1807,7 @@ public class TodResource {
         }
     }    
 
-    private static class ProjectInfo {
+    private static class ProjectContext {
         
         Project project;
 

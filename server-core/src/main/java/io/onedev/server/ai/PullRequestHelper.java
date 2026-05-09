@@ -88,9 +88,9 @@ public class PullRequestHelper {
     }
 
     public static Map<String, Object> getDetail(Project currentProject, PullRequest pullRequest) {
-        var detail = getSummary(currentProject, pullRequest, true);        
-        detail.put("headCommitHash", pullRequest.getLatestUpdate().getHeadCommitHash());
-        detail.put("assignees", pullRequest.getAssignees().stream().map(it->it.getName()).collect(Collectors.toList()));
+        var data = getSummary(currentProject, pullRequest, true);        
+        data.put("headCommitHash", pullRequest.getLatestUpdate().getHeadCommitHash());
+        data.put("assignees", pullRequest.getAssignees().stream().map(it->it.getName()).collect(Collectors.toList()));
         var reviews = new ArrayList<Map<String, Object>>();
         for (var review : pullRequest.getReviews()) {
             if (review.getStatus() == PullRequestReview.Status.EXCLUDED)
@@ -100,16 +100,16 @@ public class PullRequestHelper {
             reviewMap.put("status", review.getStatus());
             reviews.add(reviewMap);
         }        
-        detail.put("reviews", reviews);
+        data.put("reviews", reviews);
         var builds = new ArrayList<String>();
         for (var build : pullRequest.getBuilds()) {
             builds.add(build.getReference().toString(currentProject) + " (job: " + build.getJobName() + ", status: " + build.getStatus() + ")");
         }
-        detail.put("builds", builds);
-        detail.put("labels", pullRequest.getLabels().stream().map(it->it.getSpec().getName()).collect(Collectors.toList()));
-        detail.put("link", getUrlService().urlFor(pullRequest, true));
+        data.put("builds", builds);
+        data.put("labels", pullRequest.getLabels().stream().map(it->it.getSpec().getName()).collect(Collectors.toList()));
+        data.put("link", getUrlService().urlFor(pullRequest, true));
 
-        return detail;
+        return data;
     }
 
     public static List<Map<String, Object>> getComments(PullRequest pullRequest) {

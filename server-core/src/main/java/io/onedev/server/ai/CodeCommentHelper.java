@@ -22,20 +22,20 @@ public class CodeCommentHelper {
 
     public static Map<String, Object> getDetail(CodeComment comment) {        
         var typeReference = new TypeReference<LinkedHashMap<String, Object>>() {};
-        var summary = getObjectMapper().convertValue(comment, typeReference);
-        summary.remove("id");
-        summary.remove("uuid");
-        summary.remove("userId");
-        summary.put("user", comment.getUser().getName());
-        summary.put("project", comment.getProject().getPath());
-        summary.put("filePath", comment.getMark().getPath());
-        summary.put("fromLineNumber", comment.getMark().getRange().getFromRow() + 1);
-        summary.put("toLineNumber", comment.getMark().getRange().getToRow() + 1);
-        summary.remove("lastActivity");
-        summary.remove("replyCount");
-        summary.remove("compareContext");
-        summary.remove("mark");
-        return summary;
+        var data = getObjectMapper().convertValue(comment, typeReference);
+        data.remove("id");
+        data.remove("uuid");
+        data.remove("userId");
+        data.put("user", comment.getUser().getName());
+        data.put("project", comment.getProject().getPath());
+        data.put("filePath", comment.getMark().getPath());
+        data.put("fromLineNumber", comment.getMark().getRange().getFromRow() + 1);
+        data.put("toLineNumber", comment.getMark().getRange().getToRow() + 1);
+        data.remove("lastActivity");
+        data.remove("replyCount");
+        data.remove("compareContext");
+        data.remove("mark");
+        return data;
     }
 
     public static List<Map<String, Object>> getReplies(CodeComment comment) {

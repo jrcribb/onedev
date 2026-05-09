@@ -53,11 +53,11 @@ public class BuildHelper {
     }
 
     public static Map<String, Object> getDetail(Project currentProject, Build build) {
-        var detail = getSummary(currentProject, build);
-        detail.put("params", build.getParamMap());
-        detail.put("labels", build.getLabels().stream().map(it->it.getSpec().getName()).collect(Collectors.toList()));
-        detail.put("link", getUrlService().urlFor(build, true));
-        return detail;
+        var data = getSummary(currentProject, build);
+        data.put("params", build.getParamMap());
+        data.put("labels", build.getLabels().stream().map(it->it.getSpec().getName()).collect(Collectors.toList()));
+        data.put("link", getUrlService().urlFor(build, true));
+        return data;
     }
     
 }

@@ -71,11 +71,11 @@ public class IssueHelper {
     }
 
     public static Map<String, Object> getDetail(Subject subject, Project currentProject, Issue issue) {
-        var detail = getSummary(currentProject, issue);
+        var data = getSummary(currentProject, issue);
         if (SecurityUtils.canReadCode(subject, issue.getProject()))
-            detail.put("branch", issue.getBranch());
+            data.put("branch", issue.getBranch());
         for (var entry : issue.getFieldInputs().entrySet()) {
-            detail.put(entry.getKey(), entry.getValue().getValues());
+            data.put(entry.getKey(), entry.getValue().getValues());
         }
         
         Map<String, Collection<String>> linkedIssues = new HashMap<>();
@@ -92,9 +92,9 @@ public class IssueHelper {
                         .add(link.getSource().getReference().toString(currentProject));
             }
         }
-        detail.putAll(linkedIssues);
-        detail.put("link", getUrlService().urlFor(issue, true));
+        data.putAll(linkedIssues);
+        data.put("link", getUrlService().urlFor(issue, true));
 
-        return detail;
+        return data;
     }
 }
