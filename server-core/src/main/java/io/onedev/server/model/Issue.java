@@ -943,6 +943,36 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 		return fieldInputs;
 	}
 	
+	/**
+	 * Parse issue number from given branch name. The branch is expected to
+	 * follow the convention used by {@code IssueService#suggestBranch}, i.e.
+	 * an optional path prefix, followed by {@code issue-<number>}, optionally
+	 * followed by a {@code -<title>} suffix.
+	 *
+	 * @return the parsed issue number, or {@code null} if the branch name
+	 *         does not match the issue branch pattern
+	 */
+	@Nullable
+	public static Long parseNumberFromBranch(String branchName) {
+		String prefix = "issue-";
+		int segmentStart = branchName.lastIndexOf('/') + 1;
+		if (!branchName.regionMatches(true, segmentStart, prefix, 0, prefix.length()))
+			return null;
+		int numberStart = segmentStart + prefix.length();
+		int numberEnd = numberStart;
+		while (numberEnd < branchName.length()) {
+			char c = branchName.charAt(numberEnd);
+			if (c < '0' || c > '9')
+				break;
+			numberEnd++;
+		}
+		if (numberEnd == numberStart)
+			return null;
+		if (numberEnd < branchName.length() && branchName.charAt(numberEnd) != '-')
+			return null;
+		return Long.parseLong(branchName.substring(numberStart, numberEnd));
+	}
+
 	public static String getDetailChangeObservable(Long issueId) {
 		return Issue.class.getName() + ":" + issueId;
 	}
@@ -1413,19 +1443,13 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 	@Nullable
 	public String getBranch() {
 		if (branchOptional == null) {
-			String fixedPart = "issue-" + getNumber();
 			for (var ref : getProject().getBranchRefs()) {
 				String branch = Preconditions.checkNotNull(GitUtils.ref2branch(ref.getName()));
-				int index = branch.toLowerCase().indexOf(fixedPart);
-				if (index < 0)
-					continue;
-				if (index > 0 && branch.charAt(index - 1) != '/')
-					continue;
-				int end = index + fixedPart.length();
-				if (end < branch.length() && branch.charAt(end) != '-')
-					continue;
-				branchOptional = Optional.of(branch);
-				break;
+				Long parsedNumber = parseNumberFromBranch(branch);
+				if (parsedNumber != null && parsedNumber == getNumber()) {
+					branchOptional = Optional.of(branch);
+					break;
+				}
 			}
 			if (branchOptional == null)
 				branchOptional = Optional.empty();

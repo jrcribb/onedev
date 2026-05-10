@@ -491,7 +491,8 @@ public class DefaultCommitInfoService extends AbstractEnvironmentService
 			}));
 		}
 
-		if (GitUtils.branch2ref(project.getDefaultBranch()).equals(refName)) {
+		var defaultBranch = project.getDefaultBranch();
+		if (defaultBranch != null && GitUtils.branch2ref(defaultBranch).equals(refName)) {
 			collectLineStats(project, commitId);
 			collectContributions(project, commitId);
 			collectFiles(project, commitId);

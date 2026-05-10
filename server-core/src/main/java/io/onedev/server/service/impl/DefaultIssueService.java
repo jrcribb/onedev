@@ -30,6 +30,7 @@ import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 
 import org.apache.shiro.subject.Subject;
+import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -56,6 +57,8 @@ import io.onedev.server.event.Listen;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
+import io.onedev.server.event.project.RefUpdated;
+import io.onedev.server.event.project.issue.IssueBranchCreated;
 import io.onedev.server.event.project.issue.IssueDeleted;
 import io.onedev.server.event.project.issue.IssueEvent;
 import io.onedev.server.event.project.issue.IssueOpened;
@@ -257,6 +260,22 @@ public class DefaultIssueService extends BaseEntityService<Issue> implements Iss
 		}
 		
 		listenerRegistry.post(new IssueOpened(issue, notifiedEmailAddresses));
+	}
+
+	@Transactional
+	@Listen
+	public void on(RefUpdated event) {
+		if (!event.getOldCommitId().equals(ObjectId.zeroId()))
+			return;
+		String branchName = GitUtils.ref2branch(event.getRefName());
+		if (branchName == null)
+			return;
+		Long issueNumber = Issue.parseNumberFromBranch(branchName);
+		if (issueNumber == null)
+			return;
+		Issue issue = find(event.getProject(), issueNumber);
+		if (issue != null)
+			listenerRegistry.post(new IssueBranchCreated(event.getUser(), issue, branchName));
 	}
 
 	@Transactional
