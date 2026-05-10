@@ -551,7 +551,7 @@ public class TodResource {
     
     @Path("/get-issue")
     @GET
-    public Map<String, Object> getIssueInfo(
+    public Map<String, Object> getIssueDetail(
                 @QueryParam("currentProject") @NotNull String currentProjectPath, 
                 @QueryParam("reference") @NotNull String issueReference) {
         var subject = SecurityUtils.getSubject();
@@ -566,7 +566,7 @@ public class TodResource {
     @Path("/get-project")
     @GET
     @Nullable
-    public Map<String, Object> getProjectInfo(@QueryParam("project") @NotNull String projectPath) {
+    public Map<String, Object> getProjectDetail(@QueryParam("project") @NotNull String projectPath) {
         if (SecurityUtils.getUser() == null)
             throw new UnauthenticatedException();
 
@@ -589,7 +589,6 @@ public class TodResource {
             projectInfo.put("issueManagement", project.isIssueManagement());
             projectInfo.put("timeTracking", project.isTimeTracking());
         }
-        projectInfo.put("effectiveIssueBranchPrefix", project.findIssueBranchPrefix());
         projectInfo.put("link", urlService.urlFor(project, true));
         return projectInfo;
     }
@@ -803,6 +802,33 @@ public class TodResource {
         return feedback;
     }
 
+    @Path("/create-issue-branch") 
+    @POST
+    public String createIssueBranch(
+                @QueryParam("currentProject") @NotNull String currentProjectPath, 
+                @QueryParam("reference") @NotNull String issueReference) {
+        var subject = SecurityUtils.getSubject();
+
+        var currentProject = getProject(currentProjectPath);
+        var issue = getIssue(currentProject, issueReference);
+
+        if (!issue.getProject().equals(currentProject))
+            throw new NotAcceptableException("Issue " + issueReference + " is not in current project");
+
+        var project = issue.getProject();
+        if (!SecurityUtils.canWriteCode(subject, project)) 
+            throw new UnauthorizedException("Write code permission required for project: " + project.getPath());
+
+        var branch = issue.getBranch();
+        if (branch == null) {
+            branch = issueService.suggestBranch(issue);
+            if (project.getBranchProtection(branch, SecurityUtils.getUser(subject)).isPreventCreation())
+                throw new NotAcceptableException("Branch creation prohibited by branch protection rule: " + branch);
+            gitService.createBranch(project, branch, project.getDefaultBranch());
+        }
+        return branch;
+    }
+
     @Path("/link-issues")
     @GET
     public String linkIssues(
@@ -966,7 +992,7 @@ public class TodResource {
 
     @Path("/get-build")
     @GET
-    public Map<String, Object> getBuildInfo(
+    public Map<String, Object> getBuildDetail(
                 @QueryParam("currentProject") @NotNull String currentProjectPath, 
                 @QueryParam("reference") @NotNull String buildReference) {
         if (SecurityUtils.getUser() == null)
@@ -998,7 +1024,7 @@ public class TodResource {
 
     @Path("/get-pull-request")
     @GET
-    public Map<String, Object> getPullRequestInfo(
+    public Map<String, Object> getPullRequestDetail(
                 @QueryParam("currentProject") @NotNull String currentProjectPath, 
                 @QueryParam("reference") @NotNull String pullRequestReference) {
         if (SecurityUtils.getUser() == null)
