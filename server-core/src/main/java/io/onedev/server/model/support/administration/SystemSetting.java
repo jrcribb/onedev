@@ -15,11 +15,13 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.base.Preconditions;
 
+import io.onedev.commons.utils.PathUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.ServerConfig;
 import io.onedev.server.annotation.ClassValidating;
 import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.ProjectChoice;
 import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.git.location.CurlLocation;
 import io.onedev.server.git.location.GitLocation;
@@ -64,6 +66,8 @@ public class SystemSetting implements Serializable, Validatable {
 	private boolean useAvatarService;
 	
 	private String avatarServiceUrl = "https://secure.gravatar.com/avatar/";
+	
+	private String defaultForkRoot = "forks";
 	
 	@Editable(name="Server URL", order=90, description="Specify root URL to access this server")
 	@NotEmpty
@@ -193,6 +197,32 @@ public class SystemSetting implements Serializable, Validatable {
 
 	public void setAvatarServiceUrl(String avatarServiceUrl) {
 		this.avatarServiceUrl = avatarServiceUrl;
+	}
+
+	@Editable(order=700, name="Default Fork Root", placeholder="No fork root", description="""
+			When forking from the UI, the default target project will be created as 
+			&lt;default fork root&gt;/&lt;account name&gt;/&lt;project name&gt; if specified 
+			(users forking need permission to create child projects under the fork 
+			root), or &lt;account name&gt;/&lt;project name&gt; otherwise (need permission 
+			to create root projects)""")
+	@ProjectChoice
+	@Nullable
+	public String getDefaultForkRoot() {
+		return defaultForkRoot;
+	}
+
+	public void setDefaultForkRoot(String defaultForkRoot) {
+		this.defaultForkRoot = defaultForkRoot;
+	}
+
+	public void onMoveProject(String oldPath, String newPath) {
+		if (defaultForkRoot != null && PathUtils.isSelfOrAncestor(oldPath, defaultForkRoot))
+			defaultForkRoot = PathUtils.substituteSelfOrAncestor(defaultForkRoot, oldPath, newPath);
+	}
+
+	public void onDeleteProject(String projectPath) {
+		if (defaultForkRoot != null && PathUtils.isSelfOrAncestor(projectPath, defaultForkRoot))
+			defaultForkRoot = null;
 	}
 
 	public String getEffectiveSshRootUrl() {

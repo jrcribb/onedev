@@ -536,12 +536,14 @@ public class DefaultSettingService extends BaseEntityService<Setting> implements
     	if (getServiceDeskSetting() != null)
     		getServiceDeskSetting().onMoveProject(oldPath, newPath);
     	getIssueSetting().onMoveProject(oldPath, newPath);
+    	getSystemSetting().onMoveProject(oldPath, newPath);
     	
 		saveSetting(Key.JOB_EXECUTORS, (Serializable) getJobExecutors());
 		saveSetting(Key.WORKSPACE_PROVISIONERS, (Serializable) getWorkspaceProvisioners());
 		saveSetting(Key.GROOVY_SCRIPTS, (Serializable) getGroovyScripts());
 		saveSetting(Key.SERVICE_DESK_SETTING, getServiceDeskSetting());
 		saveSetting(Key.ISSUE, getIssueSetting());
+		saveSetting(Key.SYSTEM, getSystemSetting());
 	}
 
 	@Override
@@ -557,7 +559,10 @@ public class DefaultSettingService extends BaseEntityService<Setting> implements
     	if (getServiceDeskSetting() != null)
     		usage.add(getServiceDeskSetting().onDeleteProject(projectPath));
     	usage.add(getIssueSetting().onDeleteProject(projectPath));
-		
+
+    	getSystemSetting().onDeleteProject(projectPath);
+    	saveSetting(Key.SYSTEM, getSystemSetting());
+
 		return usage.prefix("administration");
 	}
 
