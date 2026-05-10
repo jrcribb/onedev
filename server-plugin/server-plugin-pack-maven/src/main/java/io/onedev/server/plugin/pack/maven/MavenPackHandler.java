@@ -6,8 +6,8 @@ import io.onedev.server.pack.PackHandler;
 import io.onedev.server.service.*;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.pack.PackPublished;
-import io.onedev.server.exception.DataTooLargeException;
 import io.onedev.server.exception.HttpResponseAwareException;
+import io.onedev.server.exception.NotAcceptableException;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Pack;
 import io.onedev.server.model.PackBlob;
@@ -332,8 +332,8 @@ public class MavenPackHandler implements PackHandler {
 				var baos = new ByteArrayOutputStream();
 				try {
 					copyWithMaxSize(is, baos, MAX_CHECKSUM_LEN);
-				} catch (DataTooLargeException e) {
-					throw new HttpResponseAwareException(SC_REQUEST_ENTITY_TOO_LARGE, "Checksum is too large");
+				} catch (NotAcceptableException e) {
+					throw new HttpResponseAwareException(SC_NOT_ACCEPTABLE, "Error copying checksum: " + e.getMessage());
 				}
 				var checksum = new String(baos.toByteArray(), UTF_8);
 				LockUtils.run(lockName, () -> transactionService.run(() -> {

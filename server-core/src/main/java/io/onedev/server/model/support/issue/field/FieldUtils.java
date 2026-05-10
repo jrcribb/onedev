@@ -8,15 +8,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.jspecify.annotations.Nullable;
 import javax.validation.ValidationException;
-import javax.ws.rs.BadRequestException;
 
 import org.apache.shiro.authz.UnauthorizedException;
+import org.apache.shiro.subject.Subject;
 import org.apache.wicket.Component;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.MetaDataKey;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +26,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.buildspecmodel.inputspec.SecretInput;
-import io.onedev.server.service.SettingService;
+import io.onedev.server.exception.NotAcceptableException;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.field.instance.FieldInstance;
@@ -34,6 +34,7 @@ import io.onedev.server.model.support.issue.field.instance.SpecifiedValue;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.SecretField;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.web.editable.BeanDescriptor;
@@ -178,7 +179,7 @@ public class FieldUtils {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static Map<String, Object> getFieldValues(Project project, Map<String, Serializable> fieldEdits) {
+	public static Map<String, Object> getFieldValues(Subject subject, Project project, Map<String, Serializable> fieldEdits) {
 		var settingService = OneDev.getInstance(SettingService.class);
 		var issueSetting = settingService.getIssueSetting();
 		Map<String, Object> fieldValues = new HashMap<>();
@@ -186,8 +187,8 @@ public class FieldUtils {
 			var fieldName = entry.getKey();
 			var fieldSpec = issueSetting.getFieldSpec(fieldName);
 			if (fieldSpec == null)
-				throw new BadRequestException("Undefined field: " + fieldName);
-			if (!SecurityUtils.canEditIssueField(project, fieldName))
+				throw new NotAcceptableException("Undefined field: " + fieldName);
+			if (!SecurityUtils.canEditIssueField(subject, project, fieldName))
 				throw new UnauthorizedException("No permission to edit field: " + fieldName);
 
 			List<String> values = new ArrayList<>();

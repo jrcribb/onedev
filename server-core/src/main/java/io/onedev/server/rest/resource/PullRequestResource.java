@@ -9,7 +9,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.jspecify.annotations.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.validation.constraints.NotEmpty;
@@ -27,14 +26,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.shiro.authz.UnauthorizedException;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.attachment.AttachmentService;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.service.AuditService;
-import io.onedev.server.service.PullRequestChangeService;
-import io.onedev.server.service.PullRequestService;
-import io.onedev.server.service.UrlService;
-import io.onedev.server.service.UserService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestAssignment;
@@ -54,6 +49,11 @@ import io.onedev.server.rest.annotation.EntityCreate;
 import io.onedev.server.rest.resource.support.RestConstants;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.PullRequestChangeService;
+import io.onedev.server.service.PullRequestService;
+import io.onedev.server.service.UrlService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.util.ProjectAndBranch;
 
 @Api(name="Pull Request", description="In most cases, pull request resource is operated with pull request id, which is different from pull request number. "
@@ -354,9 +354,6 @@ public class PullRequestResource {
 		var user = SecurityUtils.getUser(subject);
     	if (!SecurityUtils.canModifyPullRequest(subject, request))
 			throw new UnauthorizedException();
-    	String errorMessage = request.checkReopenCondition();
-    	if (errorMessage != null)
-    		throw new NotAcceptableException(errorMessage);
     	
 		pullRequestService.reopen(user, request, note);
 		return Response.ok().build();
@@ -371,8 +368,6 @@ public class PullRequestResource {
 		var user = SecurityUtils.getUser(subject);
     	if (!SecurityUtils.canModifyPullRequest(subject, request))
 			throw new UnauthorizedException();
-    	if (!request.isOpen())
-			throw new NotAcceptableException("Pull request already closed");
     	
 		pullRequestService.discard(user, request, note);
 		return Response.ok().build();
@@ -386,13 +381,6 @@ public class PullRequestResource {
 		var user = SecurityUtils.getUser();
     	if (!SecurityUtils.canWriteCode(user.asSubject(), request.getProject()))
 			throw new UnauthorizedException();
-    	String errorMessage = request.checkMergeCondition();
-    	if (errorMessage != null)
-			throw new NotAcceptableException(errorMessage);
-
-		errorMessage = request.checkMergeCommitMessage(user, note);
-		if (errorMessage != null)
-			throw new NotAcceptableException("Error validating merge commit message: " + errorMessage);
 		
 		pullRequestService.merge(user, request, note);
 		return Response.ok().build();
@@ -409,11 +397,7 @@ public class PullRequestResource {
 				|| !SecurityUtils.canDeleteBranch(subject, request.getSourceProject(), request.getSourceBranch())) {
 			throw new UnauthorizedException();
 		}
-		
-    	String errorMessage = request.checkDeleteSourceBranchCondition();
-    	if (errorMessage != null)
-			throw new NotAcceptableException(errorMessage); 		
-		
+				
 		pullRequestService.deleteSourceBranch(user, request, note);
 		return Response.ok().build();
     }
@@ -429,10 +413,6 @@ public class PullRequestResource {
 				!SecurityUtils.canWriteCode(subject, request.getSourceProject())) {
 			throw new UnauthorizedException();
 		}
-		
-    	String errorMessage = request.checkRestoreSourceBranchCondition();
-    	if (errorMessage != null)
-			throw new NotAcceptableException(errorMessage);
 		
 		pullRequestService.restoreSourceBranch(user, request, note);
 		return Response.ok().build();

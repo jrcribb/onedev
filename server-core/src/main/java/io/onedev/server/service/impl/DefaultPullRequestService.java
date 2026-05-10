@@ -41,7 +41,6 @@ import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import javax.ws.rs.NotAcceptableException;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -91,6 +90,7 @@ import io.onedev.server.event.project.pullrequest.PullRequestOpened;
 import io.onedev.server.event.project.pullrequest.PullRequestReviewerRemoved;
 import io.onedev.server.event.project.pullrequest.PullRequestUpdated;
 import io.onedev.server.event.project.pullrequest.PullRequestsDeleted;
+import io.onedev.server.exception.NotAcceptableException;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.Build;
@@ -261,7 +261,10 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 	@Transactional
 	@Override
 	public void restoreSourceBranch(User user, PullRequest request, String note) {
-		Preconditions.checkState(!request.isOpen() && request.getSourceProject() != null);
+        var errorMessage = request.checkRestoreSourceBranchCondition();
+        if (errorMessage != null)
+            throw new NotAcceptableException(errorMessage);
+
 		if (request.getSource().getObjectName(false) == null) {
 			getGitService().createBranch(request.getSourceProject(), request.getSourceBranch(),
 					request.getLatestUpdate().getHeadCommitHash());
@@ -278,7 +281,9 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 	@Transactional
 	@Override
 	public void deleteSourceBranch(User user, PullRequest request, String note) {
-		Preconditions.checkState(!request.isOpen() && request.getSourceProject() != null);
+        var errorMessage = request.checkDeleteSourceBranchCondition();
+        if (errorMessage != null)
+            throw new NotAcceptableException(errorMessage);
 
 		if (request.getSource().getObjectName(false) != null) {
 			projectService.deleteBranch(request.getSourceProject(), request.getSourceBranch());
@@ -294,6 +299,10 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 	@Transactional
 	@Override
 	public void reopen(User user, PullRequest request, String note) {
+        var errorMessage = request.checkReopenCondition();
+        if (errorMessage != null)
+            throw new NotAcceptableException(errorMessage);
+
 		request.setStatus(OPEN);
 
 		PullRequestChange change = new PullRequestChange();
@@ -312,6 +321,9 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 	@Transactional
 	@Override
  	public void discard(User user, PullRequest request, String note) {
+        if (!request.isOpen())
+            throw new NotAcceptableException("Pull request already closed");
+
 		request.setStatus(Status.DISCARDED);
 		request.setCloseDate(new Date());
 
@@ -327,6 +339,13 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 	@Transactional
 	@Override
 	public void merge(User user, PullRequest request, @Nullable String commitMessage) {
+        var errorMessage = request.checkMergeCondition();
+        if (errorMessage != null)
+            throw new NotAcceptableException(errorMessage);
+        errorMessage = request.checkMergeCommitMessage(user, commitMessage);
+        if (errorMessage != null)
+            throw new NotAcceptableException("Error checking merge commit message: " + errorMessage);
+
 		MergePreview mergePreview = checkNotNull(request.checkMergePreview());
 		ObjectId mergeCommitId = ObjectId.fromString(checkNotNull(mergePreview.getMergeCommitHash()));
         PersonIdent person = user.asPerson();

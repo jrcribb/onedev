@@ -76,6 +76,7 @@ import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entityreference.EntityReference;
 import io.onedev.server.entityreference.LinkTransformer;
+import io.onedev.server.exception.NotAcceptableException;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.git.service.RefFacade;
@@ -2128,16 +2129,11 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					@Override
 					protected String operate(AjaxRequestTarget target) {
 						if (canOperate()) {
-							var request = getPullRequest();
-							var branchProtection = getProject().getBranchProtection(request.getTargetBranch(), request.getSubmitter());
-							var commitMessage = getCommitMessage();
-							if (commitMessage != null) {
-								var errorMessage = branchProtection.checkCommitMessage(commitMessage,
-										request.getMergeStrategy() != SQUASH_SOURCE_BRANCH_COMMITS);
-								if (errorMessage != null)
-									return errorMessage;
+							try {
+								pullRequestService.merge(SecurityUtils.getUser(), getPullRequest(), getCommitMessage());
+							} catch (NotAcceptableException exception) {
+								return exception.getMessage();
 							}
-							pullRequestService.merge(SecurityUtils.getUser(), getPullRequest(), commitMessage);
 							notifyPullRequestChange(target);
 							return null;
 						} else {

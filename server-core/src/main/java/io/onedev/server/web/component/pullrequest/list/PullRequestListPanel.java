@@ -13,6 +13,9 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
@@ -56,7 +59,6 @@ import org.jspecify.annotations.Nullable;
 import com.google.common.collect.Sets;
 
 import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entityreference.LinkTransformer;
 import io.onedev.server.model.Project;
@@ -116,6 +118,30 @@ import io.onedev.server.xodus.VisitInfoService;
 
 public abstract class PullRequestListPanel extends Panel {
 
+	@Inject
+	private PullRequestService pullRequestService;
+
+	@Inject
+	private TransactionService transactionService;
+
+	@Inject
+	private VisitInfoService visitInfoService;
+
+	@Inject
+	private ProjectService projectService;
+
+	@Inject
+	private PullRequestReviewService pullRequestReviewService;
+
+	@Inject
+	private PullRequestWatchService pullRequestWatchService;
+
+	@Inject
+	private AuditService auditService;
+
+	@Inject
+	private Set<PullRequestListActionRenderer> pullRequestListActionRenderers;
+
 	private final IModel<String> queryStringModel;
 	
 	private final IModel<PullRequestQuery> queryModel = new LoadableDetachableModel<>() {
@@ -146,14 +172,6 @@ public abstract class PullRequestListPanel extends Panel {
 	public PullRequestListPanel(String id, IModel<String> queryModel) {
 		super(id);
 		this.queryStringModel = queryModel;
-	}
-
-	private PullRequestService getPullRequestService() {
-		return OneDev.getInstance(PullRequestService.class);		
-	}
-
-	private TransactionService getTransactionService() {
-		return OneDev.getInstance(TransactionService.class);
 	}
 	
 	@Nullable
@@ -299,7 +317,7 @@ public abstract class PullRequestListPanel extends Panel {
 
 											var requests = selectionColumn.getSelections().stream()
 													.map(it->it.getObject()).collect(toList());
-											getWatchService().setWatchStatus(SecurityUtils.getAuthUser(), requests, watchStatus);
+											pullRequestWatchService.setWatchStatus(SecurityUtils.getAuthUser(), requests, watchStatus);
 											selectionColumn.getSelections().clear();
 											Session.get().success(_T("Watch status changed"));
 										}
@@ -344,42 +362,32 @@ public abstract class PullRequestListPanel extends Panel {
 								public void onClick(AjaxRequestTarget target) {
 									dropdown.close();
 
-									String errorMessage = null;
-									for (IModel<PullRequest> each : selectionColumn.getSelections()) {
-										PullRequest request = each.getObject();
-										if (!request.isOpen()) {
-											errorMessage = MessageFormat.format(_T("Pull request #{0} already closed"), request.getNumber());
-											break;
+									new ConfirmModalPanel(target) {
+
+										@Override
+										protected void onConfirm(AjaxRequestTarget target) {
+											var user = SecurityUtils.getUser();
+											for (IModel<PullRequest> selection : selectionColumn.getSelections()) {
+												var pullRequest = selection.getObject();
+												if (pullRequest.isOpen())
+													pullRequestService.discard(user, pullRequest, null);
+											}
+											target.add(countLabel);
+											target.add(body);
+											selectionColumn.getSelections().clear();
 										}
-									}
 
-									if (errorMessage != null) {
-										getSession().error(errorMessage);
-									} else {
-										new ConfirmModalPanel(target) {
+										@Override
+										protected String getConfirmMessage() {
+											return _T("Type <code>yes</code> below to discard selected pull requests");
+										}
 
-											@Override
-											protected void onConfirm(AjaxRequestTarget target) {
-												var user = SecurityUtils.getUser();
-												for (IModel<PullRequest> each : selectionColumn.getSelections())
-													OneDev.getInstance(PullRequestService.class).discard(user, each.getObject(), null);
-												target.add(countLabel);
-												target.add(body);
-												selectionColumn.getSelections().clear();
-											}
+										@Override
+										protected String getConfirmInput() {
+											return "yes";
+										}
 
-											@Override
-											protected String getConfirmMessage() {
-												return _T("Type <code>yes</code> below to discard selected pull requests");
-											}
-
-											@Override
-											protected String getConfirmInput() {
-												return "yes";
-											}
-
-										};
-									}
+									};
 
 								}
 
@@ -423,14 +431,14 @@ public abstract class PullRequestListPanel extends Panel {
 
 										@Override
 										protected void onConfirm(AjaxRequestTarget target) {
-											getTransactionService().run(()-> {
+											transactionService.run(()-> {
 												Collection<PullRequest> requests = new ArrayList<>();
 												for (IModel<PullRequest> each : selectionColumn.getSelections())
 													requests.add(each.getObject());
-												getPullRequestService().delete(requests, getProject());
+												pullRequestService.delete(requests, getProject());
 												for (var request: requests) {
 													var oldAuditContent = VersionedXmlDoc.fromBean(request).toXML();
-													getAuditService().audit(request.getProject(), "deleted pull request \"" + request.getReference().toString(request.getProject()) + "\"", oldAuditContent, null);
+													auditService.audit(request.getProject(), "deleted pull request \"" + request.getReference().toString(request.getProject()) + "\"", oldAuditContent, null);
 												}													
 											});
 											target.add(countLabel);
@@ -503,7 +511,7 @@ public abstract class PullRequestListPanel extends Panel {
 											Collection<PullRequest> requests = new ArrayList<>();
 											for (@SuppressWarnings("unchecked") var it = (Iterator<PullRequest>) dataProvider.iterator(0, requestsTable.getItemCount()); it.hasNext(); )
 												requests.add(it.next());
-											getWatchService().setWatchStatus(SecurityUtils.getAuthUser(), requests, watchStatus);
+											pullRequestWatchService.setWatchStatus(SecurityUtils.getAuthUser(), requests, watchStatus);
 											Session.get().success(_T("Watch status changed"));
 										}
 
@@ -548,43 +556,33 @@ public abstract class PullRequestListPanel extends Panel {
 								public void onClick(AjaxRequestTarget target) {
 									dropdown.close();
 
-									String errorMessage = null;
-									for (Iterator<PullRequest> it = (Iterator<PullRequest>) dataProvider.iterator(0, requestsTable.getItemCount()); it.hasNext(); ) {
-										PullRequest request = it.next();
-										if (!request.isOpen()) {
-											errorMessage = MessageFormat.format(_T("Pull request #{0} already closed"), request.getNumber());
-											break;
+									new ConfirmModalPanel(target) {
+
+										@Override
+										protected void onConfirm(AjaxRequestTarget target) {
+											var user = SecurityUtils.getUser();
+											for (Iterator<PullRequest> it = (Iterator<PullRequest>) dataProvider.iterator(0, requestsTable.getItemCount()); it.hasNext();) {
+												var pullRequest = it.next();
+												if (pullRequest.isOpen())
+													pullRequestService.discard(user, pullRequest, null);
+											}
+											dataProvider.detach();
+											target.add(countLabel);
+											target.add(body);
+											selectionColumn.getSelections().clear();
 										}
-									}
 
-									if (errorMessage != null) {
-										getSession().error(errorMessage);
-									} else {
-										new ConfirmModalPanel(target) {
+										@Override
+										protected String getConfirmMessage() {
+											return _T("Type <code>yes</code> below to discard all queried pull requests");
+										}
 
-											@Override
-											protected void onConfirm(AjaxRequestTarget target) {
-												var user = SecurityUtils.getUser();
-												for (Iterator<PullRequest> it = (Iterator<PullRequest>) dataProvider.iterator(0, requestsTable.getItemCount()); it.hasNext(); )
-													OneDev.getInstance(PullRequestService.class).discard(user, it.next(), null);
-												dataProvider.detach();
-												target.add(countLabel);
-												target.add(body);
-												selectionColumn.getSelections().clear();
-											}
+										@Override
+										protected String getConfirmInput() {
+											return "yes";
+										}
 
-											@Override
-											protected String getConfirmMessage() {
-												return _T("Type <code>yes</code> below to discard all queried pull requests");
-											}
-
-											@Override
-											protected String getConfirmInput() {
-												return "yes";
-											}
-
-										};
-									}
+									};
 
 								}
 
@@ -629,14 +627,14 @@ public abstract class PullRequestListPanel extends Panel {
 
 										@Override
 										protected void onConfirm(AjaxRequestTarget target) {
-											getTransactionService().run(()-> {
+											transactionService.run(()-> {
 												Collection<PullRequest> requests = new ArrayList<>();
 												for (Iterator<PullRequest> it = (Iterator<PullRequest>) dataProvider.iterator(0, requestsTable.getItemCount()); it.hasNext(); )
 													requests.add(it.next());
-												getPullRequestService().delete(requests, getProject());
+												pullRequestService.delete(requests, getProject());
 												for (var request: requests) {
 													var oldAuditContent = VersionedXmlDoc.fromBean(request).toXML();
-													getAuditService().audit(request.getProject(), "deleted pull request \"" + request.getReference().toString(request.getProject()) + "\"", oldAuditContent, null);
+													auditService.audit(request.getProject(), "deleted pull request \"" + request.getReference().toString(request.getProject()) + "\"", oldAuditContent, null);
 												}													
 											});
 											dataProvider.detach();
@@ -711,7 +709,6 @@ public abstract class PullRequestListPanel extends Panel {
 							@Override
 							public void onClick(AjaxRequestTarget target) {
 								dropdown.close();
-								var visitInfoService = OneDev.getInstance(VisitInfoService.class);
 								for (@SuppressWarnings("unchecked") var it = (Iterator<PullRequest>) dataProvider.iterator(0, requestsTable.getItemCount()); it.hasNext(); )
 									visitInfoService.visitPullRequest(SecurityUtils.getAuthUser(), it.next());
 								target.add(body);
@@ -799,7 +796,7 @@ public abstract class PullRequestListPanel extends Panel {
 
 		var extraActionsView = new RepeatingView("extraActions");
 		add(extraActionsView);
-		for (var renderer: OneDev.getExtensions(PullRequestListActionRenderer.class))
+		for (var renderer: pullRequestListActionRenderers)
 			extraActionsView.add(renderer.render(extraActionsView.newChildId()));
 		
 		queryInput = new TextField<String>("input", queryStringModel);
@@ -858,7 +855,6 @@ public abstract class PullRequestListPanel extends Panel {
 	
 						@Override
 						protected List<Project> load() {
-							ProjectService projectService = OneDev.getInstance(ProjectService.class);
 							List<Project> projects = new ArrayList<>(SecurityUtils.getAuthorizedProjects(new ReadCode()));
 							projects.sort(projectService.cloneCache().comparingPath());
 							return projects;
@@ -974,7 +970,7 @@ public abstract class PullRequestListPanel extends Panel {
 	
 							@Override
 							protected PullRequestReview getReview() {
-								return OneDev.getInstance(PullRequestReviewService.class).load(reviewId);
+								return pullRequestReviewService.load(reviewId);
 							}
 							
 						});
@@ -1051,7 +1047,7 @@ public abstract class PullRequestListPanel extends Panel {
 				try {
 					var query = queryModel.getObject();
 					if (query != null) 
-						return getPullRequestService().query(SecurityUtils.getSubject(), getProject(), query, true, (int) first, (int) count).iterator();
+						return pullRequestService.query(SecurityUtils.getSubject(), getProject(), query, true, (int) first, (int) count).iterator();
 				} catch (ExplicitException e) {
 					error(e.getMessage());
 				}
@@ -1063,7 +1059,7 @@ public abstract class PullRequestListPanel extends Panel {
 				try {
 					var query = queryModel.getObject();
 					if (query != null)
-						return getPullRequestService().count(SecurityUtils.getSubject(), getProject(), query.getCriteria());
+						return pullRequestService.count(SecurityUtils.getSubject(), getProject(), query.getCriteria());
 				} catch (ExplicitException e) {
 					error(e.getMessage());
 				}
@@ -1077,7 +1073,7 @@ public abstract class PullRequestListPanel extends Panel {
 
 					@Override
 					protected PullRequest load() {
-						return getPullRequestService().load(requestId);
+						return pullRequestService.load(requestId);
 					}
 
 				};
@@ -1128,14 +1124,6 @@ public abstract class PullRequestListPanel extends Panel {
 		setOutputMarkupId(true);
 	}
 	
-	private PullRequestWatchService getWatchService() {
-		return OneDev.getInstance(PullRequestWatchService.class);
-	}
-
-	private AuditService getAuditService() {
-		return OneDev.getInstance(AuditService.class);
-	}
-
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);

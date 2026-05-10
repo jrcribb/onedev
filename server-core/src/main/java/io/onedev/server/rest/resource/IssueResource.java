@@ -40,13 +40,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.SubscriptionService;
 import io.onedev.server.attachment.AttachmentService;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.service.AuditService;
-import io.onedev.server.service.IssueChangeService;
-import io.onedev.server.service.IssueService;
-import io.onedev.server.service.IterationService;
-import io.onedev.server.service.ProjectService;
-import io.onedev.server.service.SettingService;
-import io.onedev.server.service.UrlService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.IssueComment;
@@ -58,7 +51,6 @@ import io.onedev.server.model.IssueWork;
 import io.onedev.server.model.Iteration;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.field.FieldUtils;
 import io.onedev.server.model.support.issue.transitionspec.ManualSpec;
 import io.onedev.server.rest.annotation.Api;
@@ -67,6 +59,13 @@ import io.onedev.server.rest.resource.support.RestConstants;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.IssueChangeService;
+import io.onedev.server.service.IssueService;
+import io.onedev.server.service.IterationService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.UrlService;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.web.page.help.ApiHelpUtils;
 import io.onedev.server.web.page.help.ValueInfo;
@@ -306,7 +305,8 @@ public class IssueResource {
 	@Api(order=1000)
     @POST
     public Long createIssue(@NotNull @Valid IssueOpenData data) {
-    	User user = SecurityUtils.getUser();
+		var subject = SecurityUtils.getSubject();
+    	var user = SecurityUtils.getUser(subject);
     	
     	Project project = projectService.load(data.getProjectId());
     	if (!SecurityUtils.canAccessProject(project))
@@ -349,7 +349,7 @@ public class IssueResource {
 			}
 		}
 
-		issue.setFieldValues(FieldUtils.getFieldValues(project, data.fields));
+		issue.setFieldValues(FieldUtils.getFieldValues(subject, project, data.fields));
 		issueService.open(issue);
 
 		return issue.getId();
@@ -449,7 +449,7 @@ public class IssueResource {
 			throw new UnauthorizedException();
 		}
 
-		issueChangeService.changeFields(user, issue, FieldUtils.getFieldValues(issue.getProject(), fields));
+		issueChangeService.changeFields(user, issue, FieldUtils.getFieldValues(subject, issue.getProject(), fields));
 		return Response.ok().build();
     }
 
@@ -475,7 +475,7 @@ public class IssueResource {
 			throw new NotAcceptableException(message);
 		}
     	
-		var fieldValues = FieldUtils.getFieldValues(issue.getProject(), data.getFields());
+		var fieldValues = FieldUtils.getFieldValues(subject, issue.getProject(), data.getFields());
 		issueChangeService.changeState(user, issue, data.getState(), fieldValues, 
 				transition.getPromptFields(), transition.getRemoveFields(), data.getComment());
 		return Response.ok().build();

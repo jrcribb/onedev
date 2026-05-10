@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import io.onedev.server.exception.DataTooLargeException;
+import io.onedev.server.exception.NotAcceptableException;
 
 @SuppressWarnings("deprecation")
 public class IOUtils extends org.apache.commons.io.IOUtils {
@@ -44,7 +44,7 @@ public class IOUtils extends org.apache.commons.io.IOUtils {
 		try {
 			long copied = copyLarge(is, os, 0, maxSize + 1, new byte[BUFFER_SIZE]);
 			if (copied >=  maxSize + 1)
-				throw new DataTooLargeException(maxSize);
+				throw new NotAcceptableException("Data exceeds maximum size: " + maxSize);
 			else 
 				return copied;
 		} catch (IOException e) {

@@ -325,7 +325,11 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	}
 	
 	public static boolean canEditIssueField(Project project, String fieldName) {
-		return getSubject().isPermitted(new ProjectPermission(project, new EditIssueField(Sets.newHashSet(fieldName))));
+		return canEditIssueField(getSubject(), project, fieldName);
+	}
+
+	public static boolean canEditIssueField(Subject subject, Project project, String fieldName) {
+		return subject.isPermitted(new ProjectPermission(project, new EditIssueField(Sets.newHashSet(fieldName))));
 	}
 	
 	public static boolean canEditIssueLink(Project project, LinkSpec link) {

@@ -1,42 +1,5 @@
 package io.onedev.server.plugin.pack.npm;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import io.onedev.commons.utils.LockUtils;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.pack.PackHandler;
-import io.onedev.server.service.BuildService;
-import io.onedev.server.service.PackBlobService;
-import io.onedev.server.service.PackService;
-import io.onedev.server.service.ProjectService;
-import io.onedev.server.service.UrlService;
-import io.onedev.server.exception.DataTooLargeException;
-import io.onedev.server.model.Build;
-import io.onedev.server.model.Pack;
-import io.onedev.server.model.PackBlob;
-import io.onedev.server.model.Project;
-import io.onedev.server.persistence.SessionService;
-import io.onedev.server.persistence.TransactionService;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.Digest;
-
-import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.binary.Hex;
-import org.apache.shiro.authz.UnauthorizedException;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.time.ZoneId;
-import java.util.*;
-
 import static com.google.common.collect.Lists.newArrayList;
 import static io.onedev.server.plugin.pack.npm.NpmPackSupport.TYPE;
 import static io.onedev.server.util.IOUtils.copyWithMaxSize;
@@ -44,9 +7,60 @@ import static io.onedev.server.util.UrlUtils.decodePath;
 import static io.onedev.server.util.UrlUtils.encodePath;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME;
-import static javax.servlet.http.HttpServletResponse.*;
+import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
+import static javax.servlet.http.HttpServletResponse.SC_CONFLICT;
+import static javax.servlet.http.HttpServletResponse.SC_CREATED;
+import static javax.servlet.http.HttpServletResponse.SC_METHOD_NOT_ALLOWED;
+import static javax.servlet.http.HttpServletResponse.SC_NOT_ACCEPTABLE;
+import static javax.servlet.http.HttpServletResponse.SC_NOT_FOUND;
+import static javax.servlet.http.HttpServletResponse.SC_OK;
 import static org.apache.commons.codec.binary.Base64.encodeBase64String;
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.substringAfter;
+import static org.apache.commons.lang3.StringUtils.substringAfterLast;
+import static org.apache.commons.lang3.StringUtils.substringBefore;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.time.ZoneId;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.binary.Hex;
+import org.apache.shiro.authz.UnauthorizedException;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import io.onedev.commons.utils.LockUtils;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.exception.NotAcceptableException;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.Pack;
+import io.onedev.server.model.PackBlob;
+import io.onedev.server.model.Project;
+import io.onedev.server.pack.PackHandler;
+import io.onedev.server.persistence.SessionService;
+import io.onedev.server.persistence.TransactionService;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.PackBlobService;
+import io.onedev.server.service.PackService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.UrlService;
+import io.onedev.server.util.Digest;
 
 @Singleton
 public class NpmPackHandler implements PackHandler {
@@ -178,8 +192,8 @@ public class NpmPackHandler implements PackHandler {
 									var baos = new ByteArrayOutputStream();
 									try (var is = request.getInputStream()) {
 										copyWithMaxSize(is, baos, MAX_TAG_BODY_LEN);
-									} catch (DataTooLargeException e) {
-										throw new ClientException(SC_REQUEST_ENTITY_TOO_LARGE, "Tag body is too large");
+									} catch (NotAcceptableException e) {
+										throw new ClientException(SC_NOT_ACCEPTABLE, "Error copying tag body: " + e.getMessage());
 									} catch (IOException e) {
 										throw new RuntimeException(e);
 									}
@@ -442,8 +456,8 @@ public class NpmPackHandler implements PackHandler {
 								});
 							}
 						}
-					} catch (DataTooLargeException e) {
-						throw new ClientException(SC_REQUEST_ENTITY_TOO_LARGE, "Package metadata is too large");
+					} catch (NotAcceptableException e) {
+						throw new ClientException(SC_NOT_ACCEPTABLE, "Error copying package metadata: " + e.getMessage());
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}

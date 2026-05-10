@@ -1,50 +1,5 @@
 package io.onedev.server.plugin.pack.gem;
 
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.commons.utils.FileUtils;
-import io.onedev.commons.utils.LockUtils;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.pack.PackHandler;
-import io.onedev.server.service.BuildService;
-import io.onedev.server.service.PackBlobService;
-import io.onedev.server.service.PackService;
-import io.onedev.server.service.ProjectService;
-import io.onedev.server.model.Build;
-import io.onedev.server.model.Pack;
-import io.onedev.server.model.PackBlob;
-import io.onedev.server.model.Project;
-import io.onedev.server.persistence.SessionService;
-import io.onedev.server.persistence.TransactionService;
-import io.onedev.server.plugin.pack.gem.marshal.Marshaller;
-import io.onedev.server.plugin.pack.gem.marshal.RubyObject;
-import io.onedev.server.plugin.pack.gem.marshal.UserDefined;
-import io.onedev.server.plugin.pack.gem.marshal.UserMarshal;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.IOUtils;
-import io.onedev.server.util.UrlUtils;
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
-import org.apache.commons.fileupload.util.Streams;
-import org.apache.shiro.authz.UnauthorizedException;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.nodes.MappingNode;
-import org.yaml.snakeyaml.nodes.ScalarNode;
-import org.yaml.snakeyaml.nodes.SequenceNode;
-
-import org.jspecify.annotations.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpUtils;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import java.io.*;
-import java.util.*;
-import java.util.zip.DeflaterOutputStream;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
-
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.onedev.server.plugin.pack.gem.GemPackSupport.TYPE;
@@ -54,7 +9,74 @@ import static java.lang.Boolean.parseBoolean;
 import static java.lang.Integer.MAX_VALUE;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.stream.Collectors.toList;
-import static javax.servlet.http.HttpServletResponse.*;
+import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
+import static javax.servlet.http.HttpServletResponse.SC_CONFLICT;
+import static javax.servlet.http.HttpServletResponse.SC_METHOD_NOT_ALLOWED;
+import static javax.servlet.http.HttpServletResponse.SC_NOT_ACCEPTABLE;
+import static javax.servlet.http.HttpServletResponse.SC_NOT_FOUND;
+import static javax.servlet.http.HttpServletResponse.SC_NOT_IMPLEMENTED;
+import static javax.servlet.http.HttpServletResponse.SC_OK;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.zip.DeflaterOutputStream;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpUtils;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.fileupload.util.Streams;
+import org.apache.shiro.authz.UnauthorizedException;
+import org.jspecify.annotations.Nullable;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.nodes.MappingNode;
+import org.yaml.snakeyaml.nodes.ScalarNode;
+import org.yaml.snakeyaml.nodes.SequenceNode;
+
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.LockUtils;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.exception.NotAcceptableException;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.Pack;
+import io.onedev.server.model.PackBlob;
+import io.onedev.server.model.Project;
+import io.onedev.server.pack.PackHandler;
+import io.onedev.server.persistence.SessionService;
+import io.onedev.server.persistence.TransactionService;
+import io.onedev.server.plugin.pack.gem.marshal.Marshaller;
+import io.onedev.server.plugin.pack.gem.marshal.RubyObject;
+import io.onedev.server.plugin.pack.gem.marshal.UserDefined;
+import io.onedev.server.plugin.pack.gem.marshal.UserMarshal;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.PackBlobService;
+import io.onedev.server.service.PackService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.util.IOUtils;
+import io.onedev.server.util.UrlUtils;
 
 @Singleton
 public class GemPackHandler implements PackHandler {
@@ -133,6 +155,8 @@ public class GemPackHandler implements PackHandler {
 					}
 				} catch (IOException e) {
 					throw new RuntimeException(e);
+				} catch (NotAcceptableException e) {
+					throw new ClientException(SC_NOT_ACCEPTABLE, "Error copying metadata: " + e.getMessage());
 				}
 				if (metadataBytes == null)
 					throw new ClientException(SC_BAD_REQUEST, "Metadata not found");

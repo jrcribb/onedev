@@ -1,36 +1,5 @@
 package io.onedev.server.plugin.pack.container;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.onedev.commons.utils.LockUtils;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.service.*;
-import io.onedev.server.exception.DataTooLargeException;
-import io.onedev.server.exception.ExceptionUtils;
-import io.onedev.server.model.Build;
-import io.onedev.server.model.Pack;
-import io.onedev.server.model.PackBlob;
-import io.onedev.server.model.Project;
-import io.onedev.server.persistence.SessionService;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.CryptoUtils;
-import io.onedev.server.util.Digest;
-import io.onedev.server.util.HttpUtils;
-import io.onedev.server.util.Pair;
-import org.apache.shiro.authz.UnauthorizedException;
-import org.eclipse.jetty.http.HttpStatus;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.regex.Matcher;
-
 import static io.onedev.server.plugin.pack.container.ContainerAuthenticationFilter.ATTR_BUILD_ID;
 import static io.onedev.server.plugin.pack.container.ContainerManifest.isImageIndex;
 import static io.onedev.server.plugin.pack.container.ContainerManifest.isImageManifest;
@@ -40,8 +9,59 @@ import static io.onedev.server.util.IOUtils.copyWithMaxSize;
 import static java.lang.Long.parseLong;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.regex.Pattern.compile;
-import static javax.servlet.http.HttpServletResponse.*;
+import static javax.servlet.http.HttpServletResponse.SC_ACCEPTED;
+import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
+import static javax.servlet.http.HttpServletResponse.SC_CREATED;
+import static javax.servlet.http.HttpServletResponse.SC_FORBIDDEN;
+import static javax.servlet.http.HttpServletResponse.SC_METHOD_NOT_ALLOWED;
+import static javax.servlet.http.HttpServletResponse.SC_NOT_ACCEPTABLE;
+import static javax.servlet.http.HttpServletResponse.SC_NO_CONTENT;
+import static javax.servlet.http.HttpServletResponse.SC_OK;
+import static javax.servlet.http.HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE;
+import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 import static org.apache.commons.lang3.StringUtils.substringBefore;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.regex.Matcher;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.shiro.authz.UnauthorizedException;
+import org.eclipse.jetty.http.HttpStatus;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.onedev.commons.utils.LockUtils;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.exception.ExceptionUtils;
+import io.onedev.server.exception.NotAcceptableException;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.Pack;
+import io.onedev.server.model.PackBlob;
+import io.onedev.server.model.Project;
+import io.onedev.server.persistence.SessionService;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.PackBlobService;
+import io.onedev.server.service.PackService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.util.CryptoUtils;
+import io.onedev.server.util.Digest;
+import io.onedev.server.util.HttpUtils;
+import io.onedev.server.util.Pair;
 
 @Singleton
 public class ContainerServlet extends HttpServlet {
@@ -261,8 +281,8 @@ public class ContainerServlet extends HttpServlet {
 						var baos = new ByteArrayOutputStream();
 						try (var is = request.getInputStream()) {
 							copyWithMaxSize(is, baos, MAX_MANIFEST_SIZE);
-						} catch (DataTooLargeException e) {
-							throw new ClientException(SC_BAD_REQUEST, ErrorCode.SIZE_INVALID, "Manifest is too large");
+						} catch (NotAcceptableException e) {
+							throw new ClientException(SC_NOT_ACCEPTABLE, ErrorCode.DENIED, "Error copying manifest: " + e.getMessage());
 						}
 
 						var bytes = baos.toByteArray();

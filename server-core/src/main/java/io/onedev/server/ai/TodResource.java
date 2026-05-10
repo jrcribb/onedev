@@ -634,7 +634,8 @@ public class TodResource {
                 @QueryParam("currentProject") @NotNull String currentProjectPath, 
                 @QueryParam("project") String projectPath, 
                 @NotNull @Valid Map<String, Serializable> data) {
-        if (SecurityUtils.getUser() == null)
+        var subject = SecurityUtils.getSubject();
+        if (SecurityUtils.getUser(subject) == null)
             throw new UnauthenticatedException();
 
         var projectContext = getProjectContext(projectPath, currentProjectPath);
@@ -686,7 +687,7 @@ public class TodResource {
         issue.setSubmitter(SecurityUtils.getUser());
         issue.setState(issueSetting.getInitialStateSpec().getName());
 
-        issue.setFieldValues(FieldUtils.getFieldValues(issue.getProject(), data));
+        issue.setFieldValues(FieldUtils.getFieldValues(subject, issue.getProject(), data));
 
         issueService.open(issue);
 
@@ -759,7 +760,7 @@ public class TodResource {
                 throw new UnauthorizedException("No permission to update issue fields");
             }
 
-            issueChangeService.changeFields(user, issue, FieldUtils.getFieldValues(issue.getProject(), data));
+            issueChangeService.changeFields(user, issue, FieldUtils.getFieldValues(subject, issue.getProject(), data));
         }
 
         return "Edited issue " + issueReference;
@@ -792,7 +793,7 @@ public class TodResource {
             throw new NotAcceptableException(message);
         }
 
-        var fieldValues = FieldUtils.getFieldValues(issue.getProject(), data);
+        var fieldValues = FieldUtils.getFieldValues(subject, issue.getProject(), data);
         issueChangeService.changeState(user, issue, state, fieldValues, transition.getPromptFields(),
                 transition.getRemoveFields(), comment);
         var feedback = "Issue " + issueReference + " transited to state \"" + state + "\"";
@@ -1383,13 +1384,6 @@ public class TodResource {
 
         commitMessage = StringUtils.trimToNull(commitMessage);
 
-        var errorMessage = pullRequest.checkMergeCondition();
-        if (errorMessage != null)
-            throw new NotAcceptableException(errorMessage);
-        errorMessage = pullRequest.checkMergeCommitMessage(user, commitMessage);
-        if (errorMessage != null)
-            throw new NotAcceptableException("Error validating merge commit message: " + errorMessage);
-
         pullRequestService.merge(user, pullRequest, commitMessage);
 
         return "Merged pull request " + pullRequestReference;
@@ -1411,8 +1405,6 @@ public class TodResource {
 
         if (!SecurityUtils.canModifyPullRequest(pullRequest))
             throw new UnauthorizedException();
-        if (!pullRequest.isOpen())
-            throw new NotAcceptableException("Pull request already closed");
 
         pullRequestService.discard(user, pullRequest, StringUtils.trimToNull(comment));
         return "Discarded pull request " + pullRequestReference;
@@ -1434,9 +1426,6 @@ public class TodResource {
 
         if (!SecurityUtils.canModifyPullRequest(pullRequest))
             throw new UnauthorizedException();
-        var errorMessage = pullRequest.checkReopenCondition();
-        if (errorMessage != null)
-            throw new NotAcceptableException(errorMessage);
 
         pullRequestService.reopen(user, pullRequest, StringUtils.trimToNull(comment));
         return "Reopened pull request " + pullRequestReference;
@@ -1461,10 +1450,6 @@ public class TodResource {
             throw new UnauthorizedException();
         }
 
-        var errorMessage = pullRequest.checkDeleteSourceBranchCondition();
-        if (errorMessage != null)
-            throw new NotAcceptableException(errorMessage);
-
         pullRequestService.deleteSourceBranch(user, pullRequest, StringUtils.trimToNull(comment));
         return "Deleted source branch of pull request " + pullRequestReference;
     }
@@ -1487,10 +1472,6 @@ public class TodResource {
                 || !SecurityUtils.canWriteCode(pullRequest.getSourceProject())) {
             throw new UnauthorizedException();
         }
-
-        var errorMessage = pullRequest.checkRestoreSourceBranchCondition();
-        if (errorMessage != null)
-            throw new NotAcceptableException(errorMessage);
 
         pullRequestService.restoreSourceBranch(user, pullRequest, StringUtils.trimToNull(comment));
         return "Restored source branch of pull request " + pullRequestReference;
