@@ -66,7 +66,6 @@ import io.onedev.server.model.IssueLink;
 import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.IssueWork;
 import io.onedev.server.model.Iteration;
-import io.onedev.server.model.Pack;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestAssignment;
@@ -96,7 +95,6 @@ import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
-import io.onedev.server.search.entity.pack.PackQuery;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.BuildService;
@@ -111,7 +109,6 @@ import io.onedev.server.service.IssueWorkService;
 import io.onedev.server.service.IterationService;
 import io.onedev.server.service.LabelSpecService;
 import io.onedev.server.service.LinkSpecService;
-import io.onedev.server.service.PackService;
 import io.onedev.server.service.ProjectService;
 import io.onedev.server.service.PullRequestAssignmentService;
 import io.onedev.server.service.PullRequestChangeService;
@@ -200,9 +197,6 @@ public class TodResource {
 
     @Inject
     private BuildService buildService;
-
-    @Inject
-    private PackService packService;
 
     @Inject
     private JobService jobService;
@@ -570,27 +564,28 @@ public class TodResource {
         if (SecurityUtils.getUser() == null)
             throw new UnauthenticatedException();
 
-        Map<String, Object> projectInfo;
+        Map<String, Object> projectDetail;
         var project = getProject(projectPath);
         if (SecurityUtils.canManageProject(project)) {
             var typeReference = new TypeReference<LinkedHashMap<String, Object>>() {};
-            projectInfo = objectMapper.convertValue(project, typeReference);
-            projectInfo.remove("lastActivityDateId");
-            projectInfo.remove("pathLen");
+            projectDetail = objectMapper.convertValue(project, typeReference);
+            projectDetail.remove("lastActivityDateId");
+            projectDetail.remove("pathLen");
         } else {
-            projectInfo = new HashMap<String, Object>();
-            projectInfo.put("id", project.getId());
-            projectInfo.put("key", project.getKey());
-            projectInfo.put("name", project.getName());
-            projectInfo.put("path", project.getPath());
-            projectInfo.put("description", project.getDescription());
-            projectInfo.put("codeManagement", project.isCodeManagement());
-            projectInfo.put("packManagement", project.isPackManagement());
-            projectInfo.put("issueManagement", project.isIssueManagement());
-            projectInfo.put("timeTracking", project.isTimeTracking());
+            projectDetail = new HashMap<String, Object>();
+            projectDetail.put("id", project.getId());
+            projectDetail.put("key", project.getKey());
+            projectDetail.put("name", project.getName());
+            projectDetail.put("path", project.getPath());
+            projectDetail.put("description", project.getDescription());
+            projectDetail.put("codeManagement", project.isCodeManagement());
+            projectDetail.put("packManagement", project.isPackManagement());
+            projectDetail.put("issueManagement", project.isIssueManagement());
+            projectDetail.put("timeTracking", project.isTimeTracking());
         }
-        projectInfo.put("link", urlService.urlFor(project, true));
-        return projectInfo;
+        projectDetail.put("defaultBranch", project.getDefaultBranch());
+        projectDetail.put("link", urlService.urlFor(project, true));
+        return projectDetail;
     }
 
     @Path("/get-issue-comments")
@@ -608,7 +603,7 @@ public class TodResource {
     @Path("/add-issue-comment")
     @Consumes(MediaType.TEXT_PLAIN)
     @POST
-    public String addIssueComment(
+    public Map<String, Object> addIssueComment(
                 @QueryParam("currentProject") @NotNull String currentProjectPath, 
                 @QueryParam("reference") @NotNull String issueReference, 
                 @NotNull String commentContent) {
@@ -624,12 +619,16 @@ public class TodResource {
         comment.setDate(new Date());
         issueCommentService.create(comment);
 
-        return "Commented on issue " + issueReference;
+        var commentMap = new HashMap<String, Object>();
+        commentMap.put("content", comment.getContent());
+        commentMap.put("user", comment.getUser().getName());
+        commentMap.put("date", comment.getDate());
+        return commentMap;
     }
 
     @Path("/create-issue")
     @POST
-    public String createIssue(
+    public Map<String, Object> createIssue(
                 @QueryParam("currentProject") @NotNull String currentProjectPath, 
                 @QueryParam("project") String projectPath, 
                 @NotNull @Valid Map<String, Serializable> data) {
@@ -690,12 +689,12 @@ public class TodResource {
 
         issueService.open(issue);
 
-        return "Created issue " + issue.getReference().toString(projectContext.currentProject) + ": " + urlService.urlFor(issue, true);
+        return IssueHelper.getDetail(subject, projectContext.currentProject, issue);
     }
 
     @Path("/edit-issue")
     @POST
-    public String editIssue(
+    public Map<String, Object> editIssue(
                 @QueryParam("currentProject") @NotNull String currentProjectPath, 
                 @QueryParam("reference") @NotNull String issueReference, 
                 @NotNull Map<String, Serializable> data) {
@@ -762,12 +761,12 @@ public class TodResource {
             issueChangeService.changeFields(user, issue, FieldUtils.getFieldValues(subject, issue.getProject(), data));
         }
 
-        return "Edited issue " + issueReference;
+        return IssueHelper.getDetail(subject, currentProject, issue);
     }
 
     @Path("/change-issue-state")
     @POST
-    public String changeIssueState(
+    public Map<String, Object> changeIssueState(
                 @QueryParam("currentProject") @NotNull String currentProjectPath, 
                 @QueryParam("reference") @NotNull String issueReference, 
                 @NotNull Map<String, Serializable> data) {
@@ -795,11 +794,7 @@ public class TodResource {
         var fieldValues = FieldUtils.getFieldValues(subject, issue.getProject(), data);
         issueChangeService.changeState(user, issue, state, fieldValues, transition.getPromptFields(),
                 transition.getRemoveFields(), comment);
-        var feedback = "Issue " + issueReference + " transited to state \"" + state + "\"";
-        var stateDescription = settingService.getIssueSetting().getStateSpec(state).getDescription();
-        if (stateDescription != null)
-            feedback += ":\n\n" + stateDescription;
-        return feedback;
+        return IssueHelper.getDetail(subject, currentProject, issue);
     }
 
     @Path("/create-issue-branch") 
@@ -831,7 +826,7 @@ public class TodResource {
 
     @Path("/link-issues")
     @GET
-    public String linkIssues(
+    public Map<String, Object> linkIssues(
                 @QueryParam("currentProject") @NotNull String currentProjectPath, 
                 @QueryParam("sourceReference") @NotNull String sourceReference, 
                 @QueryParam("linkName") @Nullable String linkName, 
@@ -864,13 +859,18 @@ public class TodResource {
         link.validate();
         issueLinkService.create(link);
 
-        return "Issue " + targetReference + " added as \"" + linkName + "\" of " + sourceReference;
+        var linkMap = new HashMap<String, Object>();
+        linkMap.put("source", link.getSource().getReference().toString(currentProject));
+        linkMap.put("target", link.getTarget().getReference().toString(currentProject));
+        linkMap.put("linkName", link.getSpec().getName());
+
+        return linkMap;
     }
 
     @Path("/log-work")
     @Consumes(MediaType.TEXT_PLAIN)
     @POST
-    public String logWork(
+    public Map<String, Object> logWork(
                 @QueryParam("currentProject") @NotNull String currentProjectPath, 
                 @QueryParam("reference") @NotNull String issueReference, 
                 @QueryParam("spentHours") int spentHours, String comment) {
@@ -894,7 +894,13 @@ public class TodResource {
         work.setMinutes(spentHours * 60);
         work.setNote(StringUtils.trimToNull(comment));
         issueWorkService.createOrUpdate(work);
-        return "Work logged for issue " + issueReference;
+
+        var workMap = new HashMap<String, Object>();
+        workMap.put("minutes", spentHours * 60);
+        workMap.put("note", comment);
+        workMap.put("user", work.getUser().getName());
+        workMap.put("date", work.getDate());
+        return workMap;
     }
 
     private void normalizeIssueData(Map<String, Serializable> data) {
@@ -1090,7 +1096,7 @@ public class TodResource {
 
     @Path("/create-pull-request")
     @POST
-    public String createPullRequest(
+    public Map<String, Object> createPullRequest(
                 @QueryParam("currentProject") @NotNull String currentProjectPath, 
                 @QueryParam("targetProject") String targetProjectPath,
                 @QueryParam("sourceProject") String sourceProjectPath,
@@ -1098,16 +1104,19 @@ public class TodResource {
         if (SecurityUtils.getUser() == null)
             throw new UnauthenticatedException();
         
+        var currentProject = getProject(currentProjectPath);
+
+        Project sourceProject;
         sourceProjectPath = StringUtils.trimToNull(sourceProjectPath);
-        targetProjectPath = StringUtils.trimToNull(targetProjectPath);
-
         if (sourceProjectPath == null)
-            sourceProjectPath = currentProjectPath;
+            sourceProject = currentProject;
+        else
+            sourceProject = getProject(sourceProjectPath);
 
-        var sourceProject = getProject(sourceProjectPath);
         if (!SecurityUtils.canReadCode(sourceProject))
             throw new UnauthorizedException("No permission to read code of source project: " + sourceProjectPath);
 
+        targetProjectPath = StringUtils.trimToNull(targetProjectPath);
         Project targetProject;
         if (targetProjectPath != null) {
             targetProject = getProject(targetProjectPath);
@@ -1118,8 +1127,6 @@ public class TodResource {
         }
         if (!SecurityUtils.canReadCode(targetProject))
             throw new UnauthorizedException("No permission to read code of target project: " + targetProjectPath);
-
-        var currentProject = getProject(currentProjectPath);
 
         normalizePullRequestData(data);
 
@@ -1136,7 +1143,11 @@ public class TodResource {
         var target = new ProjectAndBranch(targetProject, targetBranch);
         var source = new ProjectAndBranch(sourceProject, sourceBranch);
 
-        PullRequest request = new PullRequest();
+        var request = pullRequestService.findOpen(target, source);
+        if (request != null)
+            return PullRequestHelper.getDetail(currentProject, request);        
+
+        request = new PullRequest();
         request.setTarget(target);
         request.setSource(source);
         request.setSubmitter(SecurityUtils.getUser());
@@ -1205,7 +1216,7 @@ public class TodResource {
 
         pullRequestService.open(request);
 
-        return "Created pull request " + request.getReference().toString(currentProject) + ": " + urlService.urlFor(request, true);        
+        return PullRequestHelper.getDetail(currentProject, request);        
     }
 
     private PullRequest getPullRequest(Project currentProject, String referenceString) {
@@ -1223,7 +1234,7 @@ public class TodResource {
     @SuppressWarnings("unchecked")
     @Path("/edit-pull-request")
     @POST
-    public String editPullRequest(
+    public Map<String, Object> editPullRequest(
                 @QueryParam("currentProject") @NotNull String currentProjectPath,
                 @QueryParam("reference") @NotNull String pullRequestReference, @NotNull Map<String, Serializable> data) {
         var user = SecurityUtils.getUser();
@@ -1352,13 +1363,13 @@ public class TodResource {
             pullRequestChangeService.changeAutoMerge(user, request, autoMerge);
         }
                     
-        return "Edited pull request " + pullRequestReference;
+        return PullRequestHelper.getDetail(currentProject, request);        
     }    
 
     @Path("/approve-pull-request")
     @Consumes(MediaType.TEXT_PLAIN)
     @POST
-    public String approvePullRequest(
+    public Map<String, Object> approvePullRequest(
                 @QueryParam("currentProject") @NotNull String currentProjectPath,
                 @QueryParam("reference") @NotNull String pullRequestReference,
                 String comment) {
@@ -1370,13 +1381,13 @@ public class TodResource {
         var pullRequest = getPullRequest(currentProject, pullRequestReference);
 
         pullRequestReviewService.review(user, pullRequest, true, StringUtils.trimToNull(comment));
-        return "Approved pull request " + pullRequestReference;
+        return PullRequestHelper.getDetail(currentProject, pullRequest);        
     }
 
     @Path("/request-changes-on-pull-request")
     @Consumes(MediaType.TEXT_PLAIN)
     @POST
-    public String requestChangesOnPullRequest(
+    public Map<String, Object> requestChangesOnPullRequest(
                 @QueryParam("currentProject") @NotNull String currentProjectPath,
                 @QueryParam("reference") @NotNull String pullRequestReference,
                 String comment) {
@@ -1388,13 +1399,13 @@ public class TodResource {
         var pullRequest = getPullRequest(currentProject, pullRequestReference);
 
         pullRequestReviewService.review(user, pullRequest, false, StringUtils.trimToNull(comment));
-        return "Requested changes on pull request " + pullRequestReference;
+        return PullRequestHelper.getDetail(currentProject, pullRequest);        
     }
 
     @Path("/merge-pull-request")
     @Consumes(MediaType.TEXT_PLAIN)
     @POST
-    public String mergePullRequest(
+    public Map<String, Object> mergePullRequest(
                 @QueryParam("currentProject") @NotNull String currentProjectPath,
                 @QueryParam("reference") @NotNull String pullRequestReference,
                 String commitMessage) {
@@ -1412,13 +1423,13 @@ public class TodResource {
 
         pullRequestService.merge(user, pullRequest, commitMessage);
 
-        return "Merged pull request " + pullRequestReference;
+        return PullRequestHelper.getDetail(currentProject, pullRequest);        
     }
 
     @Path("/discard-pull-request")
     @Consumes(MediaType.TEXT_PLAIN)
     @POST
-    public String discardPullRequest(
+    public Map<String, Object> discardPullRequest(
                 @QueryParam("currentProject") @NotNull String currentProjectPath,
                 @QueryParam("reference") @NotNull String pullRequestReference,
                 String comment) {
@@ -1433,13 +1444,13 @@ public class TodResource {
             throw new UnauthorizedException();
 
         pullRequestService.discard(user, pullRequest, StringUtils.trimToNull(comment));
-        return "Discarded pull request " + pullRequestReference;
+        return PullRequestHelper.getDetail(currentProject, pullRequest);        
     }
 
     @Path("/reopen-pull-request")
     @Consumes(MediaType.TEXT_PLAIN)
     @POST
-    public String reopenPullRequest(
+    public Map<String, Object> reopenPullRequest(
                 @QueryParam("currentProject") @NotNull String currentProjectPath,
                 @QueryParam("reference") @NotNull String pullRequestReference,
                 String comment) {
@@ -1454,13 +1465,13 @@ public class TodResource {
             throw new UnauthorizedException();
 
         pullRequestService.reopen(user, pullRequest, StringUtils.trimToNull(comment));
-        return "Reopened pull request " + pullRequestReference;
+        return PullRequestHelper.getDetail(currentProject, pullRequest);        
     }
 
     @Path("/delete-pull-request-source-branch")
     @Consumes(MediaType.TEXT_PLAIN)
     @POST
-    public String deletePullRequestSourceBranch(
+    public Map<String, Object> deletePullRequestSourceBranch(
                 @QueryParam("currentProject") @NotNull String currentProjectPath,
                 @QueryParam("reference") @NotNull String pullRequestReference,
                 String comment) {
@@ -1477,13 +1488,13 @@ public class TodResource {
         }
 
         pullRequestService.deleteSourceBranch(user, pullRequest, StringUtils.trimToNull(comment));
-        return "Deleted source branch of pull request " + pullRequestReference;
+        return PullRequestHelper.getDetail(currentProject, pullRequest);        
     }
 
     @Path("/restore-pull-request-source-branch")
     @Consumes(MediaType.TEXT_PLAIN)
     @POST
-    public String restorePullRequestSourceBranch(
+    public Map<String, Object> restorePullRequestSourceBranch(
                 @QueryParam("currentProject") @NotNull String currentProjectPath,
                 @QueryParam("reference") @NotNull String pullRequestReference,
                 String comment) {
@@ -1500,13 +1511,13 @@ public class TodResource {
         }
 
         pullRequestService.restoreSourceBranch(user, pullRequest, StringUtils.trimToNull(comment));
-        return "Restored source branch of pull request " + pullRequestReference;
+        return PullRequestHelper.getDetail(currentProject, pullRequest);        
     }
 
     @Path("/add-pull-request-comment")
     @Consumes(MediaType.TEXT_PLAIN)
     @POST
-    public String addPullRequestComment(
+    public Map<String, Object> addPullRequestComment(
                 @QueryParam("currentProject") @NotNull String currentProjectPath, 
                 @QueryParam("reference") @NotNull String pullRequestReference, 
                 @NotNull String commentContent) {
@@ -1523,13 +1534,17 @@ public class TodResource {
         comment.setDate(new Date());
         pullRequestCommentService.create(comment);
 
-        return "Commented on pull request " + pullRequestReference;
+        var commentMap = new HashMap<String, Object>();
+        commentMap.put("content", comment.getContent());
+        commentMap.put("user", comment.getUser().getName());
+        commentMap.put("date", comment.getDate());
+        return commentMap;
     }
 
     @Path("/add-pull-request-code-comment")
     @Consumes(MediaType.TEXT_PLAIN)
     @POST
-    public String addPullRequestCodeComment(
+    public Map<String, Object> addPullRequestCodeComment(
                 @QueryParam("currentProject") @NotNull String currentProjectPath, 
                 @QueryParam("reference") @NotNull String pullRequestReference, 
                 @QueryParam("filePath") @NotNull String filePath,
@@ -1543,15 +1558,14 @@ public class TodResource {
         var currentProject = getProject(currentProjectPath);
         var pullRequest = getPullRequest(currentProject, pullRequestReference);
 
-        PullRequestHelper.addCodeComment(pullRequest, user, filePath, fromLineNumber, toLineNumber, commentContent);
-
-        return "Added code comment on pull request " + pullRequestReference;
+        var comment = PullRequestHelper.addCodeComment(pullRequest, user, filePath, fromLineNumber, toLineNumber, commentContent);
+        return CodeCommentHelper.getDetail(comment);
     }
 
     @Path("/add-code-comment-reply")
     @Consumes(MediaType.TEXT_PLAIN)
     @POST
-    public String addCodeCommentReply(
+    public Map<String, Object> addCodeCommentReply(
                 @QueryParam("commentId") @NotNull Long commentId,
                 @NotNull String replyContent) {
         var user = SecurityUtils.getUser();
@@ -1570,13 +1584,13 @@ public class TodResource {
         reply.setCompareContext(comment.getCompareContext());
         codeCommentReplyService.create(reply);
 
-        return "Added reply to code comment #" + commentId;
+        return CodeCommentHelper.getDetail(reply);
     }
 
     @Path("/resolve-code-comment")
     @Consumes(MediaType.TEXT_PLAIN)
     @POST
-    public String resolveCodeComment(@QueryParam("commentId") @NotNull Long commentId, String note) {
+    public Map<String, Object> resolveCodeComment(@QueryParam("commentId") @NotNull Long commentId, String note) {
         var user = SecurityUtils.getUser();
         if (user == null)
             throw new UnauthenticatedException();
@@ -1592,13 +1606,13 @@ public class TodResource {
         statusChange.setCompareContext(comment.getCompareContext());
         codeCommentStatusChangeService.create(statusChange, note);
 
-        return "Resolved code comment #" + commentId;
+        return CodeCommentHelper.getDetail(comment);
     }
 
     @Path("/unresolve-code-comment")
     @Consumes(MediaType.TEXT_PLAIN)
     @POST
-    public String unresolveCodeComment(@QueryParam("commentId") @NotNull Long commentId, String note) {
+    public Map<String, Object> unresolveCodeComment(@QueryParam("commentId") @NotNull Long commentId, String note) {
         var user = SecurityUtils.getUser();
         if (user == null)
             throw new UnauthenticatedException();
@@ -1615,7 +1629,7 @@ public class TodResource {
         statusChange.setCompareContext(comment.getCompareContext());
         codeCommentStatusChangeService.create(statusChange, note);
 
-        return "Unresolved code comment #" + commentId;
+        return CodeCommentHelper.getDetail(comment);
     }
 
     @SuppressWarnings("unchecked")
@@ -1693,7 +1707,7 @@ public class TodResource {
 
     @Path("/get-clone-roots")
     @GET
-    public Map<String, String> getCloneUrl() {
+    public Map<String, String> getCloneRoots() {
         if (SecurityUtils.getUser() == null)
             throw new UnauthenticatedException();
 
@@ -1755,58 +1769,6 @@ public class TodResource {
         }
     }
     
-    @Path("/query-packs")
-    @GET
-    public List<Map<String, Object>> queryPacks(
-                @QueryParam("currentProject") @NotNull String currentProjectPath, 
-                @QueryParam("project") String projectPath, 
-                @QueryParam("query") String query, 
-                @QueryParam("offset") int offset, 
-                @QueryParam("count") int count) {
-        var subject = SecurityUtils.getSubject();
-        if (SecurityUtils.getUser(subject) == null)
-            throw new UnauthenticatedException();
-
-        var projectContext = getProjectContext(projectPath, currentProjectPath);
-
-        if (count > RestConstants.MAX_PAGE_SIZE)
-            throw new NotAcceptableException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
-
-        EntityQuery<Pack> parsedQuery;
-        if (query != null) {
-            try {
-                parsedQuery = PackQuery.parse(projectContext.project, query, true);
-            } catch (ParseCancellationException e) {
-                logger.error("Error parsing query", e);
-                throw new NotAcceptableException("Invalid pack query, check server log for details");
-            }
-        } else {
-            parsedQuery = new PackQuery();
-        }
-
-        var packs = new ArrayList<Map<String, Object>>();
-        for (var pack : packService.query(subject, projectContext.project, parsedQuery, false, offset, count)) {
-            var packMap = getPackMap(projectContext.currentProject, pack);
-            packMap.put("link", urlService.urlFor(pack, true));
-            packs.add(packMap);
-        }
-        return packs;
-    }
-
-    private Map<String, Object> getPackMap(Project currentProject, Pack pack) {
-        var typeReference = new TypeReference<LinkedHashMap<String, Object>>() {};
-        var packMap = objectMapper.convertValue(pack, typeReference);
-        packMap.remove("id");
-        packMap.remove("userId");
-        packMap.put("user", pack.getUser().getName());
-        packMap.remove("buildId");
-        if (pack.getBuild() != null)
-            packMap.put("build", pack.getBuild().getReference().toString(currentProject));
-        packMap.put("project", pack.getProject().getPath());
-        
-        return packMap;
-    }
-
     private void normalizePullRequestData(Map<String, Serializable> data) {
         for (var entry : data.entrySet()) {
             if (entry.getValue() instanceof String)

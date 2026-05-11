@@ -41,13 +41,17 @@ public class CodeCommentHelper {
     public static List<Map<String, Object>> getReplies(CodeComment comment) {
         var replies = new ArrayList<Map<String, Object>>();
         comment.getReplies().stream().sorted(Comparator.comparing(CodeCommentReply::getId)).forEach(reply -> {
-            var replyMap = new HashMap<String, Object>();
-            replyMap.put("user", reply.getUser().getName());
-            replyMap.put("date", reply.getDate());
-            replyMap.put("content", reply.getContent());
-            replies.add(replyMap);
+            replies.add(getDetail(reply));
         });
         return replies;
+    }
+
+    public static Map<String, Object> getDetail(CodeCommentReply reply) {
+        var replyMap = new HashMap<String, Object>();
+        replyMap.put("user", reply.getUser().getName());
+        replyMap.put("date", reply.getDate());
+        replyMap.put("content", reply.getContent());
+        return replyMap;
     }
 
 }

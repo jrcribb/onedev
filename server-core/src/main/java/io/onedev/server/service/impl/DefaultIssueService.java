@@ -126,6 +126,8 @@ public class DefaultIssueService extends BaseEntityService<Issue> implements Iss
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultIssueService.class);
     
+	private static final int MAX_BRANCH_TITLE_LENGTH = 30;
+
 	@Inject
 	private IssueFieldService fieldService;
 
@@ -1355,7 +1357,7 @@ public class DefaultIssueService extends BaseEntityService<Issue> implements Iss
 			var systemMessage = new SystemMessage("""
 				Convert the given title into a short slug for a git branch name. 
 				Rules: use only lowercase letters (for non-english title, translate to english first), numbers and hyphens; no spaces or other special characters;
-				replace spaces with single hyphens; output only the slug, nothing else; maximum 30 characters.""");
+				replace spaces with single hyphens; output only the slug, nothing else; maximum %d characters.""".formatted(MAX_BRANCH_TITLE_LENGTH));
 			for (int attempt = 0; attempt < 3; attempt++) {
 				try {
 					var userMessage = new UserMessage(issue.getTitle());
@@ -1371,10 +1373,12 @@ public class DefaultIssueService extends BaseEntityService<Issue> implements Iss
 		}
 
 		var normalizedTitle = GitUtils.normalizeForBranch(issue.getTitle());
-		if (normalizedTitle != null)
+		if (normalizedTitle != null) {
+			normalizedTitle = StringUtils.stripEnd(StringUtils.abbreviate(normalizedTitle, "", MAX_BRANCH_TITLE_LENGTH), "-");
 			return prefixWithSlash + "issue-" + issue.getNumber() + "-" + normalizedTitle;
-		else
+		} else {
 			return prefixWithSlash + "issue-" + issue.getNumber();
+		}
 	}
 
 }

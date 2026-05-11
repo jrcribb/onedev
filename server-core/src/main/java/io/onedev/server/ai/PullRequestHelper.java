@@ -124,7 +124,7 @@ public class PullRequestHelper {
         return comments;
     }
 
-    public static void addCodeComment(PullRequest pullRequest, User user, String filePath,
+    public static CodeComment addCodeComment(PullRequest pullRequest, User user, String filePath,
             int fromLineNumber, int toLineNumber, String commentContent) {
         if (fromLineNumber <= 0)
             throw new NotAcceptableException("'fromLineNumber' must be greater than 0");
@@ -196,6 +196,7 @@ public class PullRequestHelper {
         comment.setCompareContext(compareContext);
 
         codeCommentService.create(comment);
+        return comment;
     }
 
     public static List<Map<String, Object>> getCodeComments(PullRequest pullRequest) {
