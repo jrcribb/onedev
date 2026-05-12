@@ -48,6 +48,8 @@ public class SystemSetting implements Serializable, Validatable {
 	public static final String PROP_USE_AVATAR_SERVICE = "useAvatarService";
 	
 	public static final String PROP_DISABLE_AUTO_UPDATE_CHECK = "disableAutoUpdateCheck";
+
+	public static final String PROP_DEFAULT_FORK_ROOT = "defaultForkRoot";
 	
 	private String serverUrl;
 	

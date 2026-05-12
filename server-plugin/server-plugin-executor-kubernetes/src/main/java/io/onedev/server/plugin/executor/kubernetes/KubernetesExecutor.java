@@ -546,23 +546,16 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 		if (namespaceExists.get())
 			deleteNamespace(namespace, jobLogger);
 		
-		kubectl = newKubeCtl();
-		kubectl.addArgs("create", "namespace", namespace);
-		kubectl.execute(new LineConsumer() {
-
-			@Override
-			public void consume(String line) {
-				logger.debug(line);
-			}
-			
-		}, new LineConsumer() {
-
-			@Override
-			public void consume(String line) {
-				logKubernetesError(jobLogger, line);
-			}
-			
-		}).checkReturnCode();
+		Map<Object, Object> namespaceDef = newLinkedHashMap(
+				"apiVersion", "v1",
+				"kind", "Namespace",
+				"metadata", newLinkedHashMap(
+						"name", namespace,
+						"labels", newLinkedHashMap(
+								"pod-security.kubernetes.io/audit", "privileged",
+								"pod-security.kubernetes.io/enforce", "privileged",
+								"pod-security.kubernetes.io/warn", "privileged")));
+		createResource(namespaceDef, Sets.newHashSet(), jobLogger);
 	}
 	
 	private String getServerUrl() {
