@@ -32,7 +32,6 @@ import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.exception.NotAcceptableException;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Pack;
 import io.onedev.server.model.PackBlob;
@@ -163,9 +162,9 @@ public class HelmPackHandler implements PackHandler {
                     if (items.hasNext()) {
                         var item = items.next();
                         try (var is = item.openStream()) {
-                            IOUtils.copyWithMaxSize(is, baos, MAX_FILE_SIZE);
-                        } catch (NotAcceptableException e) {
-                            throw new ClientException(SC_NOT_ACCEPTABLE, "Error copying chart archive: " + e.getMessage());
+                            var copied = IOUtils.copyWithMaxSize(is, baos, MAX_FILE_SIZE);
+                            if (copied == -1)
+                                throw new ClientException(SC_NOT_ACCEPTABLE, "Chart archive exceeds maximum size: " + MAX_FILE_SIZE);
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
@@ -177,9 +176,9 @@ public class HelmPackHandler implements PackHandler {
                 }
             } else {
                 try (var is = request.getInputStream()) {
-                    IOUtils.copyWithMaxSize(is, baos, MAX_FILE_SIZE);
-                } catch (NotAcceptableException e) {
-                    throw new ClientException(SC_NOT_ACCEPTABLE, "Error copying chart archive: " + e.getMessage());
+                    var copied = IOUtils.copyWithMaxSize(is, baos, MAX_FILE_SIZE);
+                    if (copied == -1)
+                        throw new ClientException(SC_NOT_ACCEPTABLE, "Chart archive exceeds maximum size: " + MAX_FILE_SIZE);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }    

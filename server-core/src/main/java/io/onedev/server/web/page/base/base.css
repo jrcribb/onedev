@@ -881,3 +881,8 @@ span.keycap {
 .warning>.close {
 	font-size: 1.3rem;
 }
+
+a.disabled[data-tippy-content] {
+	pointer-events:auto;
+	cursor:default;	
+}

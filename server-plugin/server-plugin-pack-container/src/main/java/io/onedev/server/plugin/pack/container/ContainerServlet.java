@@ -46,7 +46,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.exception.ExceptionUtils;
-import io.onedev.server.exception.NotAcceptableException;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Pack;
 import io.onedev.server.model.PackBlob;
@@ -280,9 +279,9 @@ public class ContainerServlet extends HttpServlet {
 						var projectId = sessionService.call(() -> checkProject(projectPath, true).getId());
 						var baos = new ByteArrayOutputStream();
 						try (var is = request.getInputStream()) {
-							copyWithMaxSize(is, baos, MAX_MANIFEST_SIZE);
-						} catch (NotAcceptableException e) {
-							throw new ClientException(SC_NOT_ACCEPTABLE, ErrorCode.DENIED, "Error copying manifest: " + e.getMessage());
+							var copied = copyWithMaxSize(is, baos, MAX_MANIFEST_SIZE);
+							if (copied == -1)
+								throw new ClientException(SC_NOT_ACCEPTABLE, ErrorCode.DENIED, "Manifest exceeds maximum size: " + MAX_MANIFEST_SIZE);
 						}
 
 						var bytes = baos.toByteArray();

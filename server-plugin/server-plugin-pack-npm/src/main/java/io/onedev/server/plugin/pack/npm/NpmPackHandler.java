@@ -46,7 +46,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.exception.NotAcceptableException;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Pack;
 import io.onedev.server.model.PackBlob;
@@ -191,9 +190,9 @@ public class NpmPackHandler implements PackHandler {
 								if (isPut) {
 									var baos = new ByteArrayOutputStream();
 									try (var is = request.getInputStream()) {
-										copyWithMaxSize(is, baos, MAX_TAG_BODY_LEN);
-									} catch (NotAcceptableException e) {
-										throw new ClientException(SC_NOT_ACCEPTABLE, "Error copying tag body: " + e.getMessage());
+										var copied = copyWithMaxSize(is, baos, MAX_TAG_BODY_LEN);
+										if (copied == -1)
+											throw new ClientException(SC_NOT_ACCEPTABLE, "Tag body exceeds maximum size: " + MAX_TAG_BODY_LEN);
 									} catch (IOException e) {
 										throw new RuntimeException(e);
 									}
@@ -346,7 +345,9 @@ public class NpmPackHandler implements PackHandler {
 					});
 					try (var is = request.getInputStream()) {
 						var baos = new ByteArrayOutputStream();
-						copyWithMaxSize(is, baos, MAX_UPLOAD_METADATA_LEN);
+						var copied = copyWithMaxSize(is, baos, MAX_UPLOAD_METADATA_LEN);
+						if (copied == -1)
+							throw new ClientException(SC_NOT_ACCEPTABLE, "Package metadata exceeds maximum size: " + MAX_UPLOAD_METADATA_LEN);
 
 						var packageMetadata = readJson(baos.toByteArray());
 
@@ -456,8 +457,6 @@ public class NpmPackHandler implements PackHandler {
 								});
 							}
 						}
-					} catch (NotAcceptableException e) {
-						throw new ClientException(SC_NOT_ACCEPTABLE, "Error copying package metadata: " + e.getMessage());
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}

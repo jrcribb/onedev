@@ -89,7 +89,6 @@ import io.onedev.server.ai.ToolExecutionResult;
 import io.onedev.server.attachment.AttachmentStorageSupport;
 import io.onedev.server.entityreference.EntityReference;
 import io.onedev.server.entityreference.PullRequestReference;
-import io.onedev.server.exception.NotAcceptableException;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.CommitMessageError;
 import io.onedev.server.git.service.GitService;
@@ -117,7 +116,6 @@ import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.util.PullRequestAware;
 import io.onedev.server.web.util.TextUtils;
 import io.onedev.server.web.util.WicketUtils;
-import io.onedev.server.workspace.WorkspaceService;
 import io.onedev.server.xodus.VisitInfoService;
 
 @Entity
@@ -1056,10 +1054,6 @@ public class PullRequest extends ProjectBelonging
 	private GitService getGitService() {
 		return OneDev.getInstance(GitService.class);
 	}
-
-	private WorkspaceService getWorkspaceService() {
-		return OneDev.getInstance(WorkspaceService.class);
-	}
 	
 	public static String getChangeObservable(Long requestId) {
 		return PullRequest.class.getName() + ":" + requestId;
@@ -1279,8 +1273,6 @@ public class PullRequest extends ProjectBelonging
 			return _T("Source branch no longer exists");
 		if (getSource().isDefault())
 			return _T("Source branch is default branch");
-		if (getWorkspaceService().count(getSourceProject(), getSourceBranch()) > 0)
-			return _T("There are workspaces on source branch");
 		MergePreview preview = checkMergePreview();
 		if (preview == null)
 			return _T("Merge preview not calculated yet");
@@ -1581,15 +1573,12 @@ public class PullRequest extends ProjectBelonging
 						return new ToolExecutionResult(convertToJson(Map.of("successful", false, "failReason", "Argument 'reason' is required")), false);
 					var reason = arguments.get("reason").asText();
 
-					try {
-						getPullRequestReviewService().review(user, request, true, reason);
-						return new ToolExecutionResult(convertToJson(Map.of("successful", true)), false);
-					} catch (NotAcceptableException e) {
-						var data = Map.of(
-							"successful", false, 
-							"failReason", "You are not a reviewer and is not allowed to approve this pull request. Add your option as comment instead");
-						return new ToolExecutionResult(convertToJson(data), false);
-					}
+					var result = checkReviewer(request, user);
+					if (result != null)
+						return result;
+
+					getPullRequestReviewService().review(user, request, true, reason);
+					return new ToolExecutionResult(convertToJson(Map.of("successful", true)), false);
 				}
 
 			});
@@ -1619,21 +1608,31 @@ public class PullRequest extends ProjectBelonging
 						return new ToolExecutionResult(convertToJson(Map.of("successful", false, "failReason", "Argument 'reason' is required")), false);
 					var reason = arguments.get("reason").asText();
 
-					try {
-						getPullRequestReviewService().review(user, request, false, reason);
-						return new ToolExecutionResult(convertToJson(Map.of("successful", true)), false);
-					} catch (NotAcceptableException e) {
-						var data = Map.of(
-							"successful", false, 
-							"failReason", e.getMessage());
-						return new ToolExecutionResult(convertToJson(data), false);
-					}
+					var result = checkReviewer(request, user);
+					if (result != null)
+						return result;
+
+					getPullRequestReviewService().review(user, request, false, reason);
+					return new ToolExecutionResult(convertToJson(Map.of("successful", true)), false);
 				}
 
 			});
 		}
 		tools.addAll(getDiffTools(projectId, oldCommitId, newCommitId, requestId));
 		return tools;
+	}
+
+	@Nullable
+	private ToolExecutionResult checkReviewer(PullRequest request, User user) {
+		var review = request.getReview(user);
+		if (review == null || review.getStatus() == PullRequestReview.Status.EXCLUDED) {
+			var data = Map.of(
+				"successful", false, 
+				"failReason", "You are not a reviewer and is not allowed to approve this pull request. Add your option as comment instead");
+			return new ToolExecutionResult(convertToJson(data), false);
+		} else {
+			return null;
+		}
 	}
 
 	private static PullRequestService getPullRequestService() {

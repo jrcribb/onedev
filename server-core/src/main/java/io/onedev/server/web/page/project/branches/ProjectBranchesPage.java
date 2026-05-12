@@ -573,8 +573,10 @@ public class ProjectBranchesPage extends ProjectPage {
 						tag.append("class", "disabled", " ");
 						if (getProject().getDefaultBranch().equals(branch)) {
 							tag.put("data-tippy-content", _T("Cannot delete default branch"));
-						} else {
+						} else if (getProject().getBranchProtection(branch, getLoginUser()).isPreventDeletion()) {
 							tag.put("data-tippy-content", _T("Deletion not allowed due to branch protection rule"));
+						} else {
+							tag.put("data-tippy-content", _T("Cannot delete branch as it has workspaces"));
 						}
 					}
 
@@ -598,18 +600,13 @@ public class ProjectBranchesPage extends ProjectPage {
 
 							@Override
 							public void onClick(AjaxRequestTarget target) {
-								if (workspaceService.count(getProject(), branch) > 0) {
-									getSession().error(MessageFormat.format(
-											_T("Cannot delete branch \"{0}\" as there are workspaces on it"), branch));
-								} else {							
-									projectService.deleteBranch(getProject(), branch);
-									getSession().success(MessageFormat.format(_T("Branch \"{0}\" deleted"), branch));
-									if (branch.equals(baseBranch)) {
-										baseBranch = getProject().getDefaultBranch();
-										target.add(baseChoice);
-									}
-									target.add(branchesTable);
+								projectService.deleteBranch(getProject(), branch);
+								getSession().success(MessageFormat.format(_T("Branch \"{0}\" deleted"), branch));
+								if (branch.equals(baseBranch)) {
+									baseBranch = getProject().getDefaultBranch();
+									target.add(baseChoice);
 								}
+								target.add(branchesTable);
 								modal.close();
 							}
 							
@@ -640,10 +637,9 @@ public class ProjectBranchesPage extends ProjectPage {
 
 						Project project = getProject();
 						if (SecurityUtils.canWriteCode(project)) {
-							if (project.getDefaultBranch().equals(branch)) 
-								setEnabled(false);
-							else 
-								setEnabled(!project.getBranchProtection(branch, getLoginUser()).isPreventDeletion());
+							setEnabled(!project.getDefaultBranch().equals(branch) 
+									&& !project.getBranchProtection(branch, getLoginUser()).isPreventDeletion()
+									&& workspaceService.count(project, branch) == 0);
 						} else {
 							setVisible(false);
 						}

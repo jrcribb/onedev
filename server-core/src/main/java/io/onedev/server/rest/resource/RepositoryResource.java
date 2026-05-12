@@ -61,7 +61,6 @@ import io.onedev.server.search.commit.CommitQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.ProjectService;
 import io.onedev.server.util.RevisionAndPath;
-import io.onedev.server.workspace.WorkspaceService;
 
 @Path("/repositories")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -76,9 +75,6 @@ public class RepositoryResource {
 
 	@Inject
 	private GitService gitService;
-
-	@Inject
-	private WorkspaceService workspaceService;
 	
 	@Inject
 	private ObjectMapper objectMapper;
@@ -184,10 +180,6 @@ public class RepositoryResource {
 		if (!SecurityUtils.canDeleteBranch(project, branchName)) 
 			throw new UnauthorizedException();
 		
-		if (workspaceService.count(project, branchName) > 0) {
-			throw new NotAcceptableException("Cannot delete branch '" + branchName + "' as there are workspaces on it");
-		}
-
 		projectService.deleteBranch(project, branchName);
 
 		return Response.ok().build();

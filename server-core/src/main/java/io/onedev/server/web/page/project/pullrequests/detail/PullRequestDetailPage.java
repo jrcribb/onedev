@@ -76,7 +76,6 @@ import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entityreference.EntityReference;
 import io.onedev.server.entityreference.LinkTransformer;
-import io.onedev.server.exception.NotAcceptableException;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.git.service.RefFacade;
@@ -173,6 +172,7 @@ import io.onedev.server.web.util.PullRequestAware;
 import io.onedev.server.web.util.TextUtils;
 import io.onedev.server.web.util.editbean.CommitMessageBean;
 import io.onedev.server.web.util.editbean.LabelsBean;
+import io.onedev.server.workspace.WorkspaceService;
 import io.onedev.server.xodus.VisitInfoService;
 
 public abstract class PullRequestDetailPage extends ProjectPage implements PullRequestAware, ChatToolAware {
@@ -217,6 +217,9 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 	@Inject
 	private UserService userService;
+
+	@Inject
+	private WorkspaceService workspaceService;
 
 	@Inject
 	private SettingService settingService;
@@ -2129,11 +2132,16 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					@Override
 					protected String operate(AjaxRequestTarget target) {
 						if (canOperate()) {
-							try {
-								pullRequestService.merge(SecurityUtils.getUser(), getPullRequest(), getCommitMessage());
-							} catch (NotAcceptableException exception) {
-								return exception.getMessage();
+							var request = getPullRequest();
+							var branchProtection = getProject().getBranchProtection(request.getTargetBranch(), request.getSubmitter());
+							var commitMessage = getCommitMessage();
+							if (commitMessage != null) {
+								var errorMessage = branchProtection.checkCommitMessage(commitMessage,
+										request.getMergeStrategy() != SQUASH_SOURCE_BRANCH_COMMITS);
+								if (errorMessage != null)
+									return errorMessage;
 							}
+							pullRequestService.merge(SecurityUtils.getUser(), getPullRequest(), commitMessage);
 							notifyPullRequestChange(target);
 							return null;
 						} else {
@@ -2221,6 +2229,13 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 		operationsContainer.add(new ModalLink("deleteSourceBranch") {
 
+			@Override
+			protected void disableLink(ComponentTag tag) {
+				super.disableLink(tag);
+				tag.append("class", "disabled", " ");
+				tag.put("data-tippy-content", _T("Cannot delete source branch as it has workspaces"));
+			}
+
 			private boolean canOperate() {
 				PullRequest request = getPullRequest();
 				return request.checkDeleteSourceBranchCondition() == null
@@ -2231,7 +2246,12 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(canOperate());
+				if (canOperate()) {
+					setVisible(true);
+					setEnabled(workspaceService.count(getPullRequest().getSourceProject(), getPullRequest().getSourceBranch()) == 0); 
+				} else {
+					setVisible(false);
+				}
 			}
 
 			@Override

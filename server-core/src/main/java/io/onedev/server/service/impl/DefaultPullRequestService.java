@@ -149,6 +149,7 @@ import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.facade.EmailAddressFacade;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
 import io.onedev.server.web.util.StatsGroup;
+import io.onedev.server.workspace.WorkspaceService;
 import io.onedev.server.xodus.CommitInfoService;
 import io.onedev.server.xodus.PullRequestInfoService;
 
@@ -186,6 +187,9 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 
 	@Inject
 	private CommitInfoService commitInfoService;
+
+	@Inject
+	private WorkspaceService workspaceService;
 
 	@Inject
 	private PullRequestChangeService changeService;
@@ -390,9 +394,20 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 		gitService.updateRef(project, request.getTargetRef(), mergeCommitId,
 				ObjectId.fromString(mergePreview.getTargetHeadCommitHash()));
 
-		if (project.findDeleteBranchAfterPullRequestMerge()
-				&& request.checkDeleteSourceBranchCondition() == null
-				&& SecurityUtils.canDeleteBranch(user.asSubject(), request.getSourceProject(), request.getSourceBranch())) {
+		if (project.findDeleteBranchAfterPullRequestMerge()) {
+			if (!SecurityUtils.canDeleteBranch(user.asSubject(), request.getSourceProject(), request.getSourceBranch())) {
+				logger.warn("User {} does not have permission to delete source branch after pull request merge", user.getName());
+				return;
+			}
+			errorMessage = request.checkDeleteSourceBranchCondition();
+			if (errorMessage != null) {
+				logger.warn("Unable to delete source branch after pull request merge: {}", errorMessage);
+				return;
+			}
+			if (workspaceService.count(request.getSourceProject(), request.getSourceBranch()) > 0) {
+				logger.warn("Cannot delete source branch after pull request merge as it has workspaces");
+				return;
+			}
 			projectService.deleteBranch(request.getSourceProject(), request.getSourceBranch());
 		}
 	}

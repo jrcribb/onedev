@@ -60,7 +60,6 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.exception.NotAcceptableException;
 import io.onedev.server.model.Pack;
 import io.onedev.server.model.PackBlob;
 import io.onedev.server.model.Project;
@@ -226,14 +225,15 @@ public class NugetPackHandler implements PackHandler {
 								while ((entry = is.getNextEntry()) != null) {
 									if (!entry.getName().contains("/") && entry.getName().endsWith(".nuspec")) {
 										var baos = new ByteArrayOutputStream();
-										copyWithMaxSize(is, baos, MAX_NUSPEC_SIZE);
+										var copied = copyWithMaxSize(is, baos, MAX_NUSPEC_SIZE);
+										if (copied == -1) {
+											logger.warn("Package metadata exceeds maximum size: " + MAX_NUSPEC_SIZE);
+											throw new ClientException(SC_NOT_ACCEPTABLE);
+										}
 										metadataBytes = baos.toByteArray();
 										break;
 									}
 								}
-							} catch (NotAcceptableException e) {
-								logger.warn("Error copying package metadata: " + e.getMessage());
-								throw new ClientException(SC_NOT_ACCEPTABLE);
 							}
 							if (metadataBytes == null) {
 								logger.warn("Package metadata not found");

@@ -116,6 +116,7 @@ import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.event.system.SystemStopped;
 import io.onedev.server.event.system.SystemStopping;
+import io.onedev.server.exception.NotAcceptableException;
 import io.onedev.server.git.CommandUtils;
 import io.onedev.server.git.GitTask;
 import io.onedev.server.git.GitUtils;
@@ -968,6 +969,8 @@ public class DefaultProjectService extends BaseEntityService<Project>
 	@Transactional
 	@Override
 	public void deleteBranch(Project project, String branchName) {
+		if (workspaceService.count(project, branchName) > 0) 
+			throw new NotAcceptableException("Cannot delete this branch as it has workspaces");
 		onDeleteBranch(project, branchName);
 		gitService.deleteBranch(project, branchName);
 	}

@@ -58,7 +58,6 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.exception.NotAcceptableException;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Pack;
 import io.onedev.server.model.PackBlob;
@@ -148,15 +147,15 @@ public class GemPackHandler implements PackHandler {
 					while ((entry = is.getNextTarEntry()) != null) {
 						if (entry.getName().equals("metadata.gz")) {
 							var baos = new ByteArrayOutputStream();
-							copyWithMaxSize(new GZIPInputStream(is), baos, MAX_METADATA_SIZE);
+							var copied = copyWithMaxSize(new GZIPInputStream(is), baos, MAX_METADATA_SIZE);
+							if (copied == -1)
+								throw new ClientException(SC_NOT_ACCEPTABLE, "Metadata exceeds maximum size: " + MAX_METADATA_SIZE);
 							metadataBytes = baos.toByteArray();
 							break;
 						}
 					}
 				} catch (IOException e) {
 					throw new RuntimeException(e);
-				} catch (NotAcceptableException e) {
-					throw new ClientException(SC_NOT_ACCEPTABLE, "Error copying metadata: " + e.getMessage());
 				}
 				if (metadataBytes == null)
 					throw new ClientException(SC_BAD_REQUEST, "Metadata not found");
