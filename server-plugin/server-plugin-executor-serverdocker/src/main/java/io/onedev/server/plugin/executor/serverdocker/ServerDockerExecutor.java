@@ -37,8 +37,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.jspecify.annotations.Nullable;
 
-import com.google.common.base.Preconditions;
-
 import io.onedev.agent.AgentUtils;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.bootstrap.SecretMasker;
@@ -125,9 +123,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 	private transient volatile LeafFacade runningStep;
 	
 	private transient volatile String containerName;
-	
-	private static volatile String hostInstallPath;
-	
+		
 	@Editable(order=400, description="Specify registry logins if necessary. For built-in registry, " +
 			"use <code>@server_url@</code> for registry url, <code>@job_token@</code> for user name, and " +
 			"access token for password")
@@ -673,16 +669,10 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 	}
 	
 	private String getHostPath(String path) {
-		String installPath = Bootstrap.installDir.getAbsolutePath();
-		Preconditions.checkState(path.startsWith(installPath + "/")
-				|| path.startsWith(installPath + "\\"));
-		if (hostInstallPath == null) {
-			if (Bootstrap.isInDocker()) 
-				hostInstallPath = AgentUtils.getHostPath(newDocker(), installPath);
-			else 
-				hostInstallPath = installPath;
-		}
-		return hostInstallPath + path.substring(installPath.length());
+		if (Bootstrap.isInDocker()) 
+			return AgentUtils.getHostPath(newDocker(), path);
+		else 
+			return path;
 	}
 	
 	@Override

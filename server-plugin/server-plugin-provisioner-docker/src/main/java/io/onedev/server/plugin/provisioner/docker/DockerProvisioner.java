@@ -97,8 +97,6 @@ public class DockerProvisioner extends WorkspaceProvisioner implements DockerAwa
 
 	private String memoryLimit;
 
-	private static volatile String hostInstallPath;
-
 	@Editable(order=400, description="Specify registry logins if necessary. For built-in registry, " +
 			"use <code>@server_url@</code> for registry url, <code>@job_token@</code> for user name, and " +
 			"access token for password")
@@ -216,15 +214,10 @@ public class DockerProvisioner extends WorkspaceProvisioner implements DockerAwa
 	}
 
 	private String getHostPath(String path) {
-		String installPath = Bootstrap.installDir.getAbsolutePath();
-		Preconditions.checkState(path.startsWith(installPath + "/") || path.startsWith(installPath + "\\"));
-		if (hostInstallPath == null) {
-			if (Bootstrap.isInDocker())
-				hostInstallPath = AgentUtils.getHostPath(newDocker(), installPath);
-			else
-				hostInstallPath = installPath;
-		}
-		return hostInstallPath + path.substring(installPath.length());
+		if (Bootstrap.isInDocker()) 
+			return AgentUtils.getHostPath(newDocker(), path);
+		else 
+			return path;
 	}
 
 	private List<RegistryLoginFacade> getRegistryLoginFacades(String token) {
