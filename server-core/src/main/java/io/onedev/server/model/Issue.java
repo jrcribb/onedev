@@ -1,7 +1,6 @@
 package io.onedev.server.model;
 
 import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
-import static io.onedev.server.ai.ToolUtils.convertToJson;
 import static io.onedev.server.model.AbstractEntity.PROP_NUMBER;
 import static io.onedev.server.model.Issue.PROP_BOARD_POSITION;
 import static io.onedev.server.model.Issue.PROP_COMMENT_COUNT;
@@ -59,8 +58,6 @@ import javax.persistence.UniqueConstraint;
 import javax.validation.ValidationException;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.authz.UnauthorizedException;
-import org.apache.shiro.subject.Subject;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.hibernate.annotations.Cache;
@@ -69,18 +66,13 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.jspecify.annotations.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import dev.langchain4j.agent.tool.ToolSpecification;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.ai.IssueHelper;
-import io.onedev.server.ai.TaskTool;
-import io.onedev.server.ai.ToolExecutionResult;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.attachment.AttachmentStorageSupport;
 import io.onedev.server.buildspecmodel.inputspec.Input;
@@ -99,7 +91,6 @@ import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.search.entity.IssueSortField;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.GroupService;
-import io.onedev.server.service.IssueService;
 import io.onedev.server.service.PullRequestService;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.service.UrlService;
@@ -1398,48 +1389,6 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 		return Emojis.getInstance().apply(getTitle()) + " (" + getReference().toString(currentProject)+ ")";		
 	}
 	
-	public List<TaskTool> getTools() {
-		var issueId = getId();
-		return List.of(new TaskTool() {
-
-			@Override
-			public ToolSpecification getSpecification() {
-				return ToolSpecification.builder()
-					.name("getCurrentIssue")
-					.description("Get info of current issue in json format")
-					.build();
-			}
-
-			@Override
-			public ToolExecutionResult execute(Subject subject, JsonNode arguments) {
-				var issue = getIssue(issueId);
-				if (!SecurityUtils.canAccessIssue(subject, issue))
-					throw new UnauthorizedException();
-				return new ToolExecutionResult(convertToJson(IssueHelper.getDetail(subject, issue.getProject(), issue)), false);
-			}
-			
-		},
-		new TaskTool() {
-
-			@Override
-			public ToolSpecification getSpecification() {
-				return ToolSpecification.builder()
-					.name("getCurrentIssueComments")
-					.description("Get comments of current issue in json format")
-					.build();
-			}
-
-			@Override
-			public ToolExecutionResult execute(Subject subject, JsonNode arguments) {
-				var issue = getIssue(issueId);
-				if (!SecurityUtils.canAccessIssue(subject, issue))
-					throw new UnauthorizedException();
-				return new ToolExecutionResult(convertToJson(IssueHelper.getComments(issue)), false);
-			}
-			
-		});
-	}
-
 	@Nullable
 	public String getBranch() {
 		if (branchOptional == null) {
@@ -1457,8 +1406,4 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 		return branchOptional.orElse(null);
 	}
 
-	private static Issue getIssue(Long issueId) {
-		return OneDev.getInstance(IssueService.class).load(issueId);
-	}
-	
 }

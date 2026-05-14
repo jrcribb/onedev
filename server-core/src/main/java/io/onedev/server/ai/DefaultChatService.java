@@ -217,6 +217,15 @@ public class DefaultChatService extends BaseEntityService<Chat> implements ChatS
 
 					private final Set<String> loggedToolCalls = new HashSet<>();
 
+					private boolean thinkingBlockOpen;
+
+					private String ensureThinkingClosed(String content) {
+						if (!thinkingBlockOpen)
+							return content;
+						thinkingBlockOpen = false;
+						return content + "</div>\n\n";
+					}
+
 					private void updateRespondingContent(StreamingHandle streamingHandle, String partialContent) {
 						ThreadContext.bind(subject);				
 						if (responseFuture.isDone()) {
@@ -227,6 +236,7 @@ public class DefaultChatService extends BaseEntityService<Chat> implements ChatS
 								var content = responding.getContent();
 								if (content == null)
 									content = "";
+								content = ensureThinkingClosed(content);
 								content += partialContent;
 								responding.content = content;
 								webSocketService.notifyObservableChange(Chat.getPartialResponseObservable(chatId), null);
@@ -240,10 +250,25 @@ public class DefaultChatService extends BaseEntityService<Chat> implements ChatS
 					}				
 					
 					@Override
-					public void onPartialThinking(PartialThinking partialThinking, PartialThinkingContext context) {				
+					public void onPartialThinking(PartialThinking partialThinking, PartialThinkingContext context) {
 						ThreadContext.bind(subject);
-						if (responseFuture.isDone())
+						if (responseFuture.isDone()) {
 							context.streamingHandle().cancel();
+						} else {
+							var responding = getResponding(sessionId, chatId, requestId);
+							if (responding != null) {
+								var content = responding.getContent();
+								if (content == null)
+									content = "";
+								if (!thinkingBlockOpen) {
+									content += "\n\n<div class='text-muted fst-italic border-start ps-2 mb-2'>";
+									thinkingBlockOpen = true;
+								}
+								content += partialThinking.text();
+								responding.content = content;
+								webSocketService.notifyObservableChange(Chat.getPartialResponseObservable(chatId), null);
+							}
+						}
 					}
 
 					@Override
@@ -261,6 +286,7 @@ public class DefaultChatService extends BaseEntityService<Chat> implements ChatS
 										content = "";
 									else 
 										content += "\n\n";
+									content = ensureThinkingClosed(content);
 									
 									content += "<div class='text-muted'>Calling tool \"" + partialToolCall.name() + "\"...</div>\n\n";
 									
@@ -274,6 +300,11 @@ public class DefaultChatService extends BaseEntityService<Chat> implements ChatS
 					@Override
 					public void onCompleteResponse(ChatResponse completeResponse) {	
 						ThreadContext.bind(subject);
+						var responding = getResponding(sessionId, chatId, requestId);
+						if (responding != null && responding.getContent() != null && thinkingBlockOpen) {
+							responding.content = ensureThinkingClosed(responding.getContent());
+							webSocketService.notifyObservableChange(Chat.getPartialResponseObservable(chatId), null);
+						}
 						sessionService.runAsync(() -> {
 							try {
 								var aiMessage = completeResponse.aiMessage();
@@ -354,7 +385,12 @@ public class DefaultChatService extends BaseEntityService<Chat> implements ChatS
 
 					@Override
 					public void onError(Throwable error) {
-						ThreadContext.bind(subject);				
+						ThreadContext.bind(subject);
+						var responding = getResponding(sessionId, chatId, requestId);
+						if (responding != null && responding.getContent() != null && thinkingBlockOpen) {
+							responding.content = ensureThinkingClosed(responding.getContent());
+							webSocketService.notifyObservableChange(Chat.getPartialResponseObservable(chatId), null);
+						}
 						responseFuture.completeExceptionally(error);
 					}
 

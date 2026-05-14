@@ -236,7 +236,7 @@ public class Translate extends CommandHandler {
 			var model = OpenAiChatModel.builder()
 					.apiKey(apiKey)
 					.baseUrl(baseUrl)
-					.modelName("gpt-4o")
+					.modelName("openai/gpt-4o")
 					.temperature(0.0)
 					.timeout(Duration.ofSeconds(30))
 					.build();

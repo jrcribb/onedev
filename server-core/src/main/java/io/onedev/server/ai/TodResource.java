@@ -58,8 +58,6 @@ import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.job.JobService;
 import io.onedev.server.model.Build;
-import io.onedev.server.model.CodeCommentReply;
-import io.onedev.server.model.CodeCommentStatusChange;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.IssueLink;
@@ -98,9 +96,7 @@ import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.BuildService;
-import io.onedev.server.service.CodeCommentReplyService;
 import io.onedev.server.service.CodeCommentService;
-import io.onedev.server.service.CodeCommentStatusChangeService;
 import io.onedev.server.service.IssueChangeService;
 import io.onedev.server.service.IssueCommentService;
 import io.onedev.server.service.IssueLinkService;
@@ -188,12 +184,6 @@ public class TodResource {
 
     @Inject
     private CodeCommentService codeCommentService;
-
-    @Inject
-    private CodeCommentReplyService codeCommentReplyService;
-
-    @Inject
-    private CodeCommentStatusChangeService codeCommentStatusChangeService;
 
     @Inject
     private BuildService buildService;
@@ -1568,68 +1558,24 @@ public class TodResource {
     public Map<String, Object> addCodeCommentReply(
                 @QueryParam("commentId") @NotNull Long commentId,
                 @NotNull String replyContent) {
-        var user = SecurityUtils.getUser();
-        if (user == null)
-            throw new UnauthenticatedException();
-
         var comment = codeCommentService.load(commentId);
-        if (!SecurityUtils.canReadCode(comment.getProject()))
-            throw new UnauthorizedException();
-
-        var reply = new CodeCommentReply();
-        reply.setComment(comment);
-        reply.setContent(replyContent);
-        reply.setUser(user);
-        reply.setDate(new Date());
-        reply.setCompareContext(comment.getCompareContext());
-        codeCommentReplyService.create(reply);
-
-        return CodeCommentHelper.getDetail(reply);
+        return CodeCommentHelper.addReply(SecurityUtils.getSubject(), comment, replyContent);
     }
 
     @Path("/resolve-code-comment")
     @Consumes(MediaType.TEXT_PLAIN)
     @POST
     public Map<String, Object> resolveCodeComment(@QueryParam("commentId") @NotNull Long commentId, String note) {
-        var user = SecurityUtils.getUser();
-        if (user == null)
-            throw new UnauthenticatedException();
-
         var comment = codeCommentService.load(commentId);
-        if (!SecurityUtils.canWriteCode(comment.getProject()))
-            throw new UnauthorizedException();
-
-        var statusChange = new CodeCommentStatusChange();
-        statusChange.setComment(comment);
-        statusChange.setUser(user);
-        statusChange.setResolved(true);
-        statusChange.setCompareContext(comment.getCompareContext());
-        codeCommentStatusChangeService.create(statusChange, note);
-
-        return CodeCommentHelper.getDetail(comment);
+        return CodeCommentHelper.changeStatus(SecurityUtils.getSubject(), comment, true, note);
     }
 
     @Path("/unresolve-code-comment")
     @Consumes(MediaType.TEXT_PLAIN)
     @POST
     public Map<String, Object> unresolveCodeComment(@QueryParam("commentId") @NotNull Long commentId, String note) {
-        var user = SecurityUtils.getUser();
-        if (user == null)
-            throw new UnauthenticatedException();
-
         var comment = codeCommentService.load(commentId);
-        if (!SecurityUtils.canWriteCode(comment.getProject()))
-            throw new UnauthorizedException();
-
-        var statusChange = new CodeCommentStatusChange();
-        statusChange.setComment(comment);
-        statusChange.setUser(user);
-        statusChange.setDate(new Date(System.currentTimeMillis() + 1000));
-        statusChange.setResolved(false);
-        statusChange.setCompareContext(comment.getCompareContext());
-        codeCommentStatusChangeService.create(statusChange, note);
-
-        return CodeCommentHelper.getDetail(comment);
+        return CodeCommentHelper.changeStatus(SecurityUtils.getSubject(), comment, false, note);
     }
 
     @SuppressWarnings("unchecked")

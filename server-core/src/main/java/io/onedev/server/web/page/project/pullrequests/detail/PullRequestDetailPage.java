@@ -71,6 +71,10 @@ import com.google.common.collect.Sets;
 
 import io.onedev.server.ai.ChatTool;
 import io.onedev.server.ai.ChatToolAware;
+import io.onedev.server.ai.TaskTool;
+import io.onedev.server.ai.ToolUtils;
+import io.onedev.server.ai.tools.pullrequest.GetPullRequestComments;
+import io.onedev.server.ai.tools.pullrequest.GetPullRequest;
 import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.data.migration.VersionedXmlDoc;
@@ -2441,7 +2445,16 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 	@Override
 	public List<ChatTool> getChatTools() {
-		return wrapForChat(getPullRequest().getTools(false));
+		var pr = getPullRequest();
+		var tools = new ArrayList<TaskTool>();
+		var requestId = pr.getId();
+		var projectId = pr.getProject().getId();
+		var oldCommitId = ObjectId.fromString(pr.getBaseCommitHash());
+		var newCommitId = ObjectId.fromString(pr.getLatestUpdate().getHeadCommitHash());
+		tools.add(new GetPullRequest(requestId));
+		tools.add(new GetPullRequestComments(requestId));
+		tools.addAll(ToolUtils.getDiffTools(projectId, oldCommitId, newCommitId, requestId));
+		return wrapForChat(tools);
 	}
 
 }

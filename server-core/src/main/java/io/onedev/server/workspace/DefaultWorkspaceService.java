@@ -1065,7 +1065,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 
 	private static class ReplayBuffer {
 
-		private static final int MAX_TOTAL_CHARS = 64 * 1024;
+		private static final int MAX_TOTAL_CHARS = 16 * 1024;
 
 		private final ArrayDeque<String> chunks = new ArrayDeque<>();
 

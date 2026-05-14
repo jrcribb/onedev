@@ -158,6 +158,8 @@ public class AiModelSetting implements Serializable {
             .baseUrl(baseUrl)
             .modelName(name)
             .timeout(Duration.ofSeconds(timeoutSeconds))
+            .returnThinking(true)
+            .sendThinking(true)
             .build(); 
     }
 
@@ -168,6 +170,8 @@ public class AiModelSetting implements Serializable {
             .baseUrl(baseUrl)
             .modelName(name)
             .timeout(Duration.ofSeconds(timeoutSeconds))
+            .returnThinking(true)
+            .sendThinking(true)
             .build();
     }
 

@@ -8,7 +8,7 @@ import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
 import io.onedev.server.ai.ChatTool;
 import io.onedev.server.ai.ChatToolAware;
-import io.onedev.server.ai.tools.CommitDetailTool;
+import io.onedev.server.ai.tools.code.CommitDetailTool;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.codequality.CodeProblem;

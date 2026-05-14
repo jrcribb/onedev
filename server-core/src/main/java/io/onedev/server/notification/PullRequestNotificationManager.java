@@ -18,6 +18,7 @@ import javax.inject.Singleton;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 import org.apache.shiro.authz.Permission;
+import org.eclipse.jgit.lib.ObjectId;
 import org.jspecify.annotations.Nullable;
 
 import com.google.common.collect.Lists;
@@ -25,10 +26,19 @@ import com.google.common.collect.Sets;
 
 import io.onedev.server.ai.AiTask;
 import io.onedev.server.ai.TaskTool;
+import io.onedev.server.ai.ToolUtils;
 import io.onedev.server.ai.responsehandlers.AddCodeCommentReply;
 import io.onedev.server.ai.responsehandlers.AddPullRequestComment;
 import io.onedev.server.ai.taskchecker.NoopTaskChecker;
 import io.onedev.server.ai.taskchecker.PullRequestReviewTaskChecker;
+import io.onedev.server.ai.tools.codecomment.GetCodeComment;
+import io.onedev.server.ai.tools.codecomment.GetCodeCommentReplies;
+import io.onedev.server.ai.tools.codecomment.ResolveCodeComment;
+import io.onedev.server.ai.tools.codecomment.UnresolveCodeComment;
+import io.onedev.server.ai.tools.pullrequest.ApprovePullRequest;
+import io.onedev.server.ai.tools.pullrequest.GetPullRequest;
+import io.onedev.server.ai.tools.pullrequest.GetPullRequestComments;
+import io.onedev.server.ai.tools.pullrequest.RequestChangesForPullRequestTool;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.pullrequest.PullRequestAssigned;
 import io.onedev.server.event.project.pullrequest.PullRequestChanged;
@@ -71,6 +81,37 @@ import io.onedev.server.xodus.VisitInfoService;
 
 @Singleton
 public class PullRequestNotificationManager {
+
+	private static final String AI_REVIEW_DECISION_TOOLS = """
+			one of these tools, and call it only once: `{0}` if you are satisfied with the change, or `{1}` if you \
+			think it needs more work. If you are unsure, explain what is unclear via final response""";
+
+	private static final String AI_PROMPT_MENTIONED_IN_PULL_REQUEST = """
+			You are mentioned in a pull request. The content mentioning you is presented as user \
+			prompt. Use existing comments as conversation context. Use getPullRequest for PR details; \
+			use getDiffPatch, getFileContent, querySymbolDefinitions, or queryCodeSnippets as needed to \
+			inspect the change. When feedback should be tied to specific lines, use \
+			getPullRequestCodeComments and addPullRequestCodeComment \
+			(range on the right side of the diff, 1-based at PR head); use \
+			addCodeCommentReply, resolveCodeComment, or \
+			unresolveCodeComment to continue or triage existing code-comment threads.""";
+
+	private static final String AI_PROMPT_MENTIONED_IN_CODE_COMMENT = """
+			You are mentioned in a pull request code comment. The content mentioning you is presented \
+			as user prompt. Use existing comment and replies as conversation context. Call relevant \
+			tools to inspect associated pull request if necessary. Use resolveCodeComment or \
+			unresolveCodeComment when the discussion outcome is to close or reopen the thread""";
+
+	private static final String AI_PROMPT_REVIEW_PULL_REQUEST = """
+			Review current pull request. Use getPullRequest for PR details; use getDiffPatch, getFileContent, \
+			querySymbolDefinitions, and queryCodeSnippets as needed to inspect the change. \
+			Use getPullRequestComments and getPullRequestCodeComments for \
+			discussion context. Prefer line-anchored feedback: call addPullRequestCodeComment for \
+			each distinct issue (the line range must lie on the right side of the PR diff—added or \
+			unchanged context—using 1-based line numbers in the file at the PR head). To follow up on \
+			an existing anchor, use addCodeCommentReply with the comment id; use \
+			resolveCodeComment or unresolveCodeComment when a prior thread should be closed or reopened. \
+			""";
 
 	@Inject
 	private MailService mailService;
@@ -297,17 +338,12 @@ public class PullRequestNotificationManager {
 									replyAddress, senderName, threadingReferences);
 						}
 					} else if (isAiEntitled(null, request, reviewer)) {
+						var tools = new ArrayList<TaskTool>();
+						addPullRequestInspectionTools(tools, request, true, true);
 						var task = new AiTask(
 							null,
-							MessageFormat.format("""
-								Review current pull request for major issues (ignore styling/format/documentation issues) \
-								introduced in the change. Check full content of relevant files to understand the change \
-								if necessary. Check existing comments for conversation context. Record your final \
-								decision by calling one of these tools, and call it only once: `{0}` if you are satisfied \
-								with the change, or `{1}` if you think it needs more work. If you are unsure, explain \
-								what is unclear via final response""", 
-								PullRequest.APPROVE_TOOL_NAME, PullRequest.REQUEST_FOR_CHANGES_TOOL_NAME),
-							request.getTools(true), 
+							aiPromptReviewPullRequest(),
+							tools,
 							new PullRequestReviewTaskChecker(),
 							new AddPullRequestComment(request.getId()));
 						userService.execute(reviewer, task);
@@ -341,60 +377,41 @@ public class PullRequestNotificationManager {
 											replyAddress, senderName, threadingReferences);
 								}
 							} else if (isAiEntitled(user, request, mentionedUser)) {
-								if (event instanceof PullRequestOpened) {									
-									var systemPrompt = """
-										You are mentioned in a pull request. The content mentioning you is presented as user \
-										prompt. Use existing comments as conversation context. Call relevant tools to get \
-										information about the pull request if necessary""";
+								if (event instanceof PullRequestOpened) {
+									var tools = new ArrayList<TaskTool>();
+									addPullRequestInspectionTools(tools, request, false, true);
 									var task = new AiTask(
-										systemPrompt.formatted(mentionedUser.getName()), 
-										event.getTextBody(), 
-										request.getTools(false), 
+										AI_PROMPT_MENTIONED_IN_PULL_REQUEST,
+										event.getTextBody(),
+										tools,
 										new NoopTaskChecker(),
 										new AddPullRequestComment(request.getId()));
 									userService.execute(mentionedUser, task);
-								} else if (event instanceof PullRequestCommentCreated) {									
+								} else if (event instanceof PullRequestCommentCreated) {
 									var review = request.getReview(mentionedUser);
 									var pendingReview = review != null && review.getStatus() == PullRequestReview.Status.PENDING;
-									String systemPrompt;
-									if (pendingReview) {
-										systemPrompt = MessageFormat.format("""
-											You are mentioned in a pull request. The content mentioning you is presented as user \
-											prompt. Use existing comments as conversation context. Call relevant tools to get \
-											information about the pull request if necessary. 
-
-											If you are requested to review the pull request, check full content of relevant \
-											files to understand the change if necessary. Record your final decision by calling \
-											one of these tools, and call it only once: `{0}` if you are satisfied with the \
-											change, or `{1}` if you think it needs more work. If you are unsure, explain what \
-											is unclear via final response""", 
-											PullRequest.APPROVE_TOOL_NAME, PullRequest.REQUEST_FOR_CHANGES_TOOL_NAME);	
-									} else {
-										systemPrompt = """
-											You are mentioned in a pull request. The content mentioning you is presented as user \
-											prompt. Use existing comments as conversation context. Call relevant tools to get \
-											information about the pull request if necessary""";	
-									}
+									var tools = new ArrayList<TaskTool>();
+									addPullRequestInspectionTools(tools, request, pendingReview, true);
 									var task = new AiTask(
-										systemPrompt.formatted(mentionedUser.getName()), 
-										event.getTextBody(), 
-										request.getTools(pendingReview), 
+										aiPromptMentionedInPullRequest(pendingReview),
+										event.getTextBody(),
+										tools,
 										new PullRequestReviewTaskChecker(),
 										new AddPullRequestComment(request.getId()));
 									userService.execute(mentionedUser, task);
 								} else if (event instanceof PullRequestCodeCommentCreated || event instanceof PullRequestCodeCommentReplyCreated) {
-									String systemPrompt = """
-										You are mentioned in a pull request code comment. The content mentioning you is presented \
-										as user prompt. Use existing comments as conversation context. Call relevant tools to get \
-										information about the code comment and pull request if necessary""";
-									var tools = new ArrayList<TaskTool>(request.getTools(false));
+									var tools = new ArrayList<TaskTool>();
 									var codeCommentEvent = (PullRequestCodeCommentEvent) event;
 									var comment = codeCommentEvent.getComment();
-									tools.addAll(comment.getTools());			
+									tools.add(new GetCodeComment(comment.getId()));
+									tools.add(new GetCodeCommentReplies(comment.getId()));
+									tools.add(new ResolveCodeComment());
+									tools.add(new UnresolveCodeComment());
+									addPullRequestInspectionTools(tools, request, false, false);
 									var task = new AiTask(
-										systemPrompt.formatted(mentionedUser.getName()), 
-										event.getTextBody(), 
-										tools, 
+										aiPromptMentionedInCodeComment(false),
+										event.getTextBody(),
+										tools,
 										new NoopTaskChecker(),
 										new AddCodeCommentReply(comment.getId()));
 									userService.execute(mentionedUser, task);
@@ -446,6 +463,47 @@ public class PullRequestNotificationManager {
 				}
 			}			
 		}
+	}
+
+	private static String formatAiReviewDecisionTools() {
+		return MessageFormat.format(AI_REVIEW_DECISION_TOOLS,
+				ApprovePullRequest.TOOL_NAME, RequestChangesForPullRequestTool.TOOL_NAME);
+	}
+
+	private static String formatAiReviewDecisionWhenRequested() {
+		return "If you are requested to review the pull request, record your final decision by calling "
+				+ formatAiReviewDecisionTools();
+	}
+
+	private static String aiPromptMentionedInPullRequest(boolean pendingReview) {
+		if (pendingReview)
+			return AI_PROMPT_MENTIONED_IN_PULL_REQUEST + "\n\n" + formatAiReviewDecisionWhenRequested();
+		return AI_PROMPT_MENTIONED_IN_PULL_REQUEST;
+	}
+
+	private static String aiPromptMentionedInCodeComment(boolean pendingReview) {
+		if (pendingReview)
+			return AI_PROMPT_MENTIONED_IN_CODE_COMMENT + ".\n\n" + formatAiReviewDecisionWhenRequested();
+		return AI_PROMPT_MENTIONED_IN_CODE_COMMENT;
+	}
+
+	private static String aiPromptReviewPullRequest() {
+		return AI_PROMPT_REVIEW_PULL_REQUEST + "Record your final decision by calling " + formatAiReviewDecisionTools();
+	}
+
+	private static void addPullRequestInspectionTools(ArrayList<TaskTool> tools, PullRequest request,
+			boolean includeReviewTools, boolean includeCodeCommentTools) {
+		long requestId = request.getId();
+		var projectId = request.getProject().getId();
+		var oldCommitId = ObjectId.fromString(request.getBaseCommitHash());
+		var newCommitId = ObjectId.fromString(request.getLatestUpdate().getHeadCommitHash());
+		tools.add(new GetPullRequest(requestId));
+		tools.add(new GetPullRequestComments(requestId));
+		if (includeReviewTools)
+			tools.addAll(ToolUtils.getPullRequestReviewTools(requestId));
+		if (includeCodeCommentTools)
+			tools.addAll(ToolUtils.getPullRequestCodeCommentTools(requestId));
+		tools.addAll(ToolUtils.getDiffTools(projectId, oldCommitId, newCommitId, requestId));
 	}
 
 	private boolean isAiEntitled(@Nullable User user, PullRequest request, User ai) {

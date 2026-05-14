@@ -190,7 +190,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Add Rule", "ルールを追加");
 		m.put("Add SSH key", "SSHキーを追加");
 		m.put("Add SSO provider", "SSOプロバイダーを追加");
-		m.put("Add Spec", "スペックを追加");
 		m.put("Add Spent Time", "使用時間を追加");
 		m.put("Add Timesheet", "タイムシートを追加");
 		m.put("Add Widget", "ウィジェットを追加");
@@ -233,7 +232,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Add new service locator", "新しいサービスロケーターを追加");
 		m.put("Add new step", "新しいステップを追加");
 		m.put("Add new trigger", "新しいトリガーを追加");
-		m.put("Add new user config", "新しいユーザー設定を追加");
 		m.put("Add new user data", "新しいユーザーデータを追加");
 		m.put("Add project", "プロジェクトを追加");
 		m.put("Add reviewer...", "レビュアーを追加...");
@@ -452,11 +450,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Belonging Groups", "所属グループ");
 		m.put("Below are some common criterias. Type in search box above to view the complete list and available combinations.", 
 			"以下は一般的な条件です。上の検索ボックスに入力して完全なリストと利用可能な組み合わせを表示してください。");
-		m.put("Below content is restored from an unsaved change. <a class=\"clear-unsaved-change\">Clear</a> to discard", 
-			"以下の内容は未保存の変更から復元されました。<a class=\"clear-unsaved-change\">クリア</a>して破棄");
 		m.put("Below content is restored from an unsaved change. <a class=\"discard-unsaved-change\">Discard</a>", 
 			"以下の内容は未保存の変更から復元されました。<a class=\"discard-unsaved-change\">破棄</a>");
-		m.put("Below content is restored from an unsaved change. Clear to discard", "以下の内容は未保存の変更から復元されました。クリアして破棄してください");
 		m.put("Below information will also be sent", "以下の情報も送信されます");
 		m.put("Binary file", "バイナリファイル");
 		m.put("Binary file.", "バイナリファイル");
@@ -601,9 +596,17 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Can Be Used By Workspaces", "ワークスペースで使用可能");
 		m.put("Can Create Root Projects", "ルートプロジェクトを作成可能");
 		m.put("Can Edit Estimated Time", "推定時間を編集可能");
+		m.put("Can only compare with common ancestor when different projects are involved", "異なるプロジェクトが関与している場合、共通の祖先との比較のみ可能です");
+		m.put("Cancel", "キャンセル");
+		m.put("Cancel All Queried Builds", "クエリされたすべてのビルドをキャンセル");
+		m.put("Cancel Selected Builds", "選択されたビルドをキャンセル");
+		m.put("Cancel invitation", "招待をキャンセル");
+		m.put("Cancel request submitted", "キャンセルリクエストが送信されました");
+		m.put("Cancel this build", "このビルドをキャンセル");
+		m.put("Cancelled", "キャンセル済み");
+		m.put("Cancelled By", "キャンセルした人");
 		m.put("Cannot convert root user to service account", "ルートユーザーをサービスアカウントに変換できません");
 		m.put("Cannot convert yourself to service account", "自分自身をサービスアカウントに変換できません");
-		m.put("Cannot delete branch \"{0}\" as there are workspaces on it", "ブランチ\"{0}\"を削除できません。そこにワークスペースがあるためです");
 		m.put("Cannot delete default branch", "デフォルトブランチを削除できません");
 		m.put("Cannot delete root account", "ルートアカウントを削除できません");
 		m.put("Cannot delete yourself", "自分自身を削除できません");
@@ -617,15 +620,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Cannot reset password for user authenticating via external system", "外部システムで認証するユーザーのパスワードをリセットできません");
 		m.put("Cannot save malformed query", "不正なクエリを保存することはできません");
 		m.put("Cannot use current or descendant project as parent", "現在のプロジェクトまたは子孫プロジェクトを親として使用することはできません");
-		m.put("Can only compare with common ancestor when different projects are involved", "異なるプロジェクトが関与している場合、共通の祖先との比較のみ可能です");
-		m.put("Cancel", "キャンセル");
-		m.put("Cancel All Queried Builds", "クエリされたすべてのビルドをキャンセル");
-		m.put("Cancel Selected Builds", "選択されたビルドをキャンセル");
-		m.put("Cancel invitation", "招待をキャンセル");
-		m.put("Cancel request submitted", "キャンセルリクエストが送信されました");
-		m.put("Cancel this build", "このビルドをキャンセル");
-		m.put("Cancelled", "キャンセル済み");
-		m.put("Cancelled By", "キャンセルした人");
 		m.put("Case Sensitive", "大文字小文字を区別");
 		m.put("Certificates to Trust", "信頼する証明書");
 		m.put("Change", "変更");
@@ -669,7 +663,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Check Vulnerabilities", "脆弱性を確認");
 		m.put("Check Workflow Integrity", "ワークフローの整合性を確認");
 		m.put("Check out to local directory", "ローカルディレクトリにチェックアウト");
-		m.put("Check out to local workspace", "ローカルワークスペースにチェックアウト");
 		m.put("Check this to compare right side with common ancestor of left and right", "左側と右側の共通祖先と比較するにはこれをチェックしてください");
 		m.put("Check this to enforce two-factor authentication for all users in the system", "システム内のすべてのユーザーに対して二要素認証を強制するにはこれをチェックしてください");
 		m.put("Check this to enforce two-factor authentication for all users in this group", "このグループ内のすべてのユーザーに対して二要素認証を強制するにはこれをチェックしてください");
@@ -1013,8 +1006,6 @@ public class Translation_ja extends TranslationResourceBundle {
 			"ブランチ保護ルールを定義します。親プロジェクトで定義されたルールはここで定義されたルールの後に考慮されます。特定のブランチとユーザーに対して最初に一致するルールが適用されます");
 		m.put("Define default issue boards for all projects here. A certain project can override this setting to define its own issue boards.", 
 			"すべてのプロジェクトに対するデフォルトの課題ボードをここで定義します。特定のプロジェクトはこの設定を上書きして独自の課題ボードを定義できます");
-		m.put("Define how issue states should be transited from one to another, either manually or automatically when some events happen. And the rule can be configured to apply to certain projects and issues via the applicable issues setting", 
-			"課題状態がどのように遷移するべきかを定義します。手動で遷移するか、またはイベントが発生した際に自動的に遷移するかを選択できます。そしてルールは特定のプロジェクトや課題に適用されるように設定できます");
 		m.put("Define issue templates here. When a new issue is created, the first matching template will be used.", 
 			"課題テンプレートをここで定義します。新しい課題が作成されると、最初に一致するテンプレートが使用されます");
 		m.put("Define labels to be assigned to project, build or pull request. For issues, custom fields can be used which is much more powerful than labels", 
@@ -1061,7 +1052,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Delete this", "これを削除");
 		m.put("Delete this GPG key", "このGPGキーを削除");
 		m.put("Delete this access token", "このアクセストークンを削除");
-		m.put("Delete this branch", "このブランチを削除");
 		m.put("Delete this executor", "このエグゼキューターを削除");
 		m.put("Delete this field", "このフィールドを削除");
 		m.put("Delete this import", "このインポートを削除");
@@ -2249,7 +2239,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("New State", "新しい状態");
 		m.put("New User Bean", "新しいユーザーBean");
 		m.put("New Value", "新しい値");
-		m.put("New Workspace Spec", "新しいワークスペース仕様");
 		m.put("New chat", "新しいチャット");
 		m.put("New issue board created", "新しい課題ボードが作成されました");
 		m.put("New project created", "新しいプロジェクトが作成されました");
@@ -2378,7 +2367,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("No valid signature for head commit of target branch", "ターゲットブランチのヘッドコミットに有効な署名がありません");
 		m.put("No value", "値がありません");
 		m.put("No verified primary email address", "確認済みのプライマリメールアドレスがありません");
-		m.put("No workspace provisioners defined", "ワークスペースプロビジョナーが定義されていません");
 		m.put("No workspaces", "ワークスペースがありません");
 		m.put("No workspaces to delete", "削除するワークスペースがありません");
 		m.put("Node Selector", "ノードセレクター");
@@ -2552,7 +2540,6 @@ public class Translation_ja extends TranslationResourceBundle {
 			"オプションで、期限情報を保持する日付フィールドを指定してください。<br><b>注意: </b>適切なオプションがない場合は、OneDev課題フィールドをカスタマイズすることができます。");
 		m.put("Optionally specify a path relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a> to put retrieved artifacts. Leave empty to use job working directory itself", 
 			"オプションで、取得したアーティファクトを配置する<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する相対パスを指定してください。ジョブワークスペース自体を使用する場合は空のままにしてください。");
-		m.put("Optionally specify a prefix to be prepended to generated branch name", "生成されたブランチ名の先頭に付けるプレフィックスを任意で指定");
 		m.put("Optionally specify a storage class to allocate build volume dynamically. Leave empty to use default storage class. <b class='text-warning'>NOTE:</b> Reclaim policy of the storage class should be set to <code>Delete</code>, as the volume is only used to hold temporary build files", 
 			"オプションで、ビルドボリュームを動的に割り当てるためのストレージクラスを指定してください。デフォルトのストレージクラスを使用する場合は空のままにしてください。<b class='text-warning'>注意:</b> ストレージクラスの再利用ポリシーは<code>Delete</code>に設定する必要があります。ボリュームは一時的なビルドファイルを保持するためだけに使用されます。");
 		m.put("Optionally specify a working period field to hold estimated time infomration.<br><b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here", 
@@ -3092,12 +3079,13 @@ public class Translation_ja extends TranslationResourceBundle {
 			"Craneを使用してOCIレイアウトとしてDockerイメージをプルします。このステップは、サーバーDockerエグゼキューター、リモートDockerエグゼキューター、またはKubernetesエグゼキューターによって実行される必要があります");
 		m.put("Pull from Remote", "リモートからプル");
 		m.put("Pull request", "プルリクエスト");
-		m.put("Pull request #{0} already closed", "プルリクエスト#{0}はすでにクローズされています");
 		m.put("Pull request administrative permission inside a project, including batch operations over multiple pull requests", 
 			"プロジェクト内でのプルリクエスト管理権限、複数のプルリクエストに対するバッチ操作を含む");
 		m.put("Pull request already closed", "プルリクエストはすでにクローズされています");
 		m.put("Pull request already opened", "プルリクエストはすでにオープンされています");
 		m.put("Pull request and code review", "プルリクエストとコードレビュー");
+		m.put("Pull request can only be merged after getting approvals from all reviewers", "すべてのレビュアーから承認を得た後にのみプルリクエストをマージできます");
+		m.put("Pull request can only be merged by users with code write permission", "コード書き込み権限を持つユーザーのみがプルリクエストをマージできます");
 		m.put("Pull request cannot be merged now as <a class=\"more-info d-inline link-primary\">some required builds</a> are not finished yet", 
 			"<a class=\"more-info d-inline link-primary\">必要なビルドの一部</a>がまだ完了していないため、現在プルリクエストをマージすることはできません");
 		m.put("Pull request cannot be merged now as <a class=\"more-info d-inline link-primary\">some required builds</a> are not successful", 
@@ -3106,10 +3094,7 @@ public class Translation_ja extends TranslationResourceBundle {
 			"<a class=\"more-info d-inline link-primary\">レビュー待ち</a>のため、現在プルリクエストをマージすることはできません");
 		m.put("Pull request cannot be merged now as it was <a class=\"more-info d-inline link-primary\">requested for changes</a>", 
 			"<a class=\"more-info d-inline link-primary\">変更が要求されました</a>ため、現在プルリクエストをマージすることはできません");
-		m.put("Pull request cannot be merged now as valid signature is required for head commit", 
-			"ヘッドコミットに有効な署名が必要なため、現在プルリクエストをマージすることはできません");
-		m.put("Pull request can only be merged after getting approvals from all reviewers", "すべてのレビュアーから承認を得た後にのみプルリクエストをマージできます");
-		m.put("Pull request can only be merged by users with code write permission", "コード書き込み権限を持つユーザーのみがプルリクエストをマージできます");
+		m.put("Pull request cannot be merged now as valid signature is required for head commit", "ヘッドコミットに有効な署名が必要なため、現在プルリクエストをマージすることはできません");
 		m.put("Pull request discard", "プルリクエストの破棄");
 		m.put("Pull request duration statistics", "プルリクエスト期間統計");
 		m.put("Pull request frequency statistics", "プルリクエスト頻度統計");
@@ -3258,7 +3243,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Request For Changes", "変更のリクエスト");
 		m.put("Request Scopes", "リクエストスコープ");
 		m.put("Request Trial Subscription", "試用版サブスクリプションをリクエスト");
-		m.put("Request review", "レビューをリクエスト");
+		m.put("Request review again", "再度レビューをリクエスト");
 		m.put("Request to sync", "同期をリクエスト");
 		m.put("Requested For changes", "変更をリクエストしました");
 		m.put("Requested changes to pull request \"{0}\" ({1})", "プルリクエスト\"{0}\"({1})に変更をリクエストしました");
@@ -3535,7 +3520,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Show Description", "説明を表示");
 		m.put("Show Duration", "期間を表示");
 		m.put("Show Emojis", "絵文字を表示");
-		m.put("Show Error Detail", "エラー詳細を表示");
 		m.put("Show Issue Status", "課題ステータスを表示");
 		m.put("Show Package Stats", "パッケージ統計を表示");
 		m.put("Show Pull Request Stats", "プルリクエスト統計を表示");
@@ -4094,7 +4078,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Symbol Name", "シンボル名");
 		m.put("Symbol name", "シンボル名");
 		m.put("Symbols", "シンボル");
-		m.put("Sync", "同期");
 		m.put("Sync (pull & push)", "同期 (プル & プッシュ)");
 		m.put("Sync Replica Status and Back to Home", "レプリカステータスを同期してホームに戻る");
 		m.put("Sync Repository", "リポジトリを同期");
@@ -4186,7 +4169,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("There are merge conflicts.", "マージコンフリクトがあります。");
 		m.put("There are merge conflicts. You can still create the pull request though", "マージコンフリクトがあります。ただし、プルリクエストを作成することは可能です");
 		m.put("There are unsaved changes, discard and continue?", "保存されていない変更があります。破棄して続行しますか？");
-		m.put("There are workspaces on source branch", "ソースブランチにワークスペースがあります");
 		m.put("These authenticators normally run on your mobile phone, some examples are Google Authenticator, Microsoft Authenticator, Authy, 1Password etc.", 
 			"これらの認証アプリは通常、携帯電話で動作します。例としてはGoogle Authenticator、Microsoft Authenticator、Authy、1Passwordなどがあります。");
 		m.put("This <span wicket:id=\"elementTypeName\"></span> is imported from <a wicket:id=\"link\" class=\"alert-link\"><span wicket:id=\"label\"></span></a>", 
@@ -5042,7 +5024,38 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Request review again", "再度レビューをリクエスト");
+		m.put("<b>NOTE: </b> Transition rules can also be configured and overridden at project level", 
+			"<b>注意: </b>遷移ルールはプロジェクトレベルで設定および上書きすることもできます");
+		m.put("<b>NOTE: </b> Transition rules can also be configured and overridden at project level in enterprise edition", 
+			"<b>注意: </b>遷移ルールはエンタープライズエディションでプロジェクトレベルで設定および上書きすることもできます");
+		m.put("Associated Branch", "関連ブランチ");
+		m.put("Branch \"{0}\" already exists", "ブランチ \"{0}\" は既に存在します");
+		m.put("Branch is created", "ブランチが作成されました");
+		m.put("Cannot delete branch as it has workspaces", "ブランチにワークスペースがあるため削除できません");
+		m.put("Cannot delete source branch as it has workspaces", "ソースブランチにワークスペースがあるため削除できません");
+		m.put("Create a workspace spec running Cursor CLI directly with server shell environment.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://cursor.com/docs/cli/overview' target='_blank'>Cursor CLI</a> is installed on OneDev server</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
+			"サーバーシェル環境で直接Cursor CLIを実行してワークスペース仕様を作成します。\n作成された仕様を使用するワークスペースは同じ環境と設定を共有します。\nこのテンプレートを使用するには、以下を確認してください:\n<ul>\n    <li><a href='https://cursor.com/docs/cli/overview' target='_blank'>Cursor CLI</a>がOneDevサーバーにインストールされている</li>\n    <li>'管理 / ワークスペースプロビジョナー'にシェルプロビジョナーが追加され、'適用可能なプロジェクト'が適切に設定されている</li>\n</ul>");
+		m.put("Create a workspace spec running Cursor CLI inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/cursor' target='_blank'>container image</a>\nlater to suit your needs if desired", 
+			"隔離とセキュリティのためにコンテナ内でCursor CLIを実行してワークスペース仕様を作成します。\n必要に応じて<a href='https://code.onedev.io/onedev/docker/cursor' target='_blank'>コンテナイメージ</a>\nを後でカスタマイズできます");
+		m.put("Default Fork Root", "デフォルトフォークルート");
+		m.put("Default branch is not available", "デフォルトブランチが利用できません");
+		m.put("Define how issues may move from one state to another in this project. At evaluation time, rules from this project, each ancestor project up to the root, and the global rules are merged in that order; the first matching rule applies.", 
+			"このプロジェクトで課題がどのように一つの状態から別の状態に移動するかを定義します。評価時には、このプロジェクト、ルートまでの各祖先プロジェクト、およびグローバルルールの順にルールが統合され、最初に一致するルールが適用されます。");
+		m.put("Define how issues move between states: manually by users, or automatically in response to events. The first matching rule applies.", 
+			"課題が状態間をどのように移動するかを定義します: ユーザーによる手動操作、またはイベントに応じた自動操作。最初に一致するルールが適用されます。");
+		m.put("Issue Branch Prefix", "課題ブランチプレフィックス");
+		m.put("Issue branch prefix updated", "課題ブランチプレフィックスが更新されました");
+		m.put("No fork root", "フォークルートがありません");
+		m.put("Optionally specify a prefix to be prepended (as a path segment) when generate issue branch.\nFor instance with prefix <code>feature</code>, generated issue branch will be\n<code>feature/issue-100-some-title</code>", 
+			"課題ブランチを生成する際にプレフィックスを（パスセグメントとして）先頭に追加する場合は指定してください。\n例えば、プレフィックス<code>feature</code>を指定すると、生成される課題ブランチは\n<code>feature/issue-100-some-title</code>となります");
+		m.put("This setting is inherited from parent project when left empty. The first non-empty value found while walking up the project hierarchy will be used.", 
+			"この設定を空のままにすると、親プロジェクトから継承されます。プロジェクト階層を上にたどる際に見つかった最初の空でない値が使用されます。");
+		m.put("When forking from the UI, the default target project will be created as\n&lt;default fork root&gt;/&lt;account name&gt;/&lt;project name&gt; if specified\n(users forking need permission to create child projects under the fork\nroot), or &lt;account name&gt;/&lt;project name&gt; otherwise (need permission\nto create root projects)", 
+			"UIからフォークする場合、デフォルトターゲットプロジェクトは\n&lt;デフォルトフォークルート&gt;/&lt;アカウント名&gt;/&lt;プロジェクト名&gt;として作成されます（指定されている場合）\n（フォークするユーザーはフォークルート下で子プロジェクトを作成する権限が必要）、または&lt;アカウント名&gt;/&lt;プロジェクト名&gt;（ルートプロジェクトを作成する権限が必要）として作成されます");
+		m.put("Workspaces on source branch", "ソースブランチ上のワークスペース");
+		m.put("Workspaces on this issue", "この課題上のワークスペース");
+		m.put("branch \"{0}\" is created", "ブランチ \"{0}\" が作成されました");
+		m.put("branch is created", "ブランチが作成されました");
 	}
 		
 	@Override

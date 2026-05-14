@@ -1,4 +1,4 @@
-package io.onedev.server.ai.tools;
+package io.onedev.server.ai.tools.code;
 
 import static io.onedev.server.ai.ToolUtils.convertToJson;
 
@@ -42,7 +42,8 @@ public class GetHighlightedText implements TaskTool {
             .name("getHighlightedTextInformation")
             .description("""
                 Get information of highlighted text in json format, including highlighted text, 
-                file path and content containing highlighted text
+                file path and content containing highlighted text. This tool also returns the 
+                code snippet being commented on when a code comment is active
                 """)
             .build();
     }

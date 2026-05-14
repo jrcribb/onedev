@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.toSet;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -18,6 +19,8 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.ai.AiTask;
 import io.onedev.server.ai.responsehandlers.AddCodeCommentReply;
 import io.onedev.server.ai.taskchecker.NoopTaskChecker;
+import io.onedev.server.ai.tools.codecomment.GetCodeCommentReplies;
+import io.onedev.server.ai.tools.codecomment.GetCodeComment;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.codecomment.CodeCommentEdited;
 import io.onedev.server.event.project.codecomment.CodeCommentEvent;
@@ -72,7 +75,9 @@ public class CodeCommentNotificationManager {
 								var task = new AiTask(
 									systemPrompt.formatted(mentionedUser.getName()), 
 									event.getTextBody(), 
-									comment.getTools(), 
+									List.of(
+											new GetCodeComment(comment.getId()),
+											new GetCodeCommentReplies(comment.getId())), 
 									new NoopTaskChecker(),
 									new AddCodeCommentReply(comment.getId()));
 								userService.execute(mentionedUser, task);						

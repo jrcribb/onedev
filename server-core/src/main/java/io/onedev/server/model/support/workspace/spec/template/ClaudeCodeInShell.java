@@ -14,6 +14,7 @@ import io.onedev.server.web.util.SuggestionUtils;
         To use this template, please ensure that: 
         <ul>
             <li><a href='https://code.claude.com/docs/en/overview' target='_blank'>Claude Code</a> is installed on OneDev server</li>
+            <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on OneDev server and companion skills are installed for Claude Code</li>
             <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>
         </ul>""")
 public class ClaudeCodeInShell extends WorkspaceSpecTemplate {

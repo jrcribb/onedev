@@ -1,9 +1,6 @@
 package io.onedev.server.model;
 
 import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
-import static io.onedev.server.ai.PullRequestHelper.getDetail;
-import static io.onedev.server.ai.ToolUtils.convertToJson;
-import static io.onedev.server.ai.ToolUtils.getDiffTools;
 import static io.onedev.server.model.AbstractEntity.PROP_NUMBER;
 import static io.onedev.server.model.PullRequest.PROP_CLOSE_DAY;
 import static io.onedev.server.model.PullRequest.PROP_CLOSE_MONTH;
@@ -67,8 +64,6 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.authz.UnauthorizedException;
-import org.apache.shiro.subject.Subject;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.hibernate.annotations.DynamicUpdate;
@@ -76,16 +71,10 @@ import org.jspecify.annotations.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
-import dev.langchain4j.agent.tool.ToolSpecification;
-import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import io.onedev.server.OneDev;
-import io.onedev.server.ai.PullRequestHelper;
-import io.onedev.server.ai.TaskTool;
-import io.onedev.server.ai.ToolExecutionResult;
 import io.onedev.server.attachment.AttachmentStorageSupport;
 import io.onedev.server.entityreference.EntityReference;
 import io.onedev.server.entityreference.PullRequestReference;
@@ -106,7 +95,6 @@ import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.search.entity.SortField;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.service.PullRequestReviewService;
 import io.onedev.server.service.PullRequestService;
 import io.onedev.server.service.UserService;
 import io.onedev.server.util.BranchSemantic;
@@ -146,10 +134,6 @@ public class PullRequest extends ProjectBelonging
 	
 	public static final int MAX_DESCRIPTION_LEN = 100000;
 
-	public static final String APPROVE_TOOL_NAME = "approvePullRequest";
-
-	public static final String REQUEST_FOR_CHANGES_TOOL_NAME = "requestChangesForPullRequest";
-	
 	public static final String NAME_STATUS = "Status";
 	
 	public static final String NAME_TARGET_PROJECT = "Target Project";
@@ -985,6 +969,11 @@ public class PullRequest extends ProjectBelonging
 		}
 		return null;
 	}
+
+	public boolean isReviewer(User user) {
+		var review = getReview(user);
+		return review != null && review.getStatus() != PullRequestReview.Status.EXCLUDED;
+	}
 	
 	public boolean canCommentOnCommit(String commitHash) {
 		if (commitHash.equals(baseCommitHash))
@@ -1499,152 +1488,8 @@ public class PullRequest extends ProjectBelonging
 		}
 	}
 
-	public List<TaskTool> getTools(boolean includeReviewActions) {
-		var projectId = getProject().getId();
-		var requestId = getId();
-		var oldCommitId = ObjectId.fromString(getBaseCommitHash());
-		var newCommitId = ObjectId.fromString(getLatestUpdate().getHeadCommitHash());
-
-		var tools = new ArrayList<TaskTool>();
-		tools.add(new TaskTool() {
-
-			@Override
-			public ToolSpecification getSpecification() {
-				return ToolSpecification.builder()
-					.name("getCurrentPullRequest")
-					.description("Get info of current OneDev pull request in json format")
-					.build();
-			}
-
-			@Override
-			public ToolExecutionResult execute(Subject subject, JsonNode arguments) {	
-				var request = getPullRequest(requestId);
-				var project = request.getProject();
-				if (!SecurityUtils.canReadCode(subject, project))
-					throw new UnauthorizedException();
-				return new ToolExecutionResult(convertToJson(getDetail(project, request)), false);
-			}
-			
-		});
-		tools.add(new TaskTool() {
-
-			@Override
-			public ToolSpecification getSpecification() {
-				return ToolSpecification.builder()
-					.name("getCurrentPullRequestComments")
-					.description("Get comments of current OneDev pull request in json format")
-					.build();
-			}
-
-			@Override
-			public ToolExecutionResult execute(Subject subject, JsonNode arguments) {	
-				var request = getPullRequest(requestId);
-				if (!SecurityUtils.canReadCode(subject, request.getProject()))
-					throw new UnauthorizedException();
-				return new ToolExecutionResult(convertToJson(PullRequestHelper.getComments(request)), false);
-			}
-			
-		});
-		
-		if (includeReviewActions) {
-			tools.add(new TaskTool() {
-
-				@Override
-				public ToolSpecification getSpecification() {
-					return ToolSpecification.builder()
-						.name(APPROVE_TOOL_NAME)
-						.description("Record an approval for current OneDev pull request. " 
-							+ "Call this exactly once after you have finished reviewing and decided to approve.")
-						.parameters(JsonObjectSchema.builder()
-							.addStringProperty("reason").description("Reason explaining why you are approving this pull request. Make sure to quote relevant code snippets if applicable")
-							.required("reason")
-							.build())
-						.build();
-				}
-
-				@Override
-				public ToolExecutionResult execute(Subject subject, JsonNode arguments) {
-					var request = getPullRequest(requestId);
-					var user = SecurityUtils.getUser(subject);
-					if (!SecurityUtils.canReadCode(subject, request.getProject()) || user == null)
-						throw new UnauthorizedException();
-
-					if (arguments.get("reason") == null)
-						return new ToolExecutionResult(convertToJson(Map.of("successful", false, "failReason", "Argument 'reason' is required")), false);
-					var reason = arguments.get("reason").asText();
-
-					var result = checkReviewer(request, user);
-					if (result != null)
-						return result;
-
-					getPullRequestReviewService().review(user, request, true, reason);
-					return new ToolExecutionResult(convertToJson(Map.of("successful", true)), false);
-				}
-
-			});
-			tools.add(new TaskTool() {
-
-				@Override
-				public ToolSpecification getSpecification() {
-					return ToolSpecification.builder()
-						.name(REQUEST_FOR_CHANGES_TOOL_NAME)
-						.description("Record a request for changes for current OneDev pull request. " 
-							+ "Call this exactly once after you have finished reviewing and decided changes are needed.")
-						.parameters(JsonObjectSchema.builder()
-							.addStringProperty("reason").description("Reason explaining why you are requesting changes for this pull request. Make sure to quote relevant code snippets if applicable")
-							.required("reason")
-							.build())
-						.build();
-				}
-
-				@Override
-				public ToolExecutionResult execute(Subject subject, JsonNode arguments) {
-					var request = getPullRequest(requestId);
-					var user = SecurityUtils.getUser(subject);
-					if (!SecurityUtils.canReadCode(subject, request.getProject()) || user == null)
-						throw new UnauthorizedException();
-
-					if (arguments.get("reason") == null)
-						return new ToolExecutionResult(convertToJson(Map.of("successful", false, "failReason", "Argument 'reason' is required")), false);
-					var reason = arguments.get("reason").asText();
-
-					var result = checkReviewer(request, user);
-					if (result != null)
-						return result;
-
-					getPullRequestReviewService().review(user, request, false, reason);
-					return new ToolExecutionResult(convertToJson(Map.of("successful", true)), false);
-				}
-
-			});
-		}
-		tools.addAll(getDiffTools(projectId, oldCommitId, newCommitId, requestId));
-		return tools;
-	}
-
-	@Nullable
-	private ToolExecutionResult checkReviewer(PullRequest request, User user) {
-		var review = request.getReview(user);
-		if (review == null || review.getStatus() == PullRequestReview.Status.EXCLUDED) {
-			var data = Map.of(
-				"successful", false, 
-				"failReason", "You are not a reviewer and is not allowed to approve this pull request. Add your option as comment instead");
-			return new ToolExecutionResult(convertToJson(data), false);
-		} else {
-			return null;
-		}
-	}
-
 	private static PullRequestService getPullRequestService() {
 		return OneDev.getInstance(PullRequestService.class);
-	}
-
-	private static PullRequestReviewService getPullRequestReviewService() {
-		return OneDev.getInstance(PullRequestReviewService.class);
-	}
-
-	private static PullRequest getPullRequest(Long requestId) {
-		return getPullRequestService().load(requestId);
 	}
 
 }

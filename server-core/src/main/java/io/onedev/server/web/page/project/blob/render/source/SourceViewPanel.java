@@ -78,7 +78,7 @@ import io.onedev.server.ai.ChatTool;
 import io.onedev.server.ai.ChatToolAware;
 import io.onedev.server.ai.ToolExecutionResult;
 import io.onedev.server.ai.ToolUtils;
-import io.onedev.server.ai.tools.GetHighlightedText;
+import io.onedev.server.ai.tools.code.GetHighlightedText;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.codequality.BlobTarget;
 import io.onedev.server.codequality.CodeProblem;

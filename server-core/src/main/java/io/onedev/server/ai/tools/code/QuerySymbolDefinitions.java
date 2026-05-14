@@ -1,4 +1,4 @@
-package io.onedev.server.ai.tools;
+package io.onedev.server.ai.tools.code;
 
 import static io.onedev.server.ai.ToolUtils.convertToJson;
 

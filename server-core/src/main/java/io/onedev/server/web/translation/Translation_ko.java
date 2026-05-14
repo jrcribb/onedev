@@ -190,7 +190,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Add Rule", "규칙 추가");
 		m.put("Add SSH key", "SSH 키 추가");
 		m.put("Add SSO provider", "SSO 제공자 추가");
-		m.put("Add Spec", "사양 추가");
 		m.put("Add Spent Time", "소요 시간 추가");
 		m.put("Add Timesheet", "근무시간표 추가");
 		m.put("Add Widget", "위젯 추가");
@@ -233,7 +232,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Add new service locator", "새 서비스 로케이터 추가");
 		m.put("Add new step", "새 단계 추가");
 		m.put("Add new trigger", "새 트리거 추가");
-		m.put("Add new user config", "새 사용자 구성 추가");
 		m.put("Add new user data", "새 사용자 데이터 추가");
 		m.put("Add project", "프로젝트 추가");
 		m.put("Add reviewer...", "검토자 추가...");
@@ -452,11 +450,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Belonging Groups", "소속 그룹");
 		m.put("Below are some common criterias. Type in search box above to view the complete list and available combinations.", 
 			"아래는 일반적인 기준입니다. 위의 검색 상자에 입력하여 전체 목록과 사용 가능한 조합을 확인하세요.");
-		m.put("Below content is restored from an unsaved change. <a class=\"clear-unsaved-change\">Clear</a> to discard", 
-			"아래 내용은 저장되지 않은 변경 사항에서 복원되었습니다. <a class=\"clear-unsaved-change\">지우기</a>하여 폐기");
 		m.put("Below content is restored from an unsaved change. <a class=\"discard-unsaved-change\">Discard</a>", 
 			"아래 내용은 저장되지 않은 변경 사항에서 복원되었습니다. <a class=\"discard-unsaved-change\">폐기</a>");
-		m.put("Below content is restored from an unsaved change. Clear to discard", "아래 내용은 저장되지 않은 변경 사항에서 복원되었습니다. 삭제하려면 지우세요.");
 		m.put("Below information will also be sent", "아래 정보도 전송됩니다");
 		m.put("Binary file", "바이너리 파일");
 		m.put("Binary file.", "바이너리 파일.");
@@ -601,9 +596,17 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Can Be Used By Workspaces", "워크스페이스에서 사용할 수 있음");
 		m.put("Can Create Root Projects", "루트 프로젝트 생성 가능");
 		m.put("Can Edit Estimated Time", "예상 시간 수정 가능");
+		m.put("Can only compare with common ancestor when different projects are involved", "다른 프로젝트가 포함된 경우 공통 조상과만 비교할 수 있습니다");
+		m.put("Cancel", "취소");
+		m.put("Cancel All Queried Builds", "쿼리된 모든 빌드 취소");
+		m.put("Cancel Selected Builds", "선택된 빌드 취소");
+		m.put("Cancel invitation", "초대 취소");
+		m.put("Cancel request submitted", "요청 취소가 제출되었습니다");
+		m.put("Cancel this build", "이 빌드 취소");
+		m.put("Cancelled", "취소됨");
+		m.put("Cancelled By", "취소한 사람");
 		m.put("Cannot convert root user to service account", "루트 사용자를 서비스 계정으로 변환할 수 없습니다");
 		m.put("Cannot convert yourself to service account", "자신을 서비스 계정으로 변환할 수 없습니다");
-		m.put("Cannot delete branch \"{0}\" as there are workspaces on it", "해당 브랜치에 워크스페이스가 있어 \"{0}\" 브랜치를 삭제할 수 없습니다");
 		m.put("Cannot delete default branch", "기본 브랜치를 삭제할 수 없습니다");
 		m.put("Cannot delete root account", "루트 계정을 삭제할 수 없습니다");
 		m.put("Cannot delete yourself", "자신을 삭제할 수 없습니다");
@@ -617,15 +620,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Cannot reset password for user authenticating via external system", "외부 시스템을 통해 인증하는 사용자의 비밀번호를 재설정할 수 없습니다");
 		m.put("Cannot save malformed query", "잘못된 쿼리를 저장할 수 없습니다");
 		m.put("Cannot use current or descendant project as parent", "현재 또는 하위 프로젝트를 부모로 사용할 수 없습니다");
-		m.put("Can only compare with common ancestor when different projects are involved", "다른 프로젝트가 포함된 경우 공통 조상과만 비교할 수 있습니다");
-		m.put("Cancel", "취소");
-		m.put("Cancel All Queried Builds", "쿼리된 모든 빌드 취소");
-		m.put("Cancel Selected Builds", "선택된 빌드 취소");
-		m.put("Cancel invitation", "초대 취소");
-		m.put("Cancel request submitted", "요청 취소가 제출되었습니다");
-		m.put("Cancel this build", "이 빌드 취소");
-		m.put("Cancelled", "취소됨");
-		m.put("Cancelled By", "취소한 사람");
 		m.put("Case Sensitive", "대소문자 구분");
 		m.put("Certificates to Trust", "신뢰할 인증서");
 		m.put("Change", "변경");
@@ -669,7 +663,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Check Vulnerabilities", "취약점 확인");
 		m.put("Check Workflow Integrity", "워크플로 무결성 확인");
 		m.put("Check out to local directory", "로컬 디렉토리로 체크아웃");
-		m.put("Check out to local workspace", "로컬 작업 공간으로 체크아웃");
 		m.put("Check this to compare right side with common ancestor of left and right", "왼쪽과 오른쪽의 공통 조상과 오른쪽을 비교하려면 이것을 선택하세요");
 		m.put("Check this to enforce two-factor authentication for all users in the system", "시스템의 모든 사용자에 대해 이중 인증을 강제하려면 이것을 선택하세요");
 		m.put("Check this to enforce two-factor authentication for all users in this group", "이 그룹의 모든 사용자에 대해 이중 인증을 강제하려면 이것을 선택하세요");
@@ -1013,8 +1006,6 @@ public class Translation_ko extends TranslationResourceBundle {
 			"브랜치 보호 규칙을 정의하세요. 상위 프로젝트에서 정의된 규칙은 여기에서 정의된 규칙 뒤에 정의된 것으로 간주됩니다. 특정 브랜치와 사용자에 대해 첫 번째 일치하는 규칙이 적용됩니다");
 		m.put("Define default issue boards for all projects here. A certain project can override this setting to define its own issue boards.", 
 			"모든 프로젝트에 대한 기본 이슈 보드를 여기에서 정의하세요. 특정 프로젝트는 이 설정을 재정의하여 자체 이슈 보드를 정의할 수 있습니다");
-		m.put("Define how issue states should be transited from one to another, either manually or automatically when some events happen. And the rule can be configured to apply to certain projects and issues via the applicable issues setting", 
-			"이슈 상태가 수동으로 또는 특정 이벤트가 발생할 때 자동으로 어떻게 전환되어야 하는지 정의하세요. 그리고 규칙은 특정 프로젝트와 이슈에 적용되도록 설정할 수 있습니다");
 		m.put("Define issue templates here. When a new issue is created, the first matching template will be used.", 
 			"이슈 템플릿을 여기에서 정의하세요. 새 이슈가 생성될 때 첫 번째 일치하는 템플릿이 사용됩니다");
 		m.put("Define labels to be assigned to project, build or pull request. For issues, custom fields can be used which is much more powerful than labels", 
@@ -1061,7 +1052,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Delete this", "이 항목 삭제");
 		m.put("Delete this GPG key", "이 GPG 키 삭제");
 		m.put("Delete this access token", "이 액세스 토큰 삭제");
-		m.put("Delete this branch", "이 브랜치 삭제");
 		m.put("Delete this executor", "이 실행기 삭제");
 		m.put("Delete this field", "이 필드 삭제");
 		m.put("Delete this import", "이 가져오기 삭제");
@@ -2249,7 +2239,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("New State", "새 상태");
 		m.put("New User Bean", "새 사용자 Bean");
 		m.put("New Value", "새 값");
-		m.put("New Workspace Spec", "새 작업 공간 사양");
 		m.put("New chat", "새 채팅");
 		m.put("New issue board created", "새 이슈 보드 생성됨");
 		m.put("New project created", "새 프로젝트가 생성되었습니다");
@@ -2378,7 +2367,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("No valid signature for head commit of target branch", "대상 브랜치의 헤드 커밋에 대한 유효한 서명이 없습니다");
 		m.put("No value", "값이 없습니다");
 		m.put("No verified primary email address", "확인된 기본 이메일 주소가 없습니다");
-		m.put("No workspace provisioners defined", "정의된 작업 공간 프로비저너 없음");
 		m.put("No workspaces", "작업 공간 없음");
 		m.put("No workspaces to delete", "삭제할 작업 공간 없음");
 		m.put("Node Selector", "노드 선택기");
@@ -2552,7 +2540,6 @@ public class Translation_ko extends TranslationResourceBundle {
 			"선택적으로 마감일 정보를 보유할 날짜 필드를 지정하세요.<br><b>참고: </b> 적절한 옵션이 없는 경우 OneDev 문제 필드를 사용자 정의할 수 있습니다.");
 		m.put("Optionally specify a path relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a> to put retrieved artifacts. Leave empty to use job working directory itself", 
 			"선택적으로 검색된 아티팩트를 저장할 <a href='https://docs.onedev.io/concepts#job-workdir'>작업 워크스페이스</a>에 상대적인 경로를 지정하세요. 작업 워크스페이스 자체를 사용하려면 비워 두세요.");
-		m.put("Optionally specify a prefix to be prepended to generated branch name", "생성된 브랜치 이름에 추가할 접두사를 선택적으로 지정합니다");
 		m.put("Optionally specify a storage class to allocate build volume dynamically. Leave empty to use default storage class. <b class='text-warning'>NOTE:</b> Reclaim policy of the storage class should be set to <code>Delete</code>, as the volume is only used to hold temporary build files", 
 			"선택적으로 빌드 볼륨을 동적으로 할당할 스토리지 클래스를 지정하세요. 기본 스토리지 클래스를 사용하려면 비워 두세요. <b class='text-warning'>참고:</b> 스토리지 클래스의 복구 정책은 <code>Delete</code>로 설정되어야 합니다. 볼륨은 임시 빌드 파일을 저장하는 데만 사용됩니다.");
 		m.put("Optionally specify a working period field to hold estimated time infomration.<br><b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here", 
@@ -3092,12 +3079,13 @@ public class Translation_ko extends TranslationResourceBundle {
 			"crane을 통해 도커 이미지를 OCI 레이아웃으로 풀합니다. 이 단계는 서버 도커 실행자, 원격 도커 실행자 또는 Kubernetes 실행자에 의해 실행되어야 합니다");
 		m.put("Pull from Remote", "원격에서 풀");
 		m.put("Pull request", "풀 리퀘스트");
-		m.put("Pull request #{0} already closed", "풀 리퀘스트 #{0}가 이미 닫혔습니다");
 		m.put("Pull request administrative permission inside a project, including batch operations over multiple pull requests", 
 			"프로젝트 내에서 풀 리퀘스트 관리 권한, 여러 풀 리퀘스트에 대한 배치 작업 포함");
 		m.put("Pull request already closed", "풀 리퀘스트가 이미 닫혔습니다");
 		m.put("Pull request already opened", "풀 리퀘스트가 이미 열렸습니다");
 		m.put("Pull request and code review", "풀 리퀘스트 및 코드 리뷰");
+		m.put("Pull request can only be merged after getting approvals from all reviewers", "모든 리뷰어의 승인을 받은 후에만 풀 리퀘스트를 병합할 수 있습니다");
+		m.put("Pull request can only be merged by users with code write permission", "코드 쓰기 권한이 있는 사용자만 풀 리퀘스트를 병합할 수 있습니다");
 		m.put("Pull request cannot be merged now as <a class=\"more-info d-inline link-primary\">some required builds</a> are not finished yet", 
 			"<a class=\"more-info d-inline link-primary\">필요한 빌드</a>가 아직 완료되지 않아 풀 리퀘스트를 지금 병합할 수 없습니다");
 		m.put("Pull request cannot be merged now as <a class=\"more-info d-inline link-primary\">some required builds</a> are not successful", 
@@ -3106,10 +3094,7 @@ public class Translation_ko extends TranslationResourceBundle {
 			"풀 리퀘스트를 지금 병합할 수 없습니다. <a class=\"more-info d-inline link-primary\">검토 대기 중</a>입니다");
 		m.put("Pull request cannot be merged now as it was <a class=\"more-info d-inline link-primary\">requested for changes</a>", 
 			"풀 리퀘스트를 지금 병합할 수 없습니다. <a class=\"more-info d-inline link-primary\">변경 요청됨</a>입니다");
-		m.put("Pull request cannot be merged now as valid signature is required for head commit", 
-			"풀 리퀘스트를 지금 병합할 수 없습니다. 헤드 커밋에 유효한 서명이 필요합니다");
-		m.put("Pull request can only be merged after getting approvals from all reviewers", "모든 리뷰어의 승인을 받은 후에만 풀 리퀘스트를 병합할 수 있습니다");
-		m.put("Pull request can only be merged by users with code write permission", "코드 쓰기 권한이 있는 사용자만 풀 리퀘스트를 병합할 수 있습니다");
+		m.put("Pull request cannot be merged now as valid signature is required for head commit", "풀 리퀘스트를 지금 병합할 수 없습니다. 헤드 커밋에 유효한 서명이 필요합니다");
 		m.put("Pull request discard", "풀 리퀘스트 폐기");
 		m.put("Pull request duration statistics", "풀 리퀘스트 지속 시간 통계");
 		m.put("Pull request frequency statistics", "풀 리퀘스트 빈도 통계");
@@ -3258,7 +3243,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Request For Changes", "변경 요청");
 		m.put("Request Scopes", "요청 범위");
 		m.put("Request Trial Subscription", "체험 구독 요청");
-		m.put("Request review", "리뷰 요청");
+		m.put("Request review again", "다시 검토 요청");
 		m.put("Request to sync", "동기화 요청");
 		m.put("Requested For changes", "변경 요청됨");
 		m.put("Requested changes to pull request \"{0}\" ({1})", "풀 리퀘스트 \"{0}\" ({1})에 대한 변경 요청");
@@ -3535,7 +3520,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Show Description", "설명 보기");
 		m.put("Show Duration", "기간 보기");
 		m.put("Show Emojis", "이모지 보기");
-		m.put("Show Error Detail", "오류 세부 정보 표시");
 		m.put("Show Issue Status", "이슈 상태 보기");
 		m.put("Show Package Stats", "패키지 통계 보기");
 		m.put("Show Pull Request Stats", "풀 리퀘스트 통계 보기");
@@ -4094,7 +4078,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Symbol Name", "심볼 이름");
 		m.put("Symbol name", "심볼 이름");
 		m.put("Symbols", "심볼");
-		m.put("Sync", "동기화");
 		m.put("Sync (pull & push)", "동기화 (풀 & 푸시)");
 		m.put("Sync Replica Status and Back to Home", "복제본 상태 동기화 및 홈으로 돌아가기");
 		m.put("Sync Repository", "저장소 동기화");
@@ -4186,7 +4169,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("There are merge conflicts.", "병합 충돌이 있습니다.");
 		m.put("There are merge conflicts. You can still create the pull request though", "병합 충돌이 있습니다. 그래도 풀 요청을 생성할 수 있습니다");
 		m.put("There are unsaved changes, discard and continue?", "저장되지 않은 변경 사항이 있습니다. 폐기하고 계속하시겠습니까?");
-		m.put("There are workspaces on source branch", "소스 브랜치에 작업 공간이 있습니다");
 		m.put("These authenticators normally run on your mobile phone, some examples are Google Authenticator, Microsoft Authenticator, Authy, 1Password etc.", 
 			"이 인증기는 일반적으로 모바일 폰에서 실행됩니다. Google Authenticator, Microsoft Authenticator, Authy, 1Password 등이 예입니다.");
 		m.put("This <span wicket:id=\"elementTypeName\"></span> is imported from <a wicket:id=\"link\" class=\"alert-link\"><span wicket:id=\"label\"></span></a>", 
@@ -5042,7 +5024,38 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Request review again", "다시 검토 요청");
+		m.put("<b>NOTE: </b> Transition rules can also be configured and overridden at project level", 
+			"<b>참고: </b> 전환 규칙은 프로젝트 수준에서 구성 및 재정의할 수 있습니다.");
+		m.put("<b>NOTE: </b> Transition rules can also be configured and overridden at project level in enterprise edition", 
+			"<b>참고: </b> 전환 규칙은 엔터프라이즈 에디션에서 프로젝트 수준에서 구성 및 재정의할 수 있습니다.");
+		m.put("Associated Branch", "연관된 브랜치");
+		m.put("Branch \"{0}\" already exists", "브랜치 \"{0}\"가 이미 존재합니다.");
+		m.put("Branch is created", "브랜치가 생성되었습니다.");
+		m.put("Cannot delete branch as it has workspaces", "작업공간이 있어 브랜치를 삭제할 수 없습니다.");
+		m.put("Cannot delete source branch as it has workspaces", "작업공간이 있어 소스 브랜치를 삭제할 수 없습니다.");
+		m.put("Create a workspace spec running Cursor CLI directly with server shell environment.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://cursor.com/docs/cli/overview' target='_blank'>Cursor CLI</a> is installed on OneDev server</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
+			"서버 셸 환경에서 Cursor CLI를 직접 실행하여 작업공간 사양을 생성합니다.\n생성된 사양을 사용하는 작업공간은 동일한 환경 및 설정을 공유합니다.\n이 템플릿을 사용하려면 다음을 확인하십시오:\n<ul>\n    <li><a href='https://cursor.com/docs/cli/overview' target='_blank'>Cursor CLI</a>가 OneDev 서버에 설치되어 있어야 합니다.</li>\n    <li>'관리 / 작업공간 프로비저너'에서 '적용 가능한 프로젝트'가 적절히 구성된 셸 프로비저너가 추가되어야 합니다.</li>\n</ul>");
+		m.put("Create a workspace spec running Cursor CLI inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/cursor' target='_blank'>container image</a>\nlater to suit your needs if desired", 
+			"격리 및 보안 목적으로 컨테이너 내부에서 Cursor CLI를 실행하여 작업공간 사양을 생성합니다.\n필요한 경우 나중에 <a href='https://code.onedev.io/onedev/docker/cursor' target='_blank'>컨테이너 이미지</a>를\n사용자 요구에 맞게 커스터마이징할 수 있습니다.");
+		m.put("Default Fork Root", "기본 포크 루트");
+		m.put("Default branch is not available", "기본 브랜치가 사용 가능하지 않습니다.");
+		m.put("Define how issues may move from one state to another in this project. At evaluation time, rules from this project, each ancestor project up to the root, and the global rules are merged in that order; the first matching rule applies.", 
+			"이 프로젝트에서 이슈가 한 상태에서 다른 상태로 이동하는 방식을 정의합니다. 평가 시, 이 프로젝트의 규칙, 루트까지의 각 상위 프로젝트의 규칙, 그리고 글로벌 규칙이 이 순서로 병합되며, 첫 번째로 일치하는 규칙이 적용됩니다.");
+		m.put("Define how issues move between states: manually by users, or automatically in response to events. The first matching rule applies.", 
+			"이슈가 상태 간에 이동하는 방식을 정의합니다: 사용자가 수동으로 이동하거나 이벤트에 응답하여 자동으로 이동합니다. 첫 번째로 일치하는 규칙이 적용됩니다.");
+		m.put("Issue Branch Prefix", "이슈 브랜치 접두사");
+		m.put("Issue branch prefix updated", "이슈 브랜치 접두사가 업데이트되었습니다.");
+		m.put("No fork root", "포크 루트 없음");
+		m.put("Optionally specify a prefix to be prepended (as a path segment) when generate issue branch.\nFor instance with prefix <code>feature</code>, generated issue branch will be\n<code>feature/issue-100-some-title</code>", 
+			"이슈 브랜치를 생성할 때 경로 세그먼트로 추가될 접두사를 선택적으로 지정할 수 있습니다.\n예를 들어 접두사가 <code>feature</code>인 경우, 생성된 이슈 브랜치는\n<code>feature/issue-100-some-title</code>가 됩니다.");
+		m.put("This setting is inherited from parent project when left empty. The first non-empty value found while walking up the project hierarchy will be used.", 
+			"이 설정이 비어 있으면 상위 프로젝트에서 상속됩니다. 프로젝트 계층을 따라 올라가면서 발견된 첫 번째 비어 있지 않은 값이 사용됩니다.");
+		m.put("When forking from the UI, the default target project will be created as\n&lt;default fork root&gt;/&lt;account name&gt;/&lt;project name&gt; if specified\n(users forking need permission to create child projects under the fork\nroot), or &lt;account name&gt;/&lt;project name&gt; otherwise (need permission\nto create root projects)", 
+			"UI에서 포크할 때, 기본 대상 프로젝트는\n&lt;기본 포크 루트&gt;/&lt;계정 이름&gt;/&lt;프로젝트 이름&gt;으로 생성됩니다.\n(포크하는 사용자는 포크 루트 아래에서 하위 프로젝트를 생성할 권한이 필요합니다),\n또는 &lt;계정 이름&gt;/&lt;프로젝트 이름&gt;으로 생성됩니다 (루트 프로젝트를 생성할 권한이 필요합니다).");
+		m.put("Workspaces on source branch", "소스 브랜치의 작업공간");
+		m.put("Workspaces on this issue", "이 이슈의 작업공간");
+		m.put("branch \"{0}\" is created", "브랜치 \"{0}\"가 생성되었습니다.");
+		m.put("branch is created", "브랜치가 생성되었습니다.");
 	}
 		
 	@Override

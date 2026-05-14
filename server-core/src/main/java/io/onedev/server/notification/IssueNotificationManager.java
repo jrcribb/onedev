@@ -8,6 +8,7 @@ import static org.unbescape.html.HtmlEscape.escapeHtml5;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -22,6 +23,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.ai.AiTask;
+import io.onedev.server.ai.tools.issue.GetIssueComments;
+import io.onedev.server.ai.tools.issue.GetIssue;
 import io.onedev.server.ai.responsehandlers.AddIssueComment;
 import io.onedev.server.ai.taskchecker.NoopTaskChecker;
 import io.onedev.server.event.Listen;
@@ -307,7 +310,9 @@ public class IssueNotificationManager {
 								var task = new AiTask(
 									systemPrompt.formatted(mentionedUser.getName()), 
 									event.getTextBody(), 
-									issue.getTools(), 
+									List.of(
+											new GetIssue(issue.getId()),
+											new GetIssueComments(issue.getId())), 
 									new NoopTaskChecker(),
 									new AddIssueComment(issue.getId()));
 								userService.execute(mentionedUser, task);

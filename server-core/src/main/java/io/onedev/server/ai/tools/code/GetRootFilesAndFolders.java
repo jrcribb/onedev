@@ -1,4 +1,4 @@
-package io.onedev.server.ai.tools;
+package io.onedev.server.ai.tools.code;
 
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.subject.Subject;

@@ -8,9 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.ws.rs.NotAcceptableException;
-import javax.ws.rs.NotFoundException;
-
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
@@ -22,6 +19,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
+import io.onedev.server.exception.NotAcceptableException;
+import io.onedev.server.exception.NotFoundException;
 import io.onedev.server.git.BlobChange;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;

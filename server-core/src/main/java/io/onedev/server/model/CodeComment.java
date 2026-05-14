@@ -1,6 +1,5 @@
 package io.onedev.server.model;
 
-import static io.onedev.server.ai.ToolUtils.convertToJson;
 import static io.onedev.server.model.CodeComment.PROP_CREATE_DATE;
 import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
 
@@ -26,20 +25,13 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.authz.UnauthorizedException;
-import org.apache.shiro.subject.Subject;
 import org.eclipse.jgit.lib.ObjectId;
 import org.jspecify.annotations.Nullable;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import dev.langchain4j.agent.tool.ToolSpecification;
 import io.onedev.server.OneDev;
-import io.onedev.server.ai.CodeCommentHelper;
-import io.onedev.server.ai.TaskTool;
-import io.onedev.server.ai.ToolExecutionResult;
 import io.onedev.server.attachment.AttachmentStorageSupport;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.support.CompareContext;
@@ -48,7 +40,6 @@ import io.onedev.server.model.support.Mark;
 import io.onedev.server.model.support.ProjectBelonging;
 import io.onedev.server.search.entity.SortField;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.service.CodeCommentService;
 import io.onedev.server.service.UserService;
 import io.onedev.server.xodus.VisitInfoService;
 
@@ -320,56 +311,6 @@ public class CodeComment extends ProjectBelonging implements AttachmentStorageSu
 			participants.remove(userService.getUnknown());
 		}
 		return new ArrayList<>(participants);
-	}
-	
-	public List<TaskTool> getTools() {
-		var commentId = getId();
-		return List.of(
-			new TaskTool() {
-			
-				@Override
-				public ToolSpecification getSpecification() {
-					return ToolSpecification.builder()
-						.name("getCurrentCodeComment")
-						.description("""
-							Get info of current code comment in json format. Commented code is highlighted \
-							and its information can be obtained via relevant tools""")
-						.build();
-				}
-
-				@Override
-				public ToolExecutionResult execute(Subject subject, JsonNode arguments) {
-					var comment = getCodeComment(commentId);
-					if (!SecurityUtils.canReadCode(subject, comment.getProject()))
-						throw new UnauthorizedException();
-					return new ToolExecutionResult(convertToJson(CodeCommentHelper.getDetail(comment)), false);
-				}
-
-			},
-			new TaskTool() {
-				
-				@Override
-				public ToolSpecification getSpecification() {
-					return ToolSpecification.builder()
-						.name("getCurrentCodeCommentReplies")
-						.description("Get replies of current code comment in json format")
-						.build();
-				}
-
-				@Override
-				public ToolExecutionResult execute(Subject subject, JsonNode arguments) {
-					var comment = getCodeComment(commentId);
-					if (!SecurityUtils.canReadCode(subject, comment.getProject()))
-						throw new UnauthorizedException();
-					return new ToolExecutionResult(convertToJson(CodeCommentHelper.getReplies(comment)), false);
-				}
-
-			}
-		);
-	}
-
-	private static CodeComment getCodeComment(Long commentId) {
-		return OneDev.getInstance(CodeCommentService.class).load(commentId);
 	}
 
 }

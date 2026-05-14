@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
@@ -45,6 +46,8 @@ import io.onedev.server.OneDev;
 import io.onedev.server.ai.ChatTool;
 import io.onedev.server.ai.ChatToolAware;
 import io.onedev.server.ai.ToolUtils;
+import io.onedev.server.ai.tools.codecomment.GetCodeCommentReplies;
+import io.onedev.server.ai.tools.codecomment.GetCodeComment;
 import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.data.migration.VersionedXmlDoc;
@@ -326,7 +329,7 @@ public abstract class CodeCommentPanel extends Panel implements ChatToolAware {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!getComment().isResolved() && SecurityUtils.canWriteCode(getComment().getProject()));
+				setVisible(!getComment().isResolved() && SecurityUtils.canChangeStatus(getComment()));
 			}
 			
 		});
@@ -340,7 +343,7 @@ public abstract class CodeCommentPanel extends Panel implements ChatToolAware {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getComment().isResolved() && SecurityUtils.canWriteCode(getComment().getProject()));
+				setVisible(getComment().isResolved() && SecurityUtils.canChangeStatus(getComment()));
 			}
 			
 		});
@@ -743,7 +746,9 @@ public abstract class CodeCommentPanel extends Panel implements ChatToolAware {
 
 	@Override
 	public List<ChatTool> getChatTools() {
-		return ToolUtils.wrapForChat(getComment().getTools());
+		return ToolUtils.wrapForChat(List.of(
+				new GetCodeComment(Objects.requireNonNull(commentId)),
+				new GetCodeCommentReplies(Objects.requireNonNull(commentId))));
 	}
 	
 	public class CodeCommentReplyActivity implements CodeCommentActivity {

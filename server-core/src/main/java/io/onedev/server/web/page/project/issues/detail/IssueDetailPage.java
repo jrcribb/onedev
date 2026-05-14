@@ -37,6 +37,8 @@ import com.google.common.collect.Lists;
 
 import io.onedev.server.ai.ChatTool;
 import io.onedev.server.ai.ChatToolAware;
+import io.onedev.server.ai.tools.issue.GetIssueComments;
+import io.onedev.server.ai.tools.issue.GetIssue;
 import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.model.Issue;
@@ -447,7 +449,9 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 	
 	@Override
 	public List<ChatTool> getChatTools() {
-		return wrapForChat(getIssue().getTools());
+		return wrapForChat(List.of(
+				new GetIssue(getIssue().getId()),
+				new GetIssueComments(getIssue().getId())));
 	}
 
 }

@@ -562,6 +562,22 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		return canManageWorkspaces(subject, workspace.getProject()) 
 				|| workspace.getUser().equals(getAuthUser(subject));
 	}
+
+	public static boolean canChangeStatus(Subject subject, CodeComment comment) {
+		var user = getAuthUser(subject);
+		if (user == null)
+			return false;
+
+		if (canWriteCode(subject, comment.getProject()) || comment.getUser().equals(user))
+			return true;
+		
+		var request = comment.getCompareContext().getPullRequest();
+		return request != null && (request.isReviewer(user) || request.getSubmitter().equals(user));
+	}
+
+	public static boolean canChangeStatus(CodeComment comment) {
+		return canChangeStatus(getSubject(), comment);
+	}
 	
 	public static boolean canModifyOrDelete(CodeComment comment) {
 		return canModifyOrDelete(getSubject(), comment);

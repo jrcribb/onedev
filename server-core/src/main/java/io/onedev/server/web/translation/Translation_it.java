@@ -190,7 +190,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Add Rule", "Aggiungi regola");
 		m.put("Add SSH key", "Aggiungi chiave SSH");
 		m.put("Add SSO provider", "Aggiungi provider SSO");
-		m.put("Add Spec", "Aggiungi Specifica");
 		m.put("Add Spent Time", "Aggiungi tempo speso");
 		m.put("Add Timesheet", "Aggiungi foglio presenze");
 		m.put("Add Widget", "Aggiungi widget");
@@ -233,7 +232,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Add new service locator", "Aggiungi nuovo localizzatore di servizio");
 		m.put("Add new step", "Aggiungi nuovo passaggio");
 		m.put("Add new trigger", "Aggiungi nuovo trigger");
-		m.put("Add new user config", "Aggiungi nuova configurazione utente");
 		m.put("Add new user data", "Aggiungi nuovi dati utente");
 		m.put("Add project", "Aggiungi progetto");
 		m.put("Add reviewer...", "Aggiungi revisore...");
@@ -452,11 +450,8 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Belonging Groups", "Gruppi di appartenenza");
 		m.put("Below are some common criterias. Type in search box above to view the complete list and available combinations.", 
 			"Di seguito sono riportati alcuni criteri comuni. Digita nella casella di ricerca sopra per visualizzare l'elenco completo e le combinazioni disponibili.");
-		m.put("Below content is restored from an unsaved change. <a class=\"clear-unsaved-change\">Clear</a> to discard", 
-			"Il contenuto sottostante è stato ripristinato da una modifica non salvata. <a class=\"clear-unsaved-change\">Cancella</a> per scartare");
 		m.put("Below content is restored from an unsaved change. <a class=\"discard-unsaved-change\">Discard</a>", 
 			"Il contenuto sottostante è stato ripristinato da una modifica non salvata. <a class=\"discard-unsaved-change\">Scarta</a>");
-		m.put("Below content is restored from an unsaved change. Clear to discard", "Il contenuto sottostante è stato ripristinato da una modifica non salvata. Cancella per scartare");
 		m.put("Below information will also be sent", "Le informazioni sottostanti saranno anche inviate");
 		m.put("Binary file", "File binario");
 		m.put("Binary file.", "File binario.");
@@ -601,9 +596,17 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Can Be Used By Workspaces", "Può essere utilizzato da Workspaces");
 		m.put("Can Create Root Projects", "Può creare progetti root");
 		m.put("Can Edit Estimated Time", "Può modificare il tempo stimato");
+		m.put("Can only compare with common ancestor when different projects are involved", "È possibile confrontare solo con un antenato comune quando sono coinvolti progetti diversi");
+		m.put("Cancel", "Annulla");
+		m.put("Cancel All Queried Builds", "Annulla tutte le build interrogate");
+		m.put("Cancel Selected Builds", "Annulla le build selezionate");
+		m.put("Cancel invitation", "Annulla invito");
+		m.put("Cancel request submitted", "Richiesta di annullamento inviata");
+		m.put("Cancel this build", "Annulla questa build");
+		m.put("Cancelled", "Annullato");
+		m.put("Cancelled By", "Annullato da");
 		m.put("Cannot convert root user to service account", "Impossibile convertire l'utente root in account di servizio");
 		m.put("Cannot convert yourself to service account", "Impossibile convertirti in account di servizio");
-		m.put("Cannot delete branch \"{0}\" as there are workspaces on it", "Impossibile eliminare il branch \"{0}\" poiché ci sono workspaces su di esso");
 		m.put("Cannot delete default branch", "Non è possibile eliminare il branch predefinito");
 		m.put("Cannot delete root account", "Non è possibile eliminare l'account root");
 		m.put("Cannot delete yourself", "Non è possibile eliminare te stesso");
@@ -617,15 +620,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Cannot reset password for user authenticating via external system", "Impossibile reimpostare la password per utente che si autentica tramite sistema esterno");
 		m.put("Cannot save malformed query", "Non è possibile salvare una query malformata");
 		m.put("Cannot use current or descendant project as parent", "Non è possibile utilizzare il progetto corrente o un discendente come genitore");
-		m.put("Can only compare with common ancestor when different projects are involved", "È possibile confrontare solo con un antenato comune quando sono coinvolti progetti diversi");
-		m.put("Cancel", "Annulla");
-		m.put("Cancel All Queried Builds", "Annulla tutte le build interrogate");
-		m.put("Cancel Selected Builds", "Annulla le build selezionate");
-		m.put("Cancel invitation", "Annulla invito");
-		m.put("Cancel request submitted", "Richiesta di annullamento inviata");
-		m.put("Cancel this build", "Annulla questa build");
-		m.put("Cancelled", "Annullato");
-		m.put("Cancelled By", "Annullato da");
 		m.put("Case Sensitive", "Sensibile alle maiuscole");
 		m.put("Certificates to Trust", "Certificati da fidare");
 		m.put("Change", "Modifica");
@@ -669,7 +663,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Check Vulnerabilities", "Controlla Vulnerabilità");
 		m.put("Check Workflow Integrity", "Controlla l'integrità del workflow");
 		m.put("Check out to local directory", "Controlla nella directory locale");
-		m.put("Check out to local workspace", "Effettua il checkout nella workspace locale");
 		m.put("Check this to compare right side with common ancestor of left and right", "Seleziona questa opzione per confrontare il lato destro con l'antenato comune di sinistra e destra");
 		m.put("Check this to enforce two-factor authentication for all users in the system", "Seleziona questa opzione per imporre l'autenticazione a due fattori per tutti gli utenti del sistema");
 		m.put("Check this to enforce two-factor authentication for all users in this group", "Seleziona questa opzione per imporre l'autenticazione a due fattori per tutti gli utenti di questo gruppo");
@@ -1013,8 +1006,6 @@ public class Translation_it extends TranslationResourceBundle {
 			"Definisci le regole di protezione del branch. Le regole definite nel progetto genitore sono considerate definite dopo le regole definite qui. Per un dato branch e utente, la prima regola corrispondente avrà effetto");
 		m.put("Define default issue boards for all projects here. A certain project can override this setting to define its own issue boards.", 
 			"Definisci qui le bacheche dei problemi predefinite per tutti i progetti. Un certo progetto può sovrascrivere questa impostazione per definire le proprie bacheche dei problemi.");
-		m.put("Define how issue states should be transited from one to another, either manually or automatically when some events happen. And the rule can be configured to apply to certain projects and issues via the applicable issues setting", 
-			"Definisci come gli stati dei problemi dovrebbero essere transitati da uno all'altro, manualmente o automaticamente quando si verificano alcuni eventi. E la regola può essere configurata per applicarsi a determinati progetti e problemi tramite l'impostazione dei problemi applicabili");
 		m.put("Define issue templates here. When a new issue is created, the first matching template will be used.", 
 			"Definisci qui i modelli di problemi. Quando viene creato un nuovo problema, verrà utilizzato il primo modello corrispondente.");
 		m.put("Define labels to be assigned to project, build or pull request. For issues, custom fields can be used which is much more powerful than labels", 
@@ -1061,7 +1052,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Delete this", "Elimina questo");
 		m.put("Delete this GPG key", "Elimina questa chiave GPG");
 		m.put("Delete this access token", "Elimina questo token di accesso");
-		m.put("Delete this branch", "Elimina questo branch");
 		m.put("Delete this executor", "Elimina questo executor");
 		m.put("Delete this field", "Elimina questo campo");
 		m.put("Delete this import", "Elimina questa importazione");
@@ -2249,7 +2239,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("New State", "Nuovo stato");
 		m.put("New User Bean", "Bean utente nuovo");
 		m.put("New Value", "Nuovo valore");
-		m.put("New Workspace Spec", "Nuova Specifica dello Spazio di Lavoro");
 		m.put("New chat", "Nuova chat");
 		m.put("New issue board created", "Nuova bacheca di issue creata");
 		m.put("New project created", "Nuovo progetto creato");
@@ -2378,7 +2367,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("No valid signature for head commit of target branch", "Nessuna firma valida per il commit principale del branch di destinazione");
 		m.put("No value", "Nessun valore");
 		m.put("No verified primary email address", "Nessun indirizzo email primario verificato");
-		m.put("No workspace provisioners defined", "Nessun provisioner dello spazio di lavoro definito");
 		m.put("No workspaces", "Nessuno spazio di lavoro");
 		m.put("No workspaces to delete", "Nessuno spazio di lavoro da eliminare");
 		m.put("Node Selector", "Selettore di Nodo");
@@ -2552,7 +2540,6 @@ public class Translation_it extends TranslationResourceBundle {
 			"Specifica facoltativamente un campo data per contenere informazioni sulla data di scadenza.<br><b>NOTA: </b> Puoi personalizzare i campi dei problemi di OneDev nel caso non ci sia un'opzione appropriata qui");
 		m.put("Optionally specify a path relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a> to put retrieved artifacts. Leave empty to use job working directory itself", 
 			"Specifica facoltativamente un percorso relativo a <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a> per posizionare gli artefatti recuperati. Lascia vuoto per utilizzare il job working directory stesso");
-		m.put("Optionally specify a prefix to be prepended to generated branch name", "Specifica facoltativamente un prefisso da anteporre al nome del branch generato");
 		m.put("Optionally specify a storage class to allocate build volume dynamically. Leave empty to use default storage class. <b class='text-warning'>NOTE:</b> Reclaim policy of the storage class should be set to <code>Delete</code>, as the volume is only used to hold temporary build files", 
 			"Specifica facoltativamente una classe di archiviazione per allocare dinamicamente il volume di build. Lascia vuoto per utilizzare la classe di archiviazione predefinita. <b class='text-warning'>NOTA:</b> La politica di recupero della classe di archiviazione dovrebbe essere impostata su <code>Delete</code>, poiché il volume viene utilizzato solo per contenere file di build temporanei");
 		m.put("Optionally specify a working period field to hold estimated time infomration.<br><b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here", 
@@ -3092,12 +3079,13 @@ public class Translation_it extends TranslationResourceBundle {
 			"Scarica l'immagine docker come layout OCI tramite crane. Questo passaggio deve essere eseguito dall'executor docker del server, dall'executor docker remoto o dall'executor Kubernetes");
 		m.put("Pull from Remote", "Pull da remoto");
 		m.put("Pull request", "Richiesta di pull");
-		m.put("Pull request #{0} already closed", "Richiesta di pull #{0} già chiusa");
 		m.put("Pull request administrative permission inside a project, including batch operations over multiple pull requests", 
 			"Permesso amministrativo per le richieste di pull all'interno di un progetto, incluse operazioni batch su più richieste di pull");
 		m.put("Pull request already closed", "Richiesta di pull già chiusa");
 		m.put("Pull request already opened", "Richiesta di pull già aperta");
 		m.put("Pull request and code review", "Richiesta di pull e revisione del codice");
+		m.put("Pull request can only be merged after getting approvals from all reviewers", "La richiesta di pull può essere unita solo dopo aver ottenuto l'approvazione di tutti i revisori");
+		m.put("Pull request can only be merged by users with code write permission", "La richiesta di pull può essere unita solo dagli utenti con permesso di scrittura del codice");
 		m.put("Pull request cannot be merged now as <a class=\"more-info d-inline link-primary\">some required builds</a> are not finished yet", 
 			"La richiesta di pull non può essere unita ora poiché <a class=\"more-info d-inline link-primary\">alcune build richieste</a> non sono ancora terminate");
 		m.put("Pull request cannot be merged now as <a class=\"more-info d-inline link-primary\">some required builds</a> are not successful", 
@@ -3106,10 +3094,7 @@ public class Translation_it extends TranslationResourceBundle {
 			"La richiesta di pull non può essere unita ora poiché è <a class=\"more-info d-inline link-primary\">in attesa di revisione</a>");
 		m.put("Pull request cannot be merged now as it was <a class=\"more-info d-inline link-primary\">requested for changes</a>", 
 			"La richiesta di pull non può essere unita ora poiché è stata <a class=\"more-info d-inline link-primary\">richiesta una modifica</a>");
-		m.put("Pull request cannot be merged now as valid signature is required for head commit", 
-			"La richiesta di pull non può essere unita ora poiché è richiesta una firma valida per il commit principale");
-		m.put("Pull request can only be merged after getting approvals from all reviewers", "La richiesta di pull può essere unita solo dopo aver ottenuto l'approvazione di tutti i revisori");
-		m.put("Pull request can only be merged by users with code write permission", "La richiesta di pull può essere unita solo dagli utenti con permesso di scrittura del codice");
+		m.put("Pull request cannot be merged now as valid signature is required for head commit", "La richiesta di pull non può essere unita ora poiché è richiesta una firma valida per il commit principale");
 		m.put("Pull request discard", "Richiesta di pull scartata");
 		m.put("Pull request duration statistics", "Statistiche sulla durata delle pull request");
 		m.put("Pull request frequency statistics", "Statistiche sulla frequenza delle pull request");
@@ -3258,7 +3243,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Request For Changes", "Richiesta di modifiche");
 		m.put("Request Scopes", "Ambiti di richiesta");
 		m.put("Request Trial Subscription", "Richiedi abbonamento di prova");
-		m.put("Request review", "Richiedi revisione");
+		m.put("Request review again", "Richiedi nuovamente la revisione");
 		m.put("Request to sync", "Richiedi sincronizzazione");
 		m.put("Requested For changes", "Richiesto per modifiche");
 		m.put("Requested changes to pull request \"{0}\" ({1})", "Richieste modifiche alla richiesta di pull \"{0}\" ({1})");
@@ -3535,7 +3520,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Show Description", "Mostra descrizione");
 		m.put("Show Duration", "Mostra durata");
 		m.put("Show Emojis", "Mostra emoji");
-		m.put("Show Error Detail", "Mostra Dettaglio Errore");
 		m.put("Show Issue Status", "Mostra stato delle problematiche");
 		m.put("Show Package Stats", "Mostra statistiche dei pacchetti");
 		m.put("Show Pull Request Stats", "Mostra statistiche delle pull request");
@@ -4094,7 +4078,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Symbol Name", "Nome Simbolo");
 		m.put("Symbol name", "Nome simbolo");
 		m.put("Symbols", "Simboli");
-		m.put("Sync", "Sincronizza");
 		m.put("Sync (pull & push)", "Sincronizza (pull & push)");
 		m.put("Sync Replica Status and Back to Home", "Sincronizza Stato Replica e Torna alla Home");
 		m.put("Sync Repository", "Sincronizza Repository");
@@ -4186,7 +4169,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("There are merge conflicts.", "Ci sono conflitti di merge.");
 		m.put("There are merge conflicts. You can still create the pull request though", "Ci sono conflitti di merge. Puoi comunque creare la richiesta di pull");
 		m.put("There are unsaved changes, discard and continue?", "Ci sono modifiche non salvate, scartare e continuare?");
-		m.put("There are workspaces on source branch", "Ci sono spazi di lavoro sul branch di origine");
 		m.put("These authenticators normally run on your mobile phone, some examples are Google Authenticator, Microsoft Authenticator, Authy, 1Password etc.", 
 			"Questi autenticatori normalmente funzionano sul tuo telefono cellulare, alcuni esempi sono Google Authenticator, Microsoft Authenticator, Authy, 1Password ecc.");
 		m.put("This <span wicket:id=\"elementTypeName\"></span> is imported from <a wicket:id=\"link\" class=\"alert-link\"><span wicket:id=\"label\"></span></a>", 
@@ -5042,7 +5024,38 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Request review again", "Richiedi nuovamente la revisione");
+		m.put("<b>NOTE: </b> Transition rules can also be configured and overridden at project level", 
+			"<b>NOTA: </b> Le regole di transizione possono anche essere configurate e sovrascritte a livello di progetto");
+		m.put("<b>NOTE: </b> Transition rules can also be configured and overridden at project level in enterprise edition", 
+			"<b>NOTA: </b> Le regole di transizione possono anche essere configurate e sovrascritte a livello di progetto nell'edizione enterprise");
+		m.put("Associated Branch", "Branch associato");
+		m.put("Branch \"{0}\" already exists", "Il branch \"{0}\" esiste già");
+		m.put("Branch is created", "Il branch è stato creato");
+		m.put("Cannot delete branch as it has workspaces", "Impossibile eliminare il branch poiché ha workspaces");
+		m.put("Cannot delete source branch as it has workspaces", "Impossibile eliminare il branch sorgente poiché ha workspaces");
+		m.put("Create a workspace spec running Cursor CLI directly with server shell environment.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://cursor.com/docs/cli/overview' target='_blank'>Cursor CLI</a> is installed on OneDev server</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
+			"Crea una specifica del workspace eseguendo Cursor CLI direttamente con l'ambiente shell del server.\nI workspaces che utilizzano la specifica creata condivideranno gli stessi ambienti e impostazioni.\nPer utilizzare questo template, assicurati che:\n<ul>\n    <li><a href='https://cursor.com/docs/cli/overview' target='_blank'>Cursor CLI</a> sia installato sul server OneDev</li>\n    <li>Un provisioner shell sia aggiunto in 'Amministrazione / Provisioner Workspace' con i 'progetti applicabili' configurati correttamente</li>\n</ul>");
+		m.put("Create a workspace spec running Cursor CLI inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/cursor' target='_blank'>container image</a>\nlater to suit your needs if desired", 
+			"Crea una specifica del workspace eseguendo Cursor CLI all'interno di un container per scopi di isolamento e sicurezza.\nPuoi personalizzare l'<a href='https://code.onedev.io/onedev/docker/cursor' target='_blank'>immagine del container</a>\nsuccessivamente per adattarla alle tue esigenze, se desiderato");
+		m.put("Default Fork Root", "Root predefinito per il fork");
+		m.put("Default branch is not available", "Il branch predefinito non è disponibile");
+		m.put("Define how issues may move from one state to another in this project. At evaluation time, rules from this project, each ancestor project up to the root, and the global rules are merged in that order; the first matching rule applies.", 
+			"Definisci come i problemi possono passare da uno stato all'altro in questo progetto. Al momento della valutazione, le regole di questo progetto, di ogni progetto antenato fino alla radice e le regole globali vengono unite in quest'ordine; si applica la prima regola corrispondente.");
+		m.put("Define how issues move between states: manually by users, or automatically in response to events. The first matching rule applies.", 
+			"Definisci come i problemi si spostano tra stati: manualmente dagli utenti o automaticamente in risposta agli eventi. Si applica la prima regola corrispondente.");
+		m.put("Issue Branch Prefix", "Prefisso del branch per i problemi");
+		m.put("Issue branch prefix updated", "Prefisso del branch per i problemi aggiornato");
+		m.put("No fork root", "Nessun root per il fork");
+		m.put("Optionally specify a prefix to be prepended (as a path segment) when generate issue branch.\nFor instance with prefix <code>feature</code>, generated issue branch will be\n<code>feature/issue-100-some-title</code>", 
+			"Specifica facoltativamente un prefisso da anteporre (come segmento di percorso) quando si genera un branch per i problemi.\nAd esempio, con il prefisso <code>feature</code>, il branch generato per i problemi sarà\n<code>feature/issue-100-some-title</code>");
+		m.put("This setting is inherited from parent project when left empty. The first non-empty value found while walking up the project hierarchy will be used.", 
+			"Questa impostazione viene ereditata dal progetto padre se lasciata vuota. Verrà utilizzato il primo valore non vuoto trovato risalendo la gerarchia del progetto.");
+		m.put("When forking from the UI, the default target project will be created as\n&lt;default fork root&gt;/&lt;account name&gt;/&lt;project name&gt; if specified\n(users forking need permission to create child projects under the fork\nroot), or &lt;account name&gt;/&lt;project name&gt; otherwise (need permission\nto create root projects)", 
+			"Quando si effettua un fork dall'interfaccia utente, il progetto target predefinito sarà creato come\n&lt;root predefinito per il fork&gt;/&lt;nome account&gt;/&lt;nome progetto&gt; se specificato\n(gli utenti che effettuano il fork devono avere il permesso di creare progetti figli sotto il root del fork\n), oppure &lt;nome account&gt;/&lt;nome progetto&gt; altrimenti (necessario il permesso\ndi creare progetti root)");
+		m.put("Workspaces on source branch", "Workspaces sul branch sorgente");
+		m.put("Workspaces on this issue", "Workspaces su questo problema");
+		m.put("branch \"{0}\" is created", "il branch \"{0}\" è stato creato");
+		m.put("branch is created", "il branch è stato creato");
 	}
 		
 	@Override
