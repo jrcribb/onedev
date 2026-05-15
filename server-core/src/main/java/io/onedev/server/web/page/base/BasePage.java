@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
@@ -61,6 +62,7 @@ import com.google.common.collect.Sets;
 
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.server.OneDev;
+import io.onedev.server.ai.ChatToolsContribution;
 import io.onedev.server.ai.ChatTool;
 import io.onedev.server.ai.ChatToolAware;
 import io.onedev.server.ai.ToolExecutionResult;
@@ -123,6 +125,9 @@ public abstract class BasePage extends WebPage {
 
 	@Inject
 	private JettyService jettyService;
+
+	@Inject
+	private Set<ChatToolsContribution> chatToolsContributions;
 	
 	public BasePage(PageParameters params) {
 		super(params);
@@ -438,6 +443,9 @@ public abstract class BasePage extends WebPage {
 		visitChildren(ChatToolAware.class, (IVisitor<Component, Void>) (object, visit) -> {
 			tools.addAll(((ChatToolAware) object).getChatTools());
 		});
+
+		for (var contribution : chatToolsContributions)
+			tools.addAll(contribution.getChatTools(this));
 
 		return tools;
 	}

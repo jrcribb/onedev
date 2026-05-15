@@ -1801,25 +1801,6 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 					}
 	
 				})
-				/* 
-				wrapForChat(new AddCodeComment(false) {
-				
-					@Override
-					protected Long getProjectId() {
-						return projectId;
-					}
-					
-					@Override
-					protected Long getPullRequestId() {
-						return null;
-					}
-					
-					@Override
-					protected ObjectId getCommitId(boolean oldRevision) {
-						return commitId;
-					}
-				})
-				*/
 			);	
 		} else {
 			return List.of();

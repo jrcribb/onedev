@@ -9,6 +9,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.SynchronousQueue;
@@ -407,6 +408,7 @@ import io.onedev.server.web.editable.EditSupportRegistry;
 import io.onedev.server.web.exceptionhandler.PageExpiredExceptionHandler;
 import io.onedev.server.web.page.layout.AdministrationSettingContribution;
 import io.onedev.server.web.page.project.blob.render.BlobRenderer;
+import io.onedev.server.ai.ChatToolsContribution;
 import io.onedev.server.web.page.project.setting.ProjectSettingContribution;
 import io.onedev.server.web.upload.DefaultUploadService;
 import io.onedev.server.web.upload.UploadService;
@@ -637,6 +639,7 @@ public class CoreModule extends AbstractPluginModule {
 		contribute(LineCoverageContribution.class, (build, blobPath, reportName) -> new HashMap<>());
 		contribute(AdministrationSettingContribution.class, () -> new ArrayList<>());
 		contribute(ProjectSettingContribution.class, () -> new ArrayList<>());
+		contribute(ChatToolsContribution.class, page -> List.of());
 		contribute(GitPreReceiveChecker.class, (project, submitter, refName, oldObjectId, newObjectId) -> null);
 
 		bind(PackFilter.class);
